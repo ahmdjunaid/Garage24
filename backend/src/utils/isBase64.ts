@@ -1,0 +1,1 @@
+export const isBase64 = (str: string) => /^data:image\/(png|jpeg|jpg|gif);base64,/.test(str);

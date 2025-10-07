@@ -1,0 +1,1 @@
+export const OTP_VERIFIED = 'OTP verified! You’re good to go.'
