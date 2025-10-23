@@ -1,5 +1,4 @@
 import { Document } from "mongoose";
-// import { ObjectId } from "mongodb";
 
 export type Role = "user" | "admin" | "garage" | "mechanic";
 
@@ -7,8 +6,13 @@ export interface ResetTokenPayload {
   Id: string;
 }
 
+export interface DecodedUser {
+  id: string;
+  role: string;
+}
+
+
 export interface IUser extends Document {
-  // _id: ObjectId;
   Id: string;
   name: string;
   email: string;
@@ -23,7 +27,12 @@ export interface IUser extends Document {
   otpExpires?: Date | undefined;
   isVerified: boolean;
   googleID?: string;
-  // createdAt: Date;
-  // updatedAt: Date;
   isOnboardingRequired?: boolean;
+}
+
+
+export interface GetUserResponse{
+  users:IUser[]
+  totalUsers: number;
+  totalPages: number;
 }

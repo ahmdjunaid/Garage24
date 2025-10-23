@@ -1,4 +1,9 @@
 import axios from "axios";
+import { logout, setAccessToken } from "../redux/slice/userSlice";
+import { store } from "../redux/store/store";
+import { logoutApi } from "./auth";
+import { errorToast } from "../utils/notificationAudio";
+import { AUTH_BASE_ROUTE } from "../constants/apiRoutes";
 
 const isLocalhost = window.location.hostname === "localhost";
 const API_URL = isLocalhost
@@ -29,12 +34,13 @@ api.interceptors.response.use(
 
     if (
       error.response?.status === 403 &&
-      error.response?.data?.message === "Your account is blocked"
+      error.response?.data?.message === "This account is blocked by Admin."
     ) {
-      console.warn("User is blocked.");
-      localStorage.clear();
-      sessionStorage.clear();
-      window.location.href = "/login";
+      errorToast("This account is blocked by Admin.");
+      setTimeout(async () => {
+        await logoutApi();
+        store.dispatch(logout());
+      }, 2000);
       return Promise.reject(error);
     }
 
@@ -42,20 +48,30 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const response = await api.post("/auth/refresh");
-        console.log("Refresh response:", response);
+        const response = await api.post(`/${AUTH_BASE_ROUTE}/refresh-token`);
 
         const newAccessToken = response.data.accessToken;
+        if(newAccessToken){
+          store.dispatch(setAccessToken(newAccessToken));
+        }
+
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         api.defaults.headers.common["Authorization"] =
           `Bearer ${newAccessToken}`;
 
         return api(originalRequest);
       } catch (Refresherror) {
         console.error("Refresh token failed", Refresherror);
+        errorToast("Refresh token failed");
+        setTimeout(async () => {
+          await logoutApi();
+          store.dispatch(logout());
+        }, 2000);
+        return Promise.reject(Refresherror);
       }
     }
     return Promise.reject(error);
-  },
+  }
 );
 
 export default api;

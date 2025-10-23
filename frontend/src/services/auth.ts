@@ -1,15 +1,16 @@
 import { AxiosError } from "axios";
 import api from "./api";
-import { GOOGLE_CALLBACK_URL } from "../constants/apiRoutes";
+import { AUTH_BASE_ROUTE } from "../constants/apiRoutes";
+const GOOGLE_CALLBACK_URL = import.meta.env.VITE_GOOGLE_CALLBACK_URL
 
-export const SignUpApi = async (data: {
+export const signUpApi = async (data: {
   name: string;
   email: string;
   password: string;
   role: string;
 }) => {
   try {
-    const response = await api.post(`/auth/signup`, data);
+    const response = await api.post(`/${AUTH_BASE_ROUTE}/signup`, data);
     const user = response.data;
 
     return user;
@@ -27,7 +28,7 @@ export const SignUpApi = async (data: {
 
 export const loginApi = async (data: { email: string; password: string }) => {
   try {
-    const response = await api.post(`/auth/login`, data);
+    const response = await api.post(`/${AUTH_BASE_ROUTE}/login`, data);
 
     return response.data;
   } catch (error) {
@@ -44,7 +45,7 @@ export const loginApi = async (data: { email: string; password: string }) => {
 
 export const verifyOtpApi = async (data: { email: string; otp: string }) => {
   try {
-    const response = await api.post(`/auth/verify-otp`, data);
+    const response = await api.post(`/${AUTH_BASE_ROUTE}/verify-otp`, data);
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -60,7 +61,7 @@ export const verifyOtpApi = async (data: { email: string; otp: string }) => {
 
 export const logoutApi = async () => {
   try {
-    await api.post("/auth/logout");
+    await api.post(`/${AUTH_BASE_ROUTE}/logout`);
     return { success: true, message: "Logged out successfully" };
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -76,7 +77,7 @@ export const logoutApi = async () => {
 
 export const forgotPasswordApi = async (data: { email: string }) => {
   try {
-    await api.post("/auth/forgot-password", data);
+    await api.post(`/${AUTH_BASE_ROUTE}/forgot-password`, data);
     return { success: true, message: "Otp sent to email address." };
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -92,7 +93,7 @@ export const forgotPasswordApi = async (data: { email: string }) => {
 
 export const resendOtpApi = async (data: { email: string }) => {
   try {
-    const response = await api.post(`/auth/resend-otp`, data);
+    const response = await api.post(`/${AUTH_BASE_ROUTE}/resend-otp`, data);
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -108,7 +109,7 @@ export const resendOtpApi = async (data: { email: string }) => {
 export const resetPasswordApi = async (data: { email: string, password: string}, token: string ) => {
   console.log(data, token, 'From reset api')
   try {
-    await api.post("/auth/reset-password", data,
+    await api.post(`/${AUTH_BASE_ROUTE}/reset-password`, data,
       {headers: {AuthorizationToken: `Bearer ${token}`}}
     );
 

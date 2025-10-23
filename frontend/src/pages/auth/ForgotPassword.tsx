@@ -8,7 +8,7 @@ import emailIcon from "../../assets/icons/email.svg";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../redux/store/store";
 import type { Role } from "../../types/UserTypes";
-import Modal from "../../components/modal/Modal";
+import Modal from "../../components/modal/Layout/Modal";
 import passwordIcon from "../../assets/icons/password.svg"
 import { forgotPasswordApi, verifyOtpApi, resendOtpApi, resetPasswordApi} from "../../services/auth";
 import { errorToast, successToast } from "../../utils/notificationAudio";

@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../redux/store/store";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import { onboardingMechanicApi } from "../../services/mechanic";
-import { success } from "zod";
 import { useNavigate } from "react-router-dom";
 
 const MechanicOnboarding = () => {
@@ -16,29 +15,32 @@ const MechanicOnboarding = () => {
   const [skillsError, setSkillsError] = useState<string>("");
   const [newSkill, setNewSkill] = useState<string>("");
   const [preview, setPreview] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [previewError, setPreviewError] = useState<string>("");
   const [mobile, setMobile] = useState<string>("");
   const [mobileError, setMobileError] = useState<string>("");
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { user, token } = useSelector((state: RootState) => state.auth);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
 
-    if (file.size > 500 * 1024) {
+    if (selectedFile.size > 500 * 1024) {
       errorToast("File size must be less than 500KB");
       e.target.value = "";
       return;
     }
 
+    setFile(selectedFile);
+
     const reader = new FileReader();
     reader.onloadend = () => setPreview(reader.result as string);
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(selectedFile);
   };
 
   const handleRemoveImage = () => {
@@ -50,7 +52,24 @@ const MechanicOnboarding = () => {
     fileInputRef.current?.click();
   };
 
-  const handleSubmit = () => {
+  const addSkill = () => {
+    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
+      setSkills([...skills, newSkill.trim()]);
+      setNewSkill("");
+    }
+  };
+
+  const removeSkill = (skillToRemove: string) => {
+    setSkills(skills.filter((skill) => skill !== skillToRemove));
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      addSkill();
+    }
+  };
+
+  const handleSubmit = async () => {
     let hasError = false;
     setOneTimePassError("");
     setNewPasswordError("");
@@ -88,47 +107,30 @@ const MechanicOnboarding = () => {
     }
 
     if (!hasError) {
-      try {
-        const response = onboardingMechanicApi(
-          {
-            userId: user?._id,
-            mobile,
-            image: preview,
-            newPassword,
-            password: oneTimePassword,
-            skills,
-          },
-          token
-        );
+      const formData = new FormData();
+      
+      formData.append("name", user?.name || "")
+      formData.append("userId", user?._id || "");
+      formData.append("mobile", mobile);
+      formData.append("newPassword", newPassword);
+      formData.append("password", oneTimePassword);
+      skills.forEach((skill) => formData.append("skills", skill));
 
-        successToast("Registration success")
-
-        setTimeout(()=>{
-          navigate('/mechanic')
-        },2000)
-
-
-      } catch (error) {
-        console.error(error)
-        errorToast(error.message)
+      if (file instanceof File) {
+        formData.append("image", file);
       }
-    }
-  };
 
-  const addSkill = () => {
-    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
-      setSkills([...skills, newSkill.trim()]);
-      setNewSkill("");
-    }
-  };
+      try {
+        await onboardingMechanicApi(formData,token);
 
-  const removeSkill = (skillToRemove: string) => {
-    setSkills(skills.filter((skill) => skill !== skillToRemove));
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      addSkill();
+        successToast("Registration success");
+        setTimeout(() => {
+          navigate("/mechanic");
+        }, 2000);
+      } catch (error) {
+        console.error(error);
+        errorToast(error.message);
+      }
     }
   };
 
@@ -184,6 +186,13 @@ const MechanicOnboarding = () => {
                 onChange={handleImageChange}
                 className="hidden"
               />
+              {previewError ? (
+                <p className="text-red-600 font-light text-sm ">
+                  {previewError}
+                </p>
+              ) : (
+                ""
+              )}
             </div>
 
             {/* Name */}
@@ -242,6 +251,13 @@ const MechanicOnboarding = () => {
                   +
                 </button>
               </div>
+              {skillsError ? (
+                <p className="text-red-600 font-light text-sm ">
+                  {skillsError}
+                </p>
+              ) : (
+                ""
+              )}
             </div>
           </div>
 
@@ -258,6 +274,13 @@ const MechanicOnboarding = () => {
              focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-0 w-130"
                 onChange={(e) => setMobile(e.target.value)}
               />
+              {mobileError ? (
+                <p className="text-red-600 font-light text-sm ">
+                  {mobileError}
+                </p>
+              ) : (
+                ""
+              )}
             </div>
 
             {/* Email ID */}
@@ -288,6 +311,13 @@ const MechanicOnboarding = () => {
                     placeholder="Enter One-Time password (Provided by company)"
                     className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600"
                   />
+                  {oneTimePassError ? (
+                    <p className="text-red-600 font-light text-sm ">
+                      {oneTimePassError}
+                    </p>
+                  ) : (
+                    ""
+                  )}
                 </div>
 
                 <div>
@@ -301,6 +331,13 @@ const MechanicOnboarding = () => {
                     placeholder="Enter New password"
                     className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600"
                   />
+                  {newPasswordError ? (
+                    <p className="text-red-600 font-light text-sm ">
+                      {newPasswordError}
+                    </p>
+                  ) : (
+                    ""
+                  )}
                 </div>
               </div>
             </div>

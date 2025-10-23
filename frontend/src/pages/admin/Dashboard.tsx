@@ -1,20 +1,17 @@
-import React from "react";
-import { useDispatch } from "react-redux";
-import { logout } from "../../redux/slice/userSlice";
+import React, { useState } from "react";
+import AdminSidebar from "../../components/elements/AdminSidebar";
+import AdminHeader from "../../components/elements/AdminHeader";
 
 const Dashboard = () => {
-  const dispatch = useDispatch();
-
-  const handleLogout = () => {
-    dispatch(logout());
-  };
+  const [searchQuery, setSearchQuery] = useState<string>("")
 
   return (
-    <div>
-      <h1>Admin Dashboard</h1>
-      <button className="bg-red-600 p-4" onClick={handleLogout}>
-        Logout
-      </button>
+    <div className="flex h-screen bg-gray-950 text-white overflow-hidden">
+      <AdminSidebar role="admin" />
+
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <AdminHeader text={"Dashboard"} searchPlaceholder={"Search anything..."} setSearchQuery={setSearchQuery}/>
+      </div>
     </div>
   );
 };

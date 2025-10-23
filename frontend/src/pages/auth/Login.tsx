@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import logo from "../../assets/icons/Logo.png";
 import banner from "../../assets/banner/LoginBanner.jpg";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Input from "../../components/elements/Input";
 import AuthButton from "../../components/elements/AuthButton";
 import passwordIcon from "../../assets/icons/password.svg";
@@ -23,27 +23,30 @@ const Login = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  const { isAuthenticated, user } = useSelector(
+  const { isAuthenticated, user, token } = useSelector(
     (state: RootState) => state.auth
   );
 
-  useEffect(() => {
-    if (isAuthenticated && user?.role) {
+const location = useLocation();
 
-      if (user.isOnboardingRequired) {
-        navigate(`/${user.role}/onboarding`, { replace: true });
-        return;
-      }
-      const roleRoutes: Record<Role, string> = {
-        user: "/",
-        mechanic: "/mechanic",
-        garage: "/garage",
-        admin: "/admin",
-      };
+useEffect(() => {
+  if (isAuthenticated && user?.role && token) {
+    const roleRoutes: Record<Role, string> = {
+      user: "/",
+      mechanic: "/mechanic",
+      garage: "/garage",
+      admin: "/admin",
+    };
 
-      navigate(roleRoutes[user?.role] || "/");
+    const targetPath = user.isOnboardingRequired
+      ? `/${user.role}/onboarding`
+      : roleRoutes[user.role] || "/";
+
+    if (location.pathname !== targetPath) {
+      navigate(targetPath, { replace: true });
     }
-  }, [isAuthenticated, user, navigate]);
+  }
+}, [isAuthenticated, user, token, navigate, location.pathname]);
 
   const handleLogin = async () => {
     let hasError = false;
@@ -81,7 +84,6 @@ const Login = () => {
           navigate("/", { replace: true });
         } else {
           if (response.user.isOnboardingRequired) {
-            console.log(response.user, "Loginpage");
             navigate(`/${response.user.role}/onboarding`, { replace: true });
           } else {
             navigate(`/${response.user.role}`, { replace: true });
@@ -222,9 +224,6 @@ const Login = () => {
               </svg>
               Login with google
             </button>
-
-            {/* <GoogleLogin onSuccess={handleGoogleLogin}>
-            </GoogleLogin> */}
 
             {/* Sign up link */}
             <div className="text-center mt-6">

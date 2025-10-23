@@ -1,1 +1,0 @@
-export const GOOGLE_FETCH_USER="https://www.googleapis.com/oauth2/v3/userinfo"

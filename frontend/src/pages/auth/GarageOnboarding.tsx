@@ -1,74 +1,79 @@
-import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import React, { useEffect, useState } from "react";
 import logo from "../../assets/icons/Logo.png";
-import { errorToast, successToast } from "../../utils/notificationAudio";
+import Modal from "../../components/modal/Layout/Modal";
 import AuthButton from "../../components/elements/AuthButton";
 import type { ILocation } from "../../types/UserTypes";
-import { useSelector } from "react-redux";
 import type { RootState } from "../../redux/store/store";
-import { validateTime } from "../../utils/validateTime";
-import Modal from "../../components/modal/Modal";
-import { onboardingApi } from "../../services/garage";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { validateTime } from "../../utils/validateTime";
+import { fetchAddressApi, onboardingApi } from "../../services/garage";
+import { errorToast, successToast } from "../../utils/notificationAudio";
+import { daysOfWeek, getTimeOptions } from "../../constants/constantDatas";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 
-// Custom marker icon
 const markerIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
   iconSize: [30, 30],
 });
 
 const Registration = () => {
-  const [location, setLocation] = useState<ILocation>({
-    lat: 11.303,
-    lng: 75.78,
-  });
+  const [location, setLocation] = useState<ILocation | null>(null);
   const [plan, setPlan] = useState<string>("");
   const [planError, setPlanError] = useState<string>("");
-  const [startTime, setStartTime] = useState<string>("09:00");
-  const [endTime, setEndTime] = useState<string>("18:00");
+  const [startTime, setStartTime] = useState<string>("");
+  const [endTime, setEndTime] = useState<string>("");
   const [timeError, setTimeError] = useState<string>("");
-  const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(
-    null
-  );
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(null);
   const [imageError, setImageError] = useState<string>("");
   const [selectedHolidays, setSelectedHolidays] = useState<string[]>([]);
   const [mobile, setMobile] = useState<string>("");
   const [mobileError, setMobileError] = useState<string>("");
   const [isRSAEnabled, setIsRSAEnabled] = useState<boolean>(true);
-  const [nameError, setNameError] = useState<string>("");
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
-  const [submitting, setSubmitting] = useState<boolean>(false)
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [city, setCity] = useState<string>("");
+  const [district, setDistrict] = useState<string>("");
+  const [state, setState] = useState<string>("");
+  const [pincode, setPincode] = useState<string>("");
+  const [locationError, setLocationError] = useState<string>("")
 
-  const { user, token } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const { user, token } = useSelector((state: RootState) => state.auth);
 
-  const navigate = useNavigate()
-
-useEffect(() => {
-  if (!user){
-    navigate("/login")
-    return;
-  };
-
-  if (!user.isOnboardingRequired) {
-    const targetRoute = user.role === "user" ? "/" : `/${user.role}`;
-    navigate(targetRoute);
-  }
-}, [user, navigate]);
+  const navigate = useNavigate();
+  const timeOptions = getTimeOptions();
 
 
-  const daysOfWeek = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
+  //checking needed
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    if (!user.isOnboardingRequired) {
+      const targetRoute = user.role === "user" ? "/" : `/${user.role}`;
+      navigate(targetRoute);
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    const getAddress = async () => {
+      if (location) {
+        const address = await fetchAddressApi(location.lat, location.lng, token);
+
+        setCity(address.city);
+        setDistrict(address.district);
+        setState(address.state);
+        setPincode(address.pincode);
+      }
+    };
+
+    getAddress();
+  }, [location, token]);
 
   const handleCheckboxChange = (day: string) => {
     setSelectedHolidays((prev) =>
@@ -82,21 +87,17 @@ useEffect(() => {
         setLocation(e.latlng);
       },
     });
-    return <Marker position={location} icon={markerIcon} />;
+
+    return location ? <Marker position={location} icon={markerIcon} /> : null;
   };
 
   const handleCompleteRegistration = () => {
     let hasError = false;
-    setNameError("");
     setTimeError("");
     setMobileError("");
     setImageError("");
     setPlanError("");
-
-    if (!user?.name) {
-      setNameError("Enter a valid name");
-      hasError = true;
-    }
+    setLocationError("")
 
     if (!validateTime(startTime, endTime)) {
       setTimeError("Select a valid timing.");
@@ -120,33 +121,56 @@ useEffect(() => {
       hasError = true;
     }
 
+    if(!location || !city){
+      setLocationError("Select your location from the map.")
+      hasError = true
+    }
+
     if (hasError) return;
     setShowConfirm(true);
   };
 
   const handleConfirm = async () => {
-    if(token){
-      setSubmitting(true)
+    if (!token) {
+      errorToast("Session expired. Log in again and resubmit.");
+      return;
+    }
 
-      await onboardingApi({ 
-        garageId: user?._id,
-        location, 
-        plan, 
-        startTime, 
-        endTime,
-        selectedHolidays,
-        image:imagePreview,
-        mobile, isRSAEnabled
-      },token);
+    setSubmitting(true);
 
-      setSubmitting(false)
+    try {
+      const formData = new FormData();
+
+      const address = { city, district, state, pincode };
+
+      formData.append("name", user?.name || "")
+      formData.append("garageId", user?._id || "");
+      formData.append("plan", plan);
+      formData.append("startTime", startTime);
+      formData.append("endTime", endTime);
+      formData.append("mobile", mobile);
+      formData.append("isRSAEnabled", String(isRSAEnabled));
+      formData.append("address", JSON.stringify(address));
+      formData.append("location", JSON.stringify(location));
+      formData.append("selectedHolidays", JSON.stringify(selectedHolidays));
+
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
+      await onboardingApi(formData, token);
+
       successToast("Successfully submitted");
+      setSubmitting(false);
+      setShowConfirm(false);
 
-      setTimeout(()=>{
-        navigate('/garage')
-      },2000)
-    }else{
-      errorToast("Session expired. Log in again and resubmit.")
+      setTimeout(() => {
+        navigate("/garage");
+      }, 2000);
+    } catch (error: any) {
+      console.error(error.message);
+      errorToast(error.message);
+      setSubmitting(false);
     }
   };
 
@@ -166,19 +190,12 @@ useEffect(() => {
         setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
+      setImageFile(file);
     } else {
       errorToast("Please select a valid image file");
       e.target.value = "";
     }
   };
-
-  const timeOptions = [];
-  for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += 30) {
-      const time = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-      timeOptions.push(time);
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -206,13 +223,6 @@ useEffect(() => {
                   className="w-full bg-gray-50 rounded-lg p-3 text-gray-800 border-2 border-transparent focus:border-red-600 focus:outline-none transition-colors"
                   readOnly
                 />
-                {nameError ? (
-                  <p className="text-red-600 font-light text-sm ">
-                    {nameError}
-                  </p>
-                ) : (
-                  ""
-                )}
               </div>
 
               <div>
@@ -265,7 +275,7 @@ useEffect(() => {
               </label>
               <div className="relative border-2 border-transparent focus-within:border-red-600 rounded-xl transition-colors">
                 <MapContainer
-                  center={[location.lat, location.lng]}
+                  center={[location?.lat || 11.303, location?.lng || 75.78]}
                   zoom={13}
                   style={{
                     height: "300px",
@@ -277,15 +287,33 @@ useEffect(() => {
                     url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/">OSM</a>'
                   />
+
                   <LocationPicker />
+
+                  {/* show marker only after user clicks */}
+                  {location && <Marker position={location} icon={markerIcon} />}
                 </MapContainer>
               </div>
-              <p className="text-sm text-gray-500 mt-2">
-                Selected:{" "}
-                <b>
-                  {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
-                </b>
-              </p>
+              {location && (
+                <>
+                  <p className="text-sm text-gray-500 mt-2">
+                    <b>Selected: </b>
+                    {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    <strong>City: </strong>{city}, 
+                    <strong> District:</strong>{district},
+                    <strong> State: </strong>{state}
+                  </p>
+                </>
+              )}
+              {locationError ? (
+                    <p className="text-red-600 font-light text-sm ">
+                      {locationError}
+                    </p>
+                  ) : (
+                    ""
+                  )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -481,10 +509,7 @@ useEffect(() => {
         </div>
       </div>
 
-      <Modal
-        isOpen={showConfirm}
-        onClose={() => setShowConfirm(!showConfirm)}
-      >
+      <Modal isOpen={showConfirm} onClose={() => setShowConfirm(!showConfirm)}>
         <div className="p-3">
           <p className="mb-6">
             Please confirm that all data entered are correct.

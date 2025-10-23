@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import logger from "../logger";
+import logger from "./logger";
 
 const connectDB = async () => {
   try {
@@ -10,7 +10,7 @@ const connectDB = async () => {
     const connect = await mongoose.connect(process.env.MONGODB_URI);
     logger.info(`Connected ${connect.connection.host}`);
   } catch (error) {
-    logger.error("Error while connecting to mongoDB");
+    logger.error("Error while connecting to mongoDB", error);
     return;
   }
 };

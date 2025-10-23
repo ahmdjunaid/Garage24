@@ -1,7 +1,8 @@
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "../pages/admin/Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
+import AdminUser from "../pages/admin/AdminUser";
+import AdminGarages from "../pages/admin/AdminGarages";
 
 const AdminRoutes = () => {
   return (
@@ -9,6 +10,8 @@ const AdminRoutes = () => {
       <Routes>
         <Route element={<ProtectedRoute requiredRoles={["admin"]} />}>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/users" element={<AdminUser/>}/>
+          <Route path="/garages" element={<AdminGarages/>}/>
         </Route>
       </Routes>
     </div>

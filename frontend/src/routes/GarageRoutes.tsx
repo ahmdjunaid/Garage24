@@ -4,6 +4,7 @@ import SignUp from "../pages/auth/SignUp";
 import Onboarding from "../pages/auth/GarageOnboarding";
 import ProtectedRoute from "./ProtectedRoute";
 import GarageHome from "../pages/garages/GarageHome";
+import GarageMechanic from "../pages/garages/GarageMechanic";
 
 const GarageRoutes = () => {
   return (
@@ -12,6 +13,7 @@ const GarageRoutes = () => {
       <Route path="/onboarding" element={<Onboarding />} />
       <Route element={<ProtectedRoute requiredRoles={["garage"]} />}>
         <Route path="/" element={<GarageHome />} />
+        <Route path="/mechanics" element={<GarageMechanic />} />
       </Route>
     </Routes>
   );

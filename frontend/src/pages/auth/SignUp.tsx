@@ -11,10 +11,10 @@ import companyIcon from "../../assets/icons/company.svg";
 import {
   googleLoginApi,
   resendOtpApi,
-  SignUpApi,
+  signUpApi,
   verifyOtpApi,
 } from "../../services/auth";
-import Modal from "../../components/modal/Modal";
+import Modal from "../../components/modal/Layout/Modal";
 import Spinner from "../../components/elements/Spinner";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../redux/store/store";
@@ -34,8 +34,6 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
   const [emailError, setEmailError] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
-  const [Cpassword, setCPassword] = useState<string>("");
-  const [CpasswordError, setCPasswordError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [otp, setOtp] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -77,10 +75,9 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
     setNameError("");
     setEmailError("");
     setPasswordError("");
-    setCPasswordError("");
     let hasError = false;
 
-    if (!name || !email || !password || !Cpassword) {
+    if (!name || !email || !password ) {
       errorToast("All fields are required");
       return;
     }
@@ -107,16 +104,11 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
       hasError = true;
     }
 
-    if (Cpassword !== password) {
-      setCPasswordError("Passwords do not match.");
-      hasError = true;
-    }
-
     if (hasError) return;
 
     try {
       setLoading(true);
-      const data = await SignUpApi({ name, email, password, role });
+      const data = await signUpApi({ name, email, password, role });
       if (data) {
         setShowModal(true);
         setSeconds(120);
@@ -262,20 +254,6 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
               {passwordError ? (
                 <p className="text-red-600 font-light text-sm ">
                   {passwordError}
-                </p>
-              ) : (
-                ""
-              )}
-              <Input
-                placeholder="Confirm Password"
-                onChange={(e) => setCPassword(e.target.value)}
-                type="password"
-                value={Cpassword}
-                icon={passwordIcon}
-              />
-              {CpasswordError ? (
-                <p className="text-red-600 font-light text-sm ">
-                  {CpasswordError}
                 </p>
               ) : (
                 ""

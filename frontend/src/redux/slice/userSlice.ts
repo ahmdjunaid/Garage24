@@ -9,8 +9,6 @@ interface User {
   role?: Role;
   isBlocked: boolean;
   isVerified: boolean;
-  createdAt: Date;
-  updatedAt: Date;
   isOnboardingRequired: boolean;
 }
 
@@ -46,8 +44,6 @@ const authSlice = createSlice({
         role: user.role,
         isBlocked: user.isBlocked,
         isVerified: user.isVerified,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
         isOnboardingRequired: user.isOnboardingRequired
       };
       state.token = token;
@@ -58,8 +54,11 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
     },
+    setAccessToken: (state, action) => {
+      state.token = action.payload.newAccessToken;
+    }
   },
 });
 
-export const { login, logout } = authSlice.actions;
+export const { login, logout, setAccessToken } = authSlice.actions;
 export default authSlice.reducer;
