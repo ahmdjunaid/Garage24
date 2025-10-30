@@ -6,7 +6,6 @@ import { IAuthRepository } from "../../../repositories/user/interface/IUserRepos
 import { Role } from "../../../types/user";
 import {
   ACCOUNT_IS_BLOCKED,
-  EMAIL_NOT_VERIFIED,
   INVALID_CREDENTIALS,
   INVALID_OTP,
   INVALID_TOKEN,
@@ -16,6 +15,7 @@ import {
   OTP_SENT_SUCCESSFULLY,
   OTP_VERIFIED_SUCCESSFULLY,
   PASSWORD_RESET_SUCCESSFULLY,
+  SIGNUP_SESSION_EXPIRED,
   USER_ALREADY_EXISTS,
   USER_NOT_FOUND,
 } from "../../../constants/messages";
@@ -29,6 +29,7 @@ import {
 } from "../../../middleware/jwt";
 import crypto from "crypto";
 import axios from "axios";
+import redisClient from "../../../config/redisClient";
 
 const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
 
@@ -37,19 +38,8 @@ export class AuthService implements IAuthService {
 
   async register(name: string, email: string, password: string, role: Role) {
     const existUser = await this._authRepository.findByEmail(email);
-    if (existUser && existUser.isVerified) {
+    if (existUser) {
       throw { status: HttpStatus.NOT_FOUND, message: USER_ALREADY_EXISTS };
-    }
-
-    if (existUser && !existUser.isVerified) {
-      const { otp, hashedOtp } = generateOtp();
-      existUser.otp = hashedOtp;
-      existUser.otpExpires = new Date(Date.now() + 2 * 60 * 1000);
-
-      await existUser.save();
-
-      await sendOtpEmail(existUser.email, otp);
-      return { user: existUser };
     }
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -57,19 +47,22 @@ export class AuthService implements IAuthService {
     const { otp, hashedOtp } = generateOtp();
     const Id = generateCustomId(role);
 
-    const otpExpires = new Date(Date.now() + 2 * 60 * 1000);
-    const { user } = await this._authRepository.register({
+    const userData = {
       Id,
       name,
       email,
       role,
-      hashedOtp,
-      otpExpires,
       hashedPassword,
-    });
+    };
+
+    const redisDataKey = `userData:${email}`;
+    const redisOtpKey = `otp:${email}`;
+
+    await redisClient.setEx(redisDataKey, 600, JSON.stringify(userData));
+    await redisClient.setEx(redisOtpKey, 120, hashedOtp);
 
     await sendOtpEmail(email, otp);
-    return { user };
+    return { message: "OTP sent for email verification." };
   }
 
   async login(email: string, password: string) {
@@ -78,12 +71,8 @@ export class AuthService implements IAuthService {
       throw { status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND };
     }
 
-    if(user.isBlocked){
+    if (user.isBlocked) {
       throw { status: HttpStatus.FORBIDDEN, message: ACCOUNT_IS_BLOCKED };
-    }
-
-    if (!user.isVerified) {
-      throw { status: HttpStatus.FORBIDDEN, message: EMAIL_NOT_VERIFIED };
     }
 
     if (!user.password) {
@@ -101,38 +90,52 @@ export class AuthService implements IAuthService {
     return { user, token, refreshToken };
   }
 
-  async verifyOtp(email: string, otp: string) {
-    const user = await this._authRepository.findByEmail(email);
-    if (!user) {
-      throw { status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND };
-    }
+  async verifyOtp(email: string, otp: string, context: "register" | "other") {
+    const redisOtpKey = `otp:${email}`;
+    const redisDataKey = `userData:${email}`;
+
+    const storedOtp = await redisClient.get(redisOtpKey);
+    if (!storedOtp)
+      throw { status: HttpStatus.BAD_REQUEST, message: OTP_EXPIRED };
 
     const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
-
-    if (!user.otpExpires || !(user.otpExpires instanceof Date)) {
-      throw { status: HttpStatus.BAD_REQUEST, message: OTP_EXPIRED };
-    }
-
-    if (user.otp !== hashedOtp) {
+    if (storedOtp !== hashedOtp)
       throw { status: HttpStatus.BAD_REQUEST, message: INVALID_OTP };
-    }
 
-    if (new Date() > new Date(user.otpExpires)) {
-      throw { status: HttpStatus.FORBIDDEN, message: OTP_EXPIRED };
-    }
-
-    user.isVerified = true;
-    user.otp = undefined;
-    user.otpExpires = undefined;
-
-    const token = generateResetToken(user._id as string);
-
-    await user.save();
-
-    return {
-      token,
+    const response = {
       message: OTP_VERIFIED_SUCCESSFULLY,
+      token: "",
     };
+
+    switch (context) {
+      case "register": {
+        const userData = await redisClient.get(redisDataKey);
+        if (!userData)
+          throw {
+            status: HttpStatus.BAD_REQUEST,
+            message: SIGNUP_SESSION_EXPIRED,
+          };
+
+          await this._authRepository.register(JSON.parse(userData));
+        break;
+      }
+      case "other": {
+        const user = await this._authRepository.findByEmail(email)
+        
+        if(!user) throw { status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND };
+
+        const token = generateResetToken(user._id as string);
+        response.token = token;
+        break;
+      }
+
+      default:
+        break;
+    }
+
+    await redisClient.del(redisOtpKey)
+    await redisClient.del(redisDataKey)
+    return response;
   }
 
   async forgotPassword(email: string) {
@@ -144,10 +147,9 @@ export class AuthService implements IAuthService {
 
     const { otp, hashedOtp } = generateOtp();
 
-    user.otp = hashedOtp;
-    user.otpExpires = new Date(Date.now() + 2 * 60 * 1000);
+    const redisOtpKey = `otp:${email}`;
+    await redisClient.setEx(redisOtpKey, 120, hashedOtp);
 
-    await user.save();
     await sendOtpEmail(email, otp);
 
     return { status: HttpStatus.OK, message: OTP_SENT_SUCCESSFULLY };
@@ -162,10 +164,9 @@ export class AuthService implements IAuthService {
 
     const { otp, hashedOtp } = generateOtp();
 
-    user.otp = hashedOtp;
-    user.otpExpires = new Date(Date.now() + 2 * 60 * 1000);
+    const redisOtpKey = `otp:${email}`;
+    await redisClient.setEx(redisOtpKey, 120, hashedOtp);
 
-    await user.save();
     await resendOtpEmail(email, otp);
 
     return { status: HttpStatus.OK, message: OTP_RESENT_SUCCESSFULLY };
@@ -221,20 +222,19 @@ export class AuthService implements IAuthService {
     const decoded = verifyRefreshToken(refreshToken);
 
     if (!decoded) {
-      throw { status:HttpStatus.FORBIDDEN, message: INVALID_TOKEN };
+      throw { status: HttpStatus.FORBIDDEN, message: INVALID_TOKEN };
     }
 
-    const user = await this._authRepository.findById(decoded.id)
-
-    if(!user){
-      throw {status:HttpStatus.NOT_FOUND, message: USER_NOT_FOUND}
+    const user = await this._authRepository.findById(decoded.id);
+    if (!user) {
+      throw { status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND };
     }
 
-    if(user.isBlocked){
-      throw {status:HttpStatus.FORBIDDEN, message: ACCOUNT_IS_BLOCKED}
+    if (user.isBlocked) {
+      throw { status: HttpStatus.FORBIDDEN, message: ACCOUNT_IS_BLOCKED };
     }
-  
-    const newAccessToken = generateToken(decoded.id,decoded.role)
+    const newAccessToken = generateToken(decoded.id, decoded.role);
+
     return { newAccessToken };
   }
 }

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import AdminSidebar from "../../components/elements/AdminSidebar";
 import AdminTable from "../../components/elements/AdminTable";
-import DarkModal from "../../components/modal/Layout/DarkModal";
+import DarkModal from "../../components/modal/layouts/DarkModal";
 import { resendOtpApi, signUpApi, verifyOtpApi } from "../../services/auth";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import {
@@ -50,6 +50,7 @@ const GarageMechanic = () => {
 
     return () => clearInterval(timer);
   }, [seconds]);
+  
 
   const handleSubmit = async () => {
     setNameError("");
@@ -120,7 +121,7 @@ const GarageMechanic = () => {
         return;
       }
 
-      await verifyOtpApi({ email, otp });
+      await verifyOtpApi({ email, otp, context:"register" });
 
       handleMechanicRegister();
 
@@ -200,7 +201,7 @@ const GarageMechanic = () => {
     return () => {
       debouncedFetch.cancel();
     };
-  }, [currentPage, searchQuery, token, fetchMechanics, debouncedFetch]);
+  }, [currentPage, token, searchQuery, fetchMechanics, debouncedFetch]);
 
   const handleBlock = async (userId: string, action: string) => {
     try {

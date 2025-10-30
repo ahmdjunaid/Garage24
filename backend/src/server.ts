@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
 import logger from "./config/logger";
 import connectDB from "./config/db";
 import http from "http";
@@ -9,8 +10,9 @@ import garageRouter from "../src/routes/garageRoutes"
 import mechanicRouter from "../src/routes/mechanicRoutes"
 import adminRouter from "../src/routes/adminRoutes"
 import cookieParser from "cookie-parser";
+import { errorHandler } from "./middleware/errorHandler";
+import { connectRedis } from "./config/redisClient";
 
-dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
@@ -31,7 +33,14 @@ app.use("/api/garage", garageRouter);
 app.use("/api/mechanic", mechanicRouter);
 app.use("/api/admin", adminRouter);
 
+
+app.use(errorHandler)
+
 connectDB();
+
+(async()=>{
+  await connectRedis()
+})()
 
 const PORT = process.env.PORT || 3000;
 

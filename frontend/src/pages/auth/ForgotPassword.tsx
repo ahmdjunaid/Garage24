@@ -8,44 +8,24 @@ import emailIcon from "../../assets/icons/email.svg";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../redux/store/store";
 import type { Role } from "../../types/UserTypes";
-import Modal from "../../components/modal/Layout/Modal";
-import passwordIcon from "../../assets/icons/password.svg"
-import { forgotPasswordApi, verifyOtpApi, resendOtpApi, resetPasswordApi} from "../../services/auth";
-import { errorToast, successToast } from "../../utils/notificationAudio";
-import { OTP_VERIFIED } from "../../constants/messages";
-
+import { forgotPasswordApi } from "../../services/auth";
+import OtpModalLight from "../../components/modal/OtpModalLight";
+import ResetPassModal from "../../components/modal/ResetPassModal";
+import { emailRegex } from "../../constants/commonRegex";
+import Spinner from "../../components/elements/Spinner";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const [otp, setOtp] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [showModal, setShowModal] = useState<boolean>(false)
-  const [seconds, setSeconds] = useState<number>(0)
-  const [otpError, setOtpError] = useState<string>("")
-  const [resendDisabled, setResendDisabled] = useState<boolean>(false)
-  const [passwordError, setPasswordError] = useState<string>('')
-  const [showReset, setShowReset] = useState<boolean>(false)
-  const [password, setPassword] = useState<string>("")
-  const [CPassword, setCPassword] = useState<string>("")
-  const [token, setToken] = useState(null)
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [showReset, setShowReset] = useState<boolean>(false);
+  const [token, setToken] = useState<string | null>(null);
 
+  
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
-
-  const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
-  );
-
-  useEffect(()=>{
-    if(seconds===0) return
-    const timer = setInterval(()=>{
-      setSeconds(prev => prev - 1)
-    },1000)
-
-    return () => clearInterval(timer)
-
-  },[seconds])
 
   useEffect(() => {
     if (isAuthenticated && user?.role) {
@@ -61,108 +41,30 @@ const ForgotPassword = () => {
   }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async () => {
-    setEmailError("")
-    setError("")
-    setLoading(true)
+    setEmailError("");
+    setError("");
+    setLoading(true);
 
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    const isValid = emailRegex.test(email);
 
-    const isValid = emailRegex.test(email)
-
-    if(!isValid){
-      setEmailError("Enter a valid email address.")
-      setLoading(false)
-      return
+    if (!isValid) {
+      setEmailError("Enter a valid email address.");
+      setLoading(false);
+      return;
     }
 
     try {
-      await forgotPasswordApi({email})
-      setShowModal(true)
-      setSeconds(120)
-    } catch (error:any) {
-      setError(error.message)
-    }finally{
-      setLoading(false)
-    }
-
-  };
-
-  const handleResetPassword = async () => {
-    let hasError = false
-    setPasswordError("")
-
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
-
-    if(!password.trim() || !CPassword.trim()){
-      setPasswordError("Enter and confirm your password.")
-      hasError = true
-    }
-
-    if(!passwordRegex.test(password)){
-      setPasswordError("Password must be 8+ chars with uppercase, lowercase, number, and special character.")
-      hasError = true
-    }
-
-    if(password !== CPassword){
-      setPasswordError("Please make sure the passwords match.")
-      hasError = true      
-    }
-
-    if(hasError) return
-
-    try {
-      if(token){
-        const res = await resetPasswordApi({email, password},token)
-        successToast(res.message || "Password reset successfull.")
-
-        setTimeout(()=>{
-          setShowReset(false)
-          navigate('/login')
-          setPassword('')
-          setCPassword('')
-        },2000)
+      await forgotPasswordApi({ email });
+      setShowModal(true);
+    } catch (error) {
+      if(error instanceof Error){
+        setError(error.message)
+      }else{
+        setError("Something went wrong.")
       }
-    } catch (error:any) {
-      errorToast(error.message || "Password reset failed, Try again.")
+    } finally {
+      setLoading(false);
     }
-  }
-
-  const handleOtp = async () => {
-    try {
-      const res = await verifyOtpApi({ email, otp })
-      setToken(res.token)
-      successToast(OTP_VERIFIED)
-      
-      
-      setTimeout(()=>{
-        setShowModal(!showModal);
-        setShowReset(!showReset)
-        setOtp("");
-      },2000)
-    } catch (error:any) {
-      console.error("error on sending otp", error);
-      setOtpError(error.message || "something went wrong");
-    }
-  }
-
-  const handleResendOtp = async () => {
-      try {
-  
-        setResendDisabled(true)
-        await resendOtpApi({ email });
-        setSeconds(120);
-  
-        successToast("OTP has been resent successfully.");
-  
-        setTimeout(()=>{
-          setResendDisabled(false)
-        },10000)
-  
-      } catch (error: any) {
-        console.error(error);
-        setOtpError(error.message || "Error while resend OTP.");
-      }
   };
 
   return (
@@ -245,76 +147,27 @@ const ForgotPassword = () => {
             </div>
           </div>
 
-          {/* OTP modal */}
-          <Modal isOpen={showModal} onClose={() => setShowModal(!showModal)}>
-            <div className="flex flex-col space-y-4">
-              <p className="text-center text-black/50 font-bold">
-                OTP Verification
-              </p>
-                {otpError && (
-                  <div className="bg-red-100 border border-red-600 p-2 rounded-lg mb-2">
-                      <p className="text-red-600 text-center text-sm">{otpError}</p>
-                  </div>
-                )}
-              <Input
-                icon={passwordIcon}
-                placeholder="Enter OTP"
-                onChange={(e) => setOtp(e.target.value)}
-                type="text"
-                value={otp}
-              />
-              <AuthButton
-                action={handleOtp}
-                text={"Verify OTP"}
-                loading={seconds > 0 ? false : true}
-              />
-              {seconds > 0 ? (
-                <p className="text-center text-black/50 font-light">
-                  {seconds} Seconds Left
-                </p>
-              ) : (
-                <button
-                  onClick={handleResendOtp}
-                  className="text-center text-black/50 font-bold hover:text-red-500"
-                  disabled={resendDisabled}
-                >
-                  {resendDisabled ? "Please wait..." : "Resend OTP"}
-                </button>
-              )}
-            </div>
-          </Modal>
+          <Spinner loading={loading} />
 
-          {/* Reset modal */}
-          <Modal isOpen={showReset} onClose={() => setShowReset(!showReset)}>
-            <div className="flex flex-col space-y-4">
-              <p className="text-center text-black/50 font-bold">
-                Reset password
-              </p>
-                {passwordError && (
-                  <div className="bg-red-100 border border-red-600 p-2 rounded-lg mb-2">
-                      <p className="text-red-600 text-center text-sm">{passwordError}</p>
-                  </div>
-                )}
-              <Input
-                icon={passwordIcon}
-                placeholder="New password"
-                onChange={(e) => setPassword(e.target.value)}
-                type="password"
-                value={password}
-              />
-              <Input
-                icon={passwordIcon}
-                placeholder="Confirm password"
-                onChange={(e) => setCPassword(e.target.value)}
-                type="password"
-                value={CPassword}
-              />
-              <AuthButton
-                action={handleResetPassword}
-                text={"Reset password"}
-              />
-            </div>
-          </Modal>
+          {/* OTP Modal */}
+          <OtpModalLight
+            isOpen={showModal}
+            onClose={()=>setShowModal(false)}
+            context="other"
+            email={email}
+            onVerified={(token)=>{
+              setToken(token)
+              setShowReset(true)
+            }}
+          />
+
+          {/* Reset password modal */}
+          <ResetPassModal
+            isOpen={showReset}
+            onClose={()=>setShowReset(false)}
+            email={email}
+            token={token}
+          />
 
           {/* Right side - Image */}
           <div className="lg:w-1/2 bg-gradient-to-br from-gray-800 to-gray-900 relative overflow-hidden">

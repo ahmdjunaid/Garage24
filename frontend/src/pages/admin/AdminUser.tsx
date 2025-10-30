@@ -93,13 +93,13 @@ const AdminUser = () => {
                 Filter By
               </button>
               <button className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-400 transition-all duration-200 hover:scale-105">
-                Sort By: {sortBy}
+                {/* Sort By: {sortBy} */}
                 <ChevronDown className="w-4 h-4" />
               </button>
             </div>
 
             {/* Table Header */}
-            <div className="grid grid-cols-7 gap-4 px-6 py-4 border-b border-gray-800 text-xs text-gray-500 font-semibold uppercase bg-gradient-to-r from-gray-900 to-gray-950">
+            <div className="grid grid-cols-6 gap-4 px-6 py-4 border-b border-gray-800 text-xs text-gray-500 font-semibold uppercase bg-gradient-to-r from-gray-900 to-gray-950">
               <div>User ID</div>
               <div>Image</div>
               <div>Name</div>
@@ -113,7 +113,7 @@ const AdminUser = () => {
               {users.map((user, index) => (
                 <div
                   key={index}
-                  className="grid grid-cols-7 gap-4 px-6 py-4 border-b border-gray-800 hover:bg-gradient-to-r hover:from-gray-800 hover:to-gray-900 transition-all duration-200 items-center group cursor-pointer"
+                  className="grid grid-cols-6 gap-4 px-6 py-4 border-b border-gray-800 hover:bg-gradient-to-r hover:from-gray-800 hover:to-gray-900 transition-all duration-200 items-center group cursor-pointer"
                 >
                   <div className="text-gray-400 group-hover:text-gray-200 transition-colors">
                     {user.userId}

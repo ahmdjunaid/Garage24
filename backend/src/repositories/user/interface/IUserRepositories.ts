@@ -9,8 +9,6 @@ export interface IAuthRepository {
     role: string,
     googleID?:string,
     imageUrl?: string,
-    hashedOtp?: string,
-    otpExpires?: Date,
     hashedPassword?: string
   }
   ): Promise<{

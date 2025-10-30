@@ -14,9 +14,7 @@ const userSchema = new Schema<IUser>(
     isBlocked: { type: Boolean, default: false },
     password: { type: String },
     googleID: { type: String },
-    otp: { type: String },
-    otpExpires: { type: Date },
-    isVerified: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
     isOnboardingRequired: { type: Boolean },
   },
   {

@@ -27,7 +27,7 @@ const AdminTable: React.FC<AdminTableProps> = ({ mechanics, onBlock, onDelete })
       </div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-7 gap-4 px-6 py-4 border-b border-gray-800 text-xs text-gray-500 font-semibold uppercase bg-gradient-to-r from-gray-900 to-gray-950">
+      <div className="grid grid-cols-6 gap-4 px-6 py-4 border-b border-gray-800 text-xs text-gray-500 font-semibold uppercase bg-gradient-to-r from-gray-900 to-gray-950">
         <div>Employee ID</div>
         <div>Image</div>
         <div>Name</div>
@@ -41,7 +41,7 @@ const AdminTable: React.FC<AdminTableProps> = ({ mechanics, onBlock, onDelete })
         {mechanics.map((mechanic, index) => (
           <div
             key={index}
-            className="grid grid-cols-7 gap-4 px-6 py-4 border-b border-gray-800 hover:bg-gradient-to-r hover:from-gray-800 hover:to-gray-900 transition-all duration-200 items-center group cursor-pointer"
+            className="grid grid-cols-6 gap-4 px-6 py-4 border-b border-gray-800 hover:bg-gradient-to-r hover:from-gray-800 hover:to-gray-900 transition-all duration-200 items-center group cursor-pointer"
           >
             <div className="text-gray-400 group-hover:text-gray-200 transition-colors">
               {mechanic.mechanicId}

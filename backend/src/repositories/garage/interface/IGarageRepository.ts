@@ -1,4 +1,4 @@
-import { FilterQuery, HydratedDocument, Types } from "mongoose";
+import { FilterQuery, Types } from "mongoose";
 import { GetMappedGarageResponse, IAddress, IGarage } from "../../../types/garage";
 import { GetPaginationQuery } from "../../../types/common";
 

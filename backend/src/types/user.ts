@@ -23,9 +23,7 @@ export interface IUser extends Document {
   role: Role;
   isBlocked: boolean;
   password?: string;
-  otp?: string | undefined;
-  otpExpires?: Date | undefined;
-  isVerified: boolean;
+  isDeleted: boolean;
   googleID?: string;
   isOnboardingRequired?: boolean;
 }

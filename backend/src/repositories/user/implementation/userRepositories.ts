@@ -18,8 +18,6 @@ async register(userData: {
   role: Role,
   googleID?: string,
   imageUrl?: string,
-  hashedOtp?: string,
-  otpExpires?: Date,
   hashedPassword?: string
 }) {
   const data = {
@@ -27,12 +25,9 @@ async register(userData: {
     name:userData.name,
     email:userData.email,
     role:userData.role,
-    ...(userData.hashedPassword && { password: userData.hashedPassword }),
-    ...(userData.hashedOtp && { otp: userData.hashedOtp }),               
-    ...(userData.otpExpires && { otpExpires:userData.otpExpires }),                  
+    ...(userData.hashedPassword && { password: userData.hashedPassword }),                
     ...(userData.googleID && { googleID:userData.googleID }),                      
     ...(userData.imageUrl && { imageUrl:userData.imageUrl }),
-    ...(userData.googleID && { isVerified: true }),
     isOnboardingRequired: userData.role === "user" ? false : true
   }
   const savedUser = await this.create(data)
@@ -40,11 +35,11 @@ async register(userData: {
 }
 
   async findByEmail(email: string) {
-    return await this.getByFilter({ email: email})
+    return await this.getByFilter({ email: email, isDeleted: false })
   }
 
   async findOneAndUpdate(userId: string, data: Partial<IUser>) {
-    return await this.updateOneByFilter({_id:userId}, data)
+    return await this.updateOneByFilter({_id:userId, isDeleted: false}, data)
   }
 
   async findById(id: string) {

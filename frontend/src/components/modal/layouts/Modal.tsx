@@ -5,10 +5,9 @@ interface ModalProps {
   isOpen: boolean;
   onClose?: () => void;
   children: React.ReactNode;
-  handleError?: () => void;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, handleError }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
 
   return (
@@ -20,7 +19,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, handleError })
 
       <div className="relative bg-white p-6 rounded-lg shadow-lg z-50 w-96">
         <button
-          onClick={() => (onClose?.(), handleError?.())}
+          onClick={() => (onClose?.())}
           className="absolute right-4 top-4 text-gray-500 hover:text-red-600 transition-colors duration-200"
           aria-label="Close"
         >

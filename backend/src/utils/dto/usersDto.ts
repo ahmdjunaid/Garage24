@@ -7,7 +7,7 @@ export const usersDataMapping = (user:any):IUsersMappedData => {
         name: user.name,
         email: user.email,
         isBlocked: user.isBlocked,
-        isVerified: user.isVerified,
+        isDeleted: user.isDeleted,
         isOnboardingRequired: user.isOnboardingRequired,
         role: user.role,
         imageUrl: user?.imageUrl,

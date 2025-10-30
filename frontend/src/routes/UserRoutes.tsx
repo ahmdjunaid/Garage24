@@ -6,6 +6,7 @@ import HomePage from "../pages/user/HomePage";
 import ProtectedRoute from "./ProtectedRoute";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import UnauthorizedPage from "../pages/auth/Unauthorized";
+import PageNotFound from "../pages/auth/PageNotFound";
 
 const UserRoutes: React.FC = () => {
   return (
@@ -16,6 +17,7 @@ const UserRoutes: React.FC = () => {
       <Route path="/unauthorized" element={<UnauthorizedPage/>} />
       <Route element={<ProtectedRoute requiredRoles={["user"]} />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="*" element={<PageNotFound/>}/>
       </Route>
     </Routes>
   );

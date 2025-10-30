@@ -5,7 +5,7 @@ export interface IUsersMappedData {
   email: string;
   role: string;
   isBlocked: boolean;
-  isVerified: boolean;
+  isDeleted: boolean;
   isOnboardingRequired: boolean;
   imageUrl?: string;
   mobileNumber?: string;

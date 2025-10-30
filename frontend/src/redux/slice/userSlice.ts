@@ -8,7 +8,7 @@ interface User {
   email: string;
   role?: Role;
   isBlocked: boolean;
-  isVerified: boolean;
+  isDeleted: boolean;
   isOnboardingRequired: boolean;
 }
 
@@ -43,7 +43,7 @@ const authSlice = createSlice({
         email: user.email,
         role: user.role,
         isBlocked: user.isBlocked,
-        isVerified: user.isVerified,
+        isDeleted: user.isDeleted,
         isOnboardingRequired: user.isOnboardingRequired
       };
       state.token = token;

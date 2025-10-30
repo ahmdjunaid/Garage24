@@ -8,13 +8,7 @@ import passwordIcon from "../../assets/icons/password.svg";
 import emailIcon from "../../assets/icons/email.svg";
 import userIcon from "../../assets/icons/user.svg";
 import companyIcon from "../../assets/icons/company.svg";
-import {
-  googleLoginApi,
-  resendOtpApi,
-  signUpApi,
-  verifyOtpApi,
-} from "../../services/auth";
-import Modal from "../../components/modal/Layout/Modal";
+import { googleLoginApi, signUpApi } from "../../services/auth";
 import Spinner from "../../components/elements/Spinner";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../redux/store/store";
@@ -22,6 +16,8 @@ import type { Role } from "../../types/UserTypes";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import { useGoogleLogin } from "@react-oauth/google";
 import { login } from "../../redux/slice/userSlice";
+import OtpModalLight from "../../components/modal/OtpModalLight";
+import { emailRegex, nameRegex, passwordRegex } from "../../constants/commonRegex";
 
 type SignUpProps = {
   role: Role;
@@ -35,11 +31,8 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
   const [password, setPassword] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [otp, setOtp] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [seconds, setSeconds] = useState<number>(0);
-  const [otpError, setOtpError] = useState<string>("");
-  const [resendDisabled, setResendDisabled] = useState<boolean>(false)
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -59,7 +52,7 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
   }, [seconds]);
 
   useEffect(() => {
-    if (isAuthenticated && user?.role && user.isVerified) {
+    if (isAuthenticated && user?.role) {
       const roleRoutes: Record<Role, string> = {
         user: "/",
         mechanic: "/mechanic",
@@ -77,18 +70,13 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
     setPasswordError("");
     let hasError = false;
 
-    if (!name || !email || !password ) {
+    if (!name || !email || !password) {
       errorToast("All fields are required");
       return;
     }
 
-    const nameRegex = /^[A-Za-z]{3,}(?: [A-Za-z]+)*$/;
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
-
     if (!name.trim() || !nameRegex.test(name.trim())) {
-      setNameError("Name must have at least 3 characters and only letters");
+      setNameError("Name must have at least 3 - 25 characters and only letters");
       hasError = true;
     }
 
@@ -111,61 +99,26 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
       const data = await signUpApi({ name, email, password, role });
       if (data) {
         setShowModal(true);
-        setSeconds(120);
       } else {
         errorToast("Signup Failed, Please try again.");
       }
-    } catch (err: any) {
-      const error = err as Error;
-      errorToast(error.message || "SignUp Failed");
+    } catch (err) {
+      if(err instanceof Error){
+        errorToast(err.message);
+      }else{
+        errorToast("Signup Failed.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleOtp = async () => {
-    setOtpError("")
-    try {
+  const handleVerifiedOtp = () => {
+    successToast("OTP has been Verified. Login with your credentials.");
 
-      const otpRegex = /^\d{6}$/;
-
-      if(!otpRegex.test(otp)){
-        setOtpError("OTP must be a 6-digit number.")
-        return
-      }
-
-      await verifyOtpApi({ email, otp });
-
-      successToast("OTP has been Verified. Login with your credentials.");
-      
-      setTimeout(() => {
-        setShowModal(!showModal);
-        setOtp("");
-        navigate("/login");
-      }, 2000);
-
-    } catch (error: any) {
-      console.error("error on verifying Otp", error.message);
-      setOtpError(error.message || "something went wrong");
-    }
-  };
-
-  const handleResendOtp = async () => {
-    try {
-      setResendDisabled(true)
-      await resendOtpApi({ email });
-      setSeconds(120);
-
-      successToast("OTP has been resent successfully.");
-
-      setTimeout(()=>{
-        setResendDisabled(false)
-      },10000)
-
-    } catch (error: any) {
-      console.error(error);
-      setOtpError(error.message || "Error while resend OTP.");
-    }
+    setTimeout(() => {
+      navigate("/login");
+    }, 2000);
   };
 
   const handleGoogleLogin = useGoogleLogin({
@@ -179,8 +132,12 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
         } else {
           navigate(`/${user?.role}`);
         }
-      } catch (error: any) {
-        errorToast(error.message || "Google login failed");
+      } catch (error) {
+        if(error instanceof Error){
+          errorToast(error.message)
+        }else{
+          errorToast("Google login failed");
+        }
       }
     },
 
@@ -188,11 +145,6 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
       errorToast("Google login failed");
     },
   });
-
-  const handleError = ()=>{
-    setOtp("")
-    setOtpError("")
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
@@ -269,49 +221,13 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
             <Spinner loading={loading} />
 
             {/* OTP modal */}
-            <Modal
+            <OtpModalLight
               isOpen={showModal}
-              onClose={() => setShowModal(!showModal)}
-              handleError={() =>handleError()}
-            >
-              <div className="flex flex-col space-y-4">
-                <p className="text-center text-black/50 font-bold">
-                  OTP Verification
-                </p>
-                {otpError && (
-                  <div className="bg-red-100 border border-red-600 p-2 rounded-lg mb-2">
-                    <p className="text-red-600 text-center text-sm">
-                      {otpError}
-                    </p>
-                  </div>
-                )}
-                <Input
-                  icon={passwordIcon}
-                  placeholder="Enter OTP"
-                  onChange={(e) => setOtp(e.target.value)}
-                  type="text"
-                  value={otp}
-                />
-                <AuthButton
-                  action={handleOtp}
-                  text={"Verify OTP"}
-                  loading={seconds > 0 ? false : true}
-                />
-                {seconds > 0 ? (
-                  <p className="text-center text-black/50 font-light">
-                    {seconds} Seconds Left
-                  </p>
-                ) : (
-                  <button
-                    onClick={handleResendOtp}
-                    disabled={resendDisabled}
-                    className="text-center text-black/50 font-bold hover:text-red-500"
-                  >
-                    {resendDisabled ? "Please wait..." : "Resend OTP"}
-                  </button>
-                )}
-              </div>
-            </Modal>
+              onClose={() => setShowModal(false)}
+              context="register"
+              email={email}
+              onVerified={() => handleVerifiedOtp()}
+            />
 
             {role === "garage" ? (
               ""

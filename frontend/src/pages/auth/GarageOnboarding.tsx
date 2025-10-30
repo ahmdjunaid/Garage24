@@ -2,7 +2,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import React, { useEffect, useState } from "react";
 import logo from "../../assets/icons/Logo.png";
-import Modal from "../../components/modal/Layout/Modal";
+import Modal from "../../components/modal/layouts/Modal";
 import AuthButton from "../../components/elements/AuthButton";
 import type { ILocation } from "../../types/UserTypes";
 import type { RootState } from "../../redux/store/store";

@@ -16,7 +16,7 @@ export class BaseRepository<T> {
   }
 
   async getById(id: string): Promise<T | null> {
-    return await this.model.findById(id);
+    return await this.model.findById(id,{ isDeleted:false });
   }
 
   async updateOneByFilter(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<T> {

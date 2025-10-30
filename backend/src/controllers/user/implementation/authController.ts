@@ -33,14 +33,14 @@ export class Authcontroller implements IAuthController {
       }
 
       const { name, email, password, role } = parsed.data;
-      const { user } = await this._authService.register(
+      const { message } = await this._authService.register(
         name,
         email,
         password,
         role
       );
 
-      res.status(HttpStatus.OK).json({ user });
+      res.status(HttpStatus.OK).json({ message });
     } catch (error) {
       const err = error as Error;
       res
@@ -82,8 +82,8 @@ export class Authcontroller implements IAuthController {
 
   verifyOtp = async (req: Request, res: Response) => {
     try {
-      const { email, otp } = req.body;
-      const { token, message } = await this._authService.verifyOtp(email, otp);
+      const { email, otp, context } = req.body;
+      const { token, message } = await this._authService.verifyOtp(email, otp, context);
 
       res.status(HttpStatus.OK).json({
         message: message,
@@ -127,9 +127,10 @@ export class Authcontroller implements IAuthController {
 
       res.status(HttpStatus.OK).json({ message: message });
     } catch (error) {
+      const err = error as Error;
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: ERROR_WHILE_FORGOT_PASS });
+        .json({ message: err?.message || ERROR_WHILE_FORGOT_PASS });
       console.log(error, "Error while forgot password");
     }
   };
@@ -159,7 +160,7 @@ export class Authcontroller implements IAuthController {
     }
   };
 
-  resetPassword = async (req:Request, res:Response) => {
+  resetPassword = async (req: Request, res: Response) => {
     try {
       const parsed = loginSchema.safeParse(req.body);
 
@@ -169,9 +170,12 @@ export class Authcontroller implements IAuthController {
 
       const { email, password } = parsed.data;
 
-      const { message } = await this._authService.resetPassword(email, password)
+      const { message } = await this._authService.resetPassword(
+        email,
+        password
+      );
 
-      res.status(HttpStatus.OK).json({message})
+      res.status(HttpStatus.OK).json({ message });
     } catch (error) {
       const err = error as Error;
       res
@@ -179,12 +183,13 @@ export class Authcontroller implements IAuthController {
         .json({ message: err?.message || ERROR_WHILE_RESEND_OTP });
       console.error("Error while reset password.", err);
     }
-  }
+  };
 
   googleAuth = async (req: Request, res: Response) => {
     try {
       const { accessToken } = req.body;
-      const { user, token, refreshToken } = await this._authService.googleAuth(accessToken)
+      const { user, token, refreshToken } =
+        await this._authService.googleAuth(accessToken);
 
       res.cookie("refresh_token", refreshToken, {
         httpOnly: true,
@@ -193,7 +198,7 @@ export class Authcontroller implements IAuthController {
         maxAge: refreshTokenMaxAge,
       });
 
-      res.status(HttpStatus.OK).json({user, token})
+      res.status(HttpStatus.OK).json({ user, token });
     } catch (error) {
       const err = error as Error;
       res
@@ -207,13 +212,17 @@ export class Authcontroller implements IAuthController {
     try {
       const refreshToken = req.cookies?.refresh_token;
 
-      if(!refreshToken){
-        throw {status: HttpStatus.UNAUTHORIZED, message: NO_REFRESH_TOKEN_FOUND}
+      if (!refreshToken) {
+        throw {
+          status: HttpStatus.UNAUTHORIZED,
+          message: NO_REFRESH_TOKEN_FOUND,
+        };
       }
 
-      const { newAccessToken } = await this._authService.refreshToken(refreshToken)
+      const { newAccessToken } =
+        await this._authService.refreshToken(refreshToken);
 
-      res.status(HttpStatus.OK).json({accessToken: newAccessToken})
+      res.status(HttpStatus.OK).json({ accessToken: newAccessToken });
     } catch (error) {
       const err = error as Error;
       res
@@ -221,5 +230,5 @@ export class Authcontroller implements IAuthController {
         .json({ message: err?.message || NO_REFRESH_TOKEN_FOUND });
       console.error("Error while creating refreshToken.", err);
     }
-  }
+  };
 }

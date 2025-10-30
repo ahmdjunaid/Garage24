@@ -7,6 +7,7 @@ export const USER_STATUS_UPDATE_FAILED = "Failed to update user status";
 export const USER_STATUS_CHANGED = "User status changed successfully";
 export const USER_ALREADY_EXISTS = "User already exists";
 export const ACCOUNT_IS_BLOCKED = "This account is blocked by Admin.";
+export const SIGNUP_SESSION_EXPIRED = "Signup session expired"
 
 //Email
 export const INVALID_EMAIL = 'Invalid email address'

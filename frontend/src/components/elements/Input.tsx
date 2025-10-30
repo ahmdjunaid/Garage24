@@ -28,6 +28,7 @@ const Input = ({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        maxLength={100}
         className="w-full px-4 py-3 pl-12 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
         required
       />

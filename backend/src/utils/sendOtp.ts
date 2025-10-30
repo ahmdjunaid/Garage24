@@ -12,6 +12,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendOtpEmail = async (email: string, otp: string) => {
+
   const mailOptions = {
     from: process.env.NODEMAILER_EMAIL,
     to: email,
@@ -21,6 +22,7 @@ export const sendOtpEmail = async (email: string, otp: string) => {
         <p>Your one-time password (OTP) for verification is:</p>
         <h2 style="color: #FF6B00; ">${otp}</h2>
         <p>This OTP is valid for <strong>120 seconds</strong>. Do not share it with anyone.</p>
+        <p>Please complete your registration within <strong>10 minutes</strong>. If not, you’ll need to restart the process.</p>
         <p>If you did not request this, you can safely ignore this email.</p>
         <br/>
         <p>Best regards,</p>
@@ -28,9 +30,10 @@ export const sendOtpEmail = async (email: string, otp: string) => {
   };
 
   try {
-    console.log(otp);
+
     await transporter.sendMail(mailOptions);
     logger.info(`OTP Sent to ${email}, OTP: ${otp}`);
+
   } catch (error) {
     logger.error("Error while sending OTP", error);
   }

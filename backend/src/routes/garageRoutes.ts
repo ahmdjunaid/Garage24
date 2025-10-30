@@ -6,6 +6,7 @@ import { AuthRepository } from "../repositories/user/implementation/userReposito
 import { uploadImage } from "../config/multerConfig";
 import { verifyJWT } from "../middleware/jwt";
 import { MechanicRepository } from "../repositories/mechanic/implementation/mechanicRepositories";
+import { authorizeRoles } from "../middleware/authorizeRoles";
 
 
 const router = express.Router()
@@ -16,11 +17,11 @@ const mechanicRepository = new MechanicRepository()
 const garageService = new GarageService(garageRepository, authRepository, mechanicRepository)
 const garageController = new GarageController(garageService)
 
-router.route('/onboarding').post(uploadImage,garageController.onboarding)
-router.route('/get-address').get(verifyJWT,garageController.getAddressFromCoordinates)
-router.route('/mechanics').get(verifyJWT,garageController.getAllMechanics)
+router.route('/onboarding').post(verifyJWT,authorizeRoles("garage"),uploadImage,garageController.onboarding)
+router.route('/get-address').get(verifyJWT,authorizeRoles("garage"),garageController.getAddressFromCoordinates)
+router.route('/mechanics').get(verifyJWT,authorizeRoles("garage"),garageController.getAllMechanics)
 router.route('/mechanic/:userId')
-            .patch(verifyJWT,garageController.toggleStatus)
-            .delete(verifyJWT,garageController.deleteMechanic)
+            .patch(verifyJWT,authorizeRoles("garage"),garageController.toggleStatus)
+            .delete(verifyJWT,authorizeRoles("garage"),garageController.deleteMechanic)
 
 export default router;

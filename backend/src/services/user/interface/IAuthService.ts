@@ -6,7 +6,7 @@ export default interface IAuthService {
     email: string,
     password: string,
     role: string
-  ): Promise<{ user: IUser }>;
+  ): Promise<{ message: string }>;
 
 
   login(
@@ -17,7 +17,8 @@ export default interface IAuthService {
 
   verifyOtp(
     email: string,
-    otp: string
+    otp: string,
+    context: "register" | "other"
   ): Promise<{
     message: string;
     token: string;

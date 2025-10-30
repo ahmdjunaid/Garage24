@@ -43,7 +43,7 @@ export const loginApi = async (data: { email: string; password: string }) => {
   }
 };
 
-export const verifyOtpApi = async (data: { email: string; otp: string }) => {
+export const verifyOtpApi = async (data: { email: string; otp: string, context: "register" | "other"}) => {
   try {
     const response = await api.post(`/${AUTH_BASE_ROUTE}/verify-otp`, data);
     return response.data;

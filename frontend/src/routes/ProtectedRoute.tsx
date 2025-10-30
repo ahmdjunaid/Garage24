@@ -10,7 +10,6 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRoles }) => {
   const { user, token, isAuthenticated } = useSelector((state: RootState) => state.auth);
-  console.log(user, token);
   
 
   if (!token || !isAuthenticated) {

@@ -1,4 +1,3 @@
-import { HydratedDocument } from "mongoose";
 import { IAddress, IGarage } from "../../../types/garage";
 import { GetMappedMechanicResponse} from "../../../types/mechanic";
 import { GetPaginationQuery } from "../../../types/common";

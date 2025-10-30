@@ -13,6 +13,7 @@ import { login } from "../../redux/slice/userSlice";
 import type { Role } from "../../types/UserTypes";
 import { errorToast } from "../../utils/notificationAudio";
 import { useGoogleLogin } from "@react-oauth/google";
+import { emailRegex, passwordRegex } from "../../constants/commonRegex";
 
 const Login = () => {
   const [email, setEmail] = useState<string>("");
@@ -53,10 +54,6 @@ useEffect(() => {
     setEmailError("");
     setPasswordError("");
 
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
-
     if (!email.trim() || !password.trim()) {
       errorToast("All fields are required.");
       return;
@@ -90,13 +87,13 @@ useEffect(() => {
           }
         }
         setLoading(false);
-      } catch (err: any) {
-        const message =
-          err?.message ||
-          err?.response?.data?.message ||
-          "Something went wrong";
+      } catch (err) {
+        if(err instanceof Error){
+          errorToast(err.message);
+        }else{
+          errorToast("Error while login");
+        }
         setLoading(false);
-        errorToast(message);
       } finally {
         setLoading(false);
       }
@@ -107,7 +104,6 @@ useEffect(() => {
     onSuccess: async (tokenResponse) => {
       try {
         const res = await googleLoginApi(tokenResponse);
-        console.log(res, "google login");
         dispatch(login({ user: res.user, token: res.token }));
 
         if (res.user.role === "user") {
@@ -115,8 +111,12 @@ useEffect(() => {
         } else {
           navigate(`/${user?.role}`);
         }
-      } catch (error: any) {
-        errorToast(error.message || "Google login failed");
+      } catch (error) {
+        if(error instanceof Error){
+          errorToast(error.message);
+        }else{
+          errorToast("Google login failed");
+        }
       }
     },
 

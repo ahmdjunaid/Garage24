@@ -5,6 +5,7 @@ import { MechanicService } from "../services/mechanic/implementation/mechanicSer
 import { MechanicController } from "../controllers/mechanic/implementation/mechanicController";
 import { verifyJWT } from "../middleware/jwt";
 import { uploadImage } from "../config/multerConfig";
+import { authorizeRoles } from "../middleware/authorizeRoles";
 
 
 const router = express.Router()
@@ -15,7 +16,7 @@ const authRepository = new AuthRepository()
 const mechanicService = new MechanicService(mechanicRepository, authRepository)
 const mechanicController = new MechanicController(mechanicService)
 
-router.route('/register').post(verifyJWT,mechanicController.register)
-router.route('/onboarding').post(verifyJWT,uploadImage,mechanicController.onboarding)
+router.route('/register').post(verifyJWT,authorizeRoles("mechanic"),mechanicController.register)
+router.route('/onboarding').post(verifyJWT,authorizeRoles("mechanic"),uploadImage,mechanicController.onboarding)
 
 export default router;
