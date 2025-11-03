@@ -91,7 +91,7 @@ export const forgotPasswordApi = async (data: { email: string }) => {
   }
 };
 
-export const resendOtpApi = async (data: { email: string }) => {
+export const resendOtpApi = async (data: { email: string, context: "register" | "other"}) => {
   try {
     const response = await api.post(`/${AUTH_BASE_ROUTE}/resend-otp`, data);
     return response.data;

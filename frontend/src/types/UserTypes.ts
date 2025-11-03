@@ -1,9 +1,21 @@
 export type Role = "user" | "admin" | "garage" | "mechanic";
+
 export interface RouteRoles {
   user: string;
   mechanic: string;
   garage: string;
   admin: string;
+}
+
+export interface User {
+  _id: string;
+  userId: string;
+  name: string;
+  email: string;
+  role?: Role;
+  isBlocked: boolean;
+  isDeleted: boolean;
+  isOnboardingRequired: boolean;
 }
 
 

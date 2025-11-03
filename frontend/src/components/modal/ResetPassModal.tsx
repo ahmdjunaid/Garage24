@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Modal from "./layouts/Modal";
+import Modal from "../layouts/Modal";
 import Input from "../elements/Input";
 import AuthButton from "../elements/AuthButton";
 import passwordIcon from "../../assets/icons/password.svg";

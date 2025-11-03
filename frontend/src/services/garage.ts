@@ -32,7 +32,7 @@ export const registerMechanicApi = async (
   token: string | null
 ) => {
   try {
-    const response = await api.post(`/${GARAGE_BASE_ROUTE}/register`, data, {
+    const response = await api.post(`/${GARAGE_BASE_ROUTE}/register-mechanic`, data, {
       headers: { AuthorizationToken: `Bearer ${token}` },
     });
 

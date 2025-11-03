@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminSidebar from "../../components/elements/AdminSidebar";
-import AdminTable from "../../components/elements/AdminTable";
-import DarkModal from "../../components/modal/layouts/DarkModal";
-import { resendOtpApi, signUpApi, verifyOtpApi } from "../../services/auth";
+import AdminTable, {
+  type TableColumn,
+} from "../../components/elements/AdminTable";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import {
   deleteMechanic,
@@ -15,167 +15,52 @@ import type { RootState } from "../../redux/store/store";
 import AdminHeader from "../../components/elements/AdminHeader";
 import _ from "lodash";
 import type { IMechanic } from "../../types/MechanicTypes";
-import Spinner from "../../components/elements/Spinner";
+import RegisterMechanic, {
+  type registerData,
+} from "../../components/modal/RegisterMechanic";
+import OtpModalDark from "../../components/modal/OtpModalDark";
+import { ConfirmModal } from "../../components/modal/ConfirmModal";
+import type { ActionPayload } from "../../types/CommonTypes";
+import profilePlaceholder from "../../assets/icons/profile-placeholder.jpg";
 
 const GarageMechanic = () => {
   const [mechanics, setMechanics] = useState<IMechanic[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [nameError, setNameError] = useState<string>("");
-  const [emailError, setEmailError] = useState<string>("");
-  const [passwordError, setPasswordError] = useState<string>("");
-  const [otp, setOtp] = useState<string>("");
-  const [otpError, setOtpError] = useState<string>("");
-  const [seconds, setSeconds] = useState<number>(0);
   const [showOtpModal, setShowOtpModal] = useState<boolean>(false);
-  const [resendDisabled, setResendDisabled] = useState<boolean>(false);
-  const [userId, setUserId] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [totalPages, setTotalPages] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false)
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [newUser, setNewUser] = useState<registerData | null>(null);
+  const [action, setAction] = useState<ActionPayload | null>(null);
   const mechanicsPerPage = 5;
 
   const { user, token } = useSelector((state: RootState) => state.auth);
   const garageId = user?._id;
 
-  useEffect(() => {
-    if (seconds === 0) return;
-
-    const timer = setInterval(() => {
-      setSeconds((prev) => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [seconds]);
-  
-
-  const handleSubmit = async () => {
-    setNameError("");
-    setEmailError("");
-    setPasswordError("");
-    let hasError = false;
-    
-    const nameRegex = /^[A-Za-z]{3,}(?: [A-Za-z]+)*$/;
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    const passwordRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
-    
-    if (!nameRegex.test(name)) {
-      setNameError("Enter a valid name.");
-      hasError = true;
-    }
-    
-    if (!emailRegex.test(email)) {
-      setEmailError("Enter a valid email address.");
-      hasError = true;
-    }
-    
-    if (!passwordRegex.test(password)) {
-      setPasswordError(
-        "Password must be 8+ chars with uppercase, lowercase, number, and special character."
-      );
-      hasError = true;
-    }
-    
-    if (!hasError) {
-      try {
-        setLoading(true)
-
-        const res = await signUpApi({
-          name,
-          email,
-          password,
-          role: "mechanic",
-        });
-
-        setUserId(res.user?._id);
-        setTimeout(() => {
-          setShowModal(!showModal);
-          setName("");
-          setEmail("");
-          setPassword("");
-          setLoading(false)
-          setShowOtpModal(true);
-          setSeconds(120);
-          setOtpError("");
-        }, 2000);
-      } catch (error: any) {
-        console.error(error.message);
-        errorToast("Error while creating mechanic");
-        setLoading(false)
-      } finally {
-        setLoading(false)
-      }
-    }
-  };
-
-  const handleOtp = async () => {
-    setOtpError("");
-    try {
-      const otpRegex = /^\d{6}$/;
-      if (!otpRegex.test(otp)) {
-        setOtpError("OTP must be a 6-digit number.");
-        return;
-      }
-
-      await verifyOtpApi({ email, otp, context:"register" });
-
-      handleMechanicRegister();
-
-      setTimeout(() => {
-        setShowOtpModal(!showOtpModal);
-        setOtp("");
-        setEmail("");
-      }, 1000);
-    } catch (error: any) {
-      console.error("error on verifying Otp", error.message);
-      setOtpError(error.message || "something went wrong");
-    }
-  };
-
-  const handleMechanicRegister = async () => {
+  const handleMechanicRegister = async (userId: string) => {
     try {
       await registerMechanicApi({ garageId, userId }, token);
       successToast("Mechanic account created successfully.");
       fetchMechanics(currentPage, searchQuery, token);
     } catch (error) {
-      errorToast(error.message || "Error while creating new mechanic");
-    }
-  };
-
-  const handleResendOtp = async () => {
-    try {
-      setResendDisabled(true);
-      await resendOtpApi({ email });
-      setSeconds(120);
-
-      successToast("OTP has been resent successfully.");
-
-      setTimeout(() => {
-        setResendDisabled(false);
-      }, 10000);
-    } catch (error: any) {
-      console.error(error);
-      setOtpError(error.message || "Error while resend OTP.");
-      setResendDisabled(false);
+      if (error instanceof Error)
+        errorToast(error.message || "Error while creating new mechanic");
     }
   };
 
   const fetchMechanics = useCallback(
     async (currentPage: number, searchQuery: string, token: string | null) => {
       try {
+        console.log(searchQuery)
         const response = await fetchMechanicsApi(
           currentPage,
           mechanicsPerPage,
           searchQuery,
           token
         );
+
         setMechanics(response.mechanics);
         setTotalPages(response.totalPages);
-        console.log("Fetched mechanics:", response.mechanics);
       } catch (error) {
         console.error("Error from page:", error);
       }
@@ -203,31 +88,63 @@ const GarageMechanic = () => {
     };
   }, [currentPage, token, searchQuery, fetchMechanics, debouncedFetch]);
 
-  const handleBlock = async (userId: string, action: string) => {
+  const handleConfirm = async () => {
+    if (!action) return;
+
+    const { id, action: act } = action;
+
     try {
-      await toggleUserStatusApi(userId, action, token);
-      setMechanics((prev) =>
-        prev.map((m) =>
-          m.userId === userId ? { ...m, isBlocked: action === "Block" } : m
-        )
-      );
-      successToast(`${action}ed successfull`);
-    } catch (error: any) {
+      if (act === "delete") {
+        await deleteMechanic(id, token);
+        setMechanics((prev) => prev.filter((m) => m.userId !== id));
+        successToast("Deleted successfully");
+      } else if (act === "block" || act === "unblock") {
+        await toggleUserStatusApi(id, act, token);
+        setMechanics((prev) =>
+          prev.map((m) =>
+            m.userId === id ? { ...m, isBlocked: act === "block" } : m
+          )
+        );
+        successToast(`${act}ed successfully`);
+      }
+
+      setAction(null);
+    } catch (error) {
+      if (error instanceof Error) errorToast(error.message);
       console.error(error);
-      errorToast(error.message);
     }
   };
 
-  const handleDelete = async (userId: string) => {
-    try {
-      await deleteMechanic(userId, token);
-      setMechanics(prev => prev.filter(m => m.userId !== userId))
-      successToast(`Deleted successfull`);
-    } catch (error: any) {
-      console.error(error);
-      errorToast(error.message);
-    }
-  };
+  const columns: TableColumn<IMechanic>[] = [
+    { key: "mechanicId", label: "ID" },
+    {
+      key: "imageUrl",
+      label: "Image",
+      render: (m) => (
+        <img
+          src={m.imageUrl || profilePlaceholder}
+          className="w-10 h-10 rounded-full ring-2 ring-gray-700"
+        />
+      ),
+    },
+    { key: "name", label: "Name" },
+    { key: "skills", label: "Skills", render: (m) => m.skills.join(", ") },
+    {
+      key: "isBlocked",
+      label: "Status",
+      render: (m) => (
+        <span
+          className={`px-3 py-1 rounded-full text-xs font-medium ${
+            m.isBlocked
+              ? "bg-red-900 text-red-300"
+              : "bg-green-900 text-green-300"
+          }`}
+        >
+          {m.isBlocked ? "Inactive" : "Active"}
+        </span>
+      ),
+    },
+  ];
 
   return (
     <div className="flex h-screen bg-gray-950 text-white overflow-hidden">
@@ -249,153 +166,78 @@ const GarageMechanic = () => {
               Add Mechanics
             </button>
           </div>
-
-          <DarkModal
+          {/* Register Mechanic */}
+          <RegisterMechanic
             isOpen={showModal}
-            onClose={() => setShowModal(!showModal)}
-          >
-            <div className="text-white mt-5 rounded-2xl w-full max-w-md">
-              <h2 className="text-xl font-semibold mb-6">Add Mechanic</h2>
-              {/* Name */}
-              <div>
-                <label className="block mb-2 text-sm font-medium">Name:</label>
-                <input
-                  type="text"
-                  placeholder="Enter full-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-[#1c1c1c] border border-transparent focus:border-red-600 rounded-md px-4 py-3 text-gray-200 placeholder-gray-500 focus:outline-none transition"
-                />
-                {nameError ? (
-                  <p className="text-red-600 font-light text-sm ">
-                    {nameError}
-                  </p>
-                ) : (
-                  ""
-                )}
-              </div>
+            onClose={() => setShowModal(false)}
+            onCreated={(data) => {
+              setNewUser(data);
+              setShowModal(false);
+              setShowOtpModal(true);
+            }}
+          />
 
-              {/* Login credentials */}
-              <div className="mt-6">
-                <h3 className="text-lg font-medium mb-4">Login credentials:</h3>
-
-                {/* Email */}
-                <label className="block mb-2 text-sm font-medium">
-                  Email ID:
-                </label>
-                <input
-                  type="email"
-                  placeholder="Enter email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#1c1c1c] border border-transparent focus:border-red-600 rounded-md px-4 py-3 text-gray-200 placeholder-gray-500 focus:outline-none transition"
-                />
-                {emailError ? (
-                  <p className="text-red-600 font-light text-sm ">
-                    {emailError}
-                  </p>
-                ) : (
-                  ""
-                )}
-
-                {/* Password */}
-                <label className="block mt-6 mb-2 text-sm font-medium">
-                  One-Time Password:
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter a temporory password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#1c1c1c] border border-transparent focus:border-red-600 rounded-md px-4 py-3 text-gray-200 placeholder-gray-500 focus:outline-none transition"
-                />
-                {passwordError ? (
-                  <p className="text-red-600 font-light text-sm ">
-                    {passwordError}
-                  </p>
-                ) : (
-                  ""
-                )}
-              </div>
-
-              {/* Buttons */}
-              <div className="flex justify-end gap-3 mt-8">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(!showModal)}
-                  className="bg-black text-white px-5 py-2.5 rounded-lg hover:bg-neutral-900 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  className="bg-red-600 text-white px-5 py-2.5 rounded-lg hover:bg-red-700 transition"
-                  onClick={handleSubmit}
-                  disabled={loading}
-                >
-                  {loading ? "Loading" : "Add Mechanic"}
-                </button>
-              </div>
-            </div>
-          </DarkModal>
-
-          {/* Otp modal */}
-          <DarkModal
+          {/* OTP Modal */}
+          <OtpModalDark
             isOpen={showOtpModal}
-            onClose={() => setShowOtpModal(!showOtpModal)}
-          >
-            <div className="flex flex-col space-y-4">
-              <p className="text-center text-white/50 font-bold">
-                OTP Verification
-              </p>
-              {otpError && (
-                <div className="border border-red-600 p-2 rounded-lg mb-2">
-                  <p className="text-red-600 text-center text-sm">{otpError}</p>
-                </div>
-              )}
-              <input
-                type="text"
-                placeholder="Enter OTP"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                className="w-full bg-[#1c1c1c] border border-transparent focus:border-red-600 rounded-md px-4 py-3 text-gray-200 placeholder-gray-500 focus:outline-none transition"
-              />
-              <button
-                className="bg-red-600 text-white px-5 py-2.5 rounded-lg hover:bg-red-700 transition"
-                onClick={handleOtp}
-                disabled={seconds > 0 ? false : true}
-              >
-                Verify OTP
-              </button>
-              {seconds > 0 ? (
-                <p className="text-center text-white/50 font-light">
-                  {seconds} Seconds Left
-                </p>
-              ) : (
-                <button
-                  onClick={handleResendOtp}
-                  disabled={resendDisabled}
-                  className="text-center text-white/50 font-bold hover:text-red-500"
-                >
-                  {resendDisabled ? "Please wait..." : "Resend OTP"}
-                </button>
-              )}
-            </div>
-          </DarkModal>
-
-          <Spinner loading={loading} />
+            onClose={() => setShowOtpModal(false)}
+            context="register"
+            email={newUser?.email}
+            onVerified={(userId) => {
+              handleMechanicRegister(userId);
+            }}
+          />
 
           {/* Table with glass effect */}
           <AdminTable
-            mechanics={mechanics}
-            onBlock={handleBlock}
-            onDelete={handleDelete}
+            data={mechanics}
+            columns={columns}
+            renderActions={(m) => {
+              return (
+                <div className="flex gap-3">
+                  <button
+                    className="text-blue-400 hover:text-blue-300"
+                    onClick={() =>
+                      setAction({
+                        id: m.userId,
+                        name: m.name,
+                        action: m.isBlocked ? "unblock" : "block",
+                      })
+                    }
+                  >
+                    {m.isBlocked ? "Unblock" : "Block"}
+                  </button>
+
+                  <button
+                    className="text-red-400 hover:text-red-300"
+                    onClick={() =>
+                      setAction({
+                        id: m.userId,
+                        name: m.name,
+                        action: "delete",
+                      })
+                    }
+                  >
+                    Delete
+                  </button>
+                </div>
+              );
+            }}
+          />
+
+          <ConfirmModal
+            isOpen={!!action}
+            message={`Are you sure want ${action?.action} ${action?.name}`}
+            onClose={() => setAction(null)}
+            onConfirm={() => handleConfirm()}
+            onCancel={() => setAction(null)}
           />
 
           {/* Pagination */}
           <div className="px-6 py-5 flex items-center justify-center gap-4">
             <button
               className="w-8 h-8 rounded-full border-2 border-red-600 flex items-center justify-center hover:bg-red-600 transition-all text-red-600 hover:text-white hover:scale-110 shadow-lg shadow-red-900/30"
-              onClick={() => setCurrentPage((c) => c > 1 ? c - 1 : c)}
+              onClick={() => setCurrentPage((c) => (c > 1 ? c - 1 : c))}
             >
               ‹
             </button>
@@ -406,7 +248,9 @@ const GarageMechanic = () => {
             </span>
             <button
               className="w-8 h-8 rounded-full border-2 border-red-600 flex items-center justify-center hover:bg-red-600 transition-all text-red-600 hover:text-white hover:scale-110 shadow-lg shadow-red-900/30"
-              onClick={() => setCurrentPage((c) => c < totalPages ? c + 1 : c)}
+              onClick={() =>
+                setCurrentPage((c) => (c < totalPages ? c + 1 : c))
+              }
             >
               ›
             </button>

@@ -5,6 +5,7 @@ import type { RootState } from "../../redux/store/store";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import { onboardingMechanicApi } from "../../services/mechanic";
 import { useNavigate } from "react-router-dom";
+import { mobileRegex, passwordRegex } from "../../constants/commonRegex";
 
 const MechanicOnboarding = () => {
   const [oneTimePassword, setOneTimePassword] = useState<string>("");
@@ -77,10 +78,6 @@ const MechanicOnboarding = () => {
     setPreviewError("");
     setMobileError("");
 
-    const mobileRegex = /^[6-9]\d{9}$/;
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
-
     if (
       !passwordRegex.test(newPassword) ||
       !passwordRegex.test(oneTimePassword)
@@ -128,8 +125,8 @@ const MechanicOnboarding = () => {
           navigate("/mechanic");
         }, 2000);
       } catch (error) {
+        if(error instanceof Error) errorToast(error.message);
         console.error(error);
-        errorToast(error.message);
       }
     }
   };

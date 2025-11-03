@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 export const useOtpTimer = (initialSeconds: number, active: boolean) => {
   const [seconds, setSeconds] = useState<number>(0);
+  const [triggerCounter, setTriggerCounter] = useState<number>(0)
 
   useEffect(() => {
     if (!active) return;
@@ -18,9 +19,12 @@ export const useOtpTimer = (initialSeconds: number, active: boolean) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [active, initialSeconds]);
+  }, [active, initialSeconds, triggerCounter]);
 
-  const resetTimer = () => setSeconds(initialSeconds);
+  const resetTimer = () => {
+    setTriggerCounter(c => c + 1)    
+    setSeconds(initialSeconds);
+  }
 
   return { seconds, resetTimer };
 };

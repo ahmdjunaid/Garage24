@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Modal from "./layouts/Modal";
+import Modal from "../layouts/Modal";
 import Input from "../elements/Input";
 import AuthButton from "../elements/AuthButton";
 import { resendOtpApi, verifyOtpApi } from "../../services/auth";
@@ -7,6 +7,7 @@ import { successToast } from "../../utils/notificationAudio";
 import { OTP_VERIFIED } from "../../constants/messages";
 import passwordIcon from "../../assets/icons/password.svg";
 import { useOtpTimer } from "../../hooks/useOtpTimer";
+import { otpRegex } from "../../constants/commonRegex";
 
 interface ModalProps {
   isOpen: boolean;
@@ -30,6 +31,11 @@ const OtpModalLight: React.FC<ModalProps> = ({
 
   const handleOtp = async () => {
     try {
+      if(!otpRegex.test(otp)){
+        setOtpError("OTP must be a 6-digit number.");
+        return;
+      }
+
       const res = await verifyOtpApi({ email, otp, context});
       successToast(OTP_VERIFIED);
 
@@ -51,15 +57,15 @@ const OtpModalLight: React.FC<ModalProps> = ({
   const handleResendOtp = async () => {
     try {
       setResendDisabled(true);
-      await resendOtpApi({ email });
+      await resendOtpApi({ email, context });
       resetTimer()
-
       successToast("OTP has been resent successfully.");
 
       setTimeout(() => {
         setResendDisabled(false);
       }, 120000);
     } catch (error) {
+      setResendDisabled(false);
       console.error(error,"Error while resend otp");
       if(error instanceof Error){
           setOtpError(error.message);

@@ -2,7 +2,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import React, { useEffect, useState } from "react";
 import logo from "../../assets/icons/Logo.png";
-import Modal from "../../components/modal/layouts/Modal";
+import Modal from "../../components/layouts/Modal";
 import AuthButton from "../../components/elements/AuthButton";
 import type { ILocation } from "../../types/UserTypes";
 import type { RootState } from "../../redux/store/store";
@@ -167,10 +167,11 @@ const Registration = () => {
       setTimeout(() => {
         navigate("/garage");
       }, 2000);
-    } catch (error: any) {
-      console.error(error.message);
-      errorToast(error.message);
-      setSubmitting(false);
+    } catch (error) {
+      if(error instanceof Error)
+        errorToast(error.message);
+        console.error(error);
+        setSubmitting(false);
     }
   };
 

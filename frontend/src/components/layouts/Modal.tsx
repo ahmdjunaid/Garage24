@@ -1,5 +1,5 @@
 import React from "react";
-import logo from '../../../assets/icons/Logo.png'
+import logo from '../../assets/icons/Logo.png'
 
 interface ModalProps {
   isOpen: boolean;

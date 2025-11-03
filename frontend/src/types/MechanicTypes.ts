@@ -4,7 +4,7 @@ export interface IMechanic {
   name: string;
   email: string;
   isBlocked: boolean;
-  isVerified: boolean;
+  isDeleted: boolean;
   isOnboardingRequired: boolean;
   role: string;
   skills: string[];

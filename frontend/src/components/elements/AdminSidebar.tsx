@@ -1,9 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { NavLink } from "react-router-dom";
 import {
-
   MessageSquare,
-  ChevronRight,
 } from "lucide-react";
 import whiteLogo from "../../assets/icons/logo-white.png";
 import { logoutApi } from "../../services/auth";
@@ -36,9 +34,10 @@ const menuItems = getMenuItems(role)
       await logoutApi();
       dispatch(logout())
       successToast("Logout successfull.")
-    } catch (error:any) {
-      console.error(error);
-      errorToast(error.message)
+    } catch (error) {
+      if(error instanceof Error)
+        errorToast(error.message)
+        console.error(error);
     }
   };
 
