@@ -9,6 +9,7 @@ const mechanicSchema = new Schema<IMechanic>(
     skills: {type: [String]},
     imageUrl: { type: String },
     mobileNumber: { type: String },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

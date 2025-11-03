@@ -17,6 +17,7 @@ export default interface IGarageService {
     isRSAEnabled: boolean
   ): Promise<{ garageData: IGarage }>;
   getAddressFromCoordinates (lat:string, lng:string):Promise<IAddress>;
+  registerMechanic( garageId:string, userId:string): Promise<{ message: string }>;
   getAllMechanics(query: GetPaginationQuery):Promise<GetMappedMechanicResponse>;
   toggleStatus(userId:string,action: string): Promise<{message:string}>;
   deleteUser(userId: string): Promise<{message:string}>;

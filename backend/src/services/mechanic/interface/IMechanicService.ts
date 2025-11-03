@@ -2,11 +2,6 @@ import { HydratedDocument } from "mongoose";
 import { IMechanic } from "../../../types/mechanic";
 
 export default interface IMechanicService {
-  register(
-    garageId: string,
-    userId: string,
-  ): Promise<{ message: string }>;
-
   onboarding(
     name: string,
     userId:string,

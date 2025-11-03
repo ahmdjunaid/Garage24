@@ -6,7 +6,8 @@ export interface IMechanic {
   userId: ObjectId;
   skills: string[];
   imageUrl: string;
-  mobileNumber: string
+  mobileNumber: string;
+  isDeleted: boolean;
 }
 
 export interface GetMechanicResponse{

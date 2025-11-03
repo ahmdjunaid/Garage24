@@ -24,10 +24,14 @@ export class AdminService implements IAdminService {
     return mappedResponse;
   }
 
-  async getAllGarages(query: GetPaginationQuery): Promise<GetMappedGarageResponse> {
+  async getAllGarages(
+    query: GetPaginationQuery
+  ): Promise<GetMappedGarageResponse> {
     const response = await this._adminRepository.getAllGarages(query);
     const mappedResponse = {
-      garages: response.garages.map((garage:any) => garageDataMapping(garage)) as unknown as IGarage[],
+      garages: response.garages.map((garage: any) =>
+        garageDataMapping(garage)
+      ) as unknown as IGarage[],
       totalGarages: response.totalGarages,
       totalPages: response.totalPages,
     };
@@ -35,19 +39,25 @@ export class AdminService implements IAdminService {
     return mappedResponse;
   }
 
-  async toggleStatus(userId: string, action: string): Promise<{ message: string; }> {
-      const data = {
-            isBlocked: action === "Block" ? true : false,
-          };
-          const response = await this._adminRepository.findByIdAndUpdate(userId, data);
-      
-          if (!response) {
-            throw {
-              status: HttpStatus.BAD_REQUEST,
-              message: USER_STATUS_UPDATE_FAILED,
-            };
-          }
-      
-          return { message: `${action}ed successfull` };
+  async toggleStatus(
+    userId: string,
+    action: string
+  ): Promise<{ message: string }> {
+    const data = {
+      isBlocked: action === "block" ? true : false,
+    };
+    const response = await this._adminRepository.findByIdAndUpdate(
+      userId,
+      data
+    );
+
+    if (!response) {
+      throw {
+        status: HttpStatus.BAD_REQUEST,
+        message: USER_STATUS_UPDATE_FAILED,
+      };
+    }
+
+    return { message: `${action}ed successfull` };
   }
 }

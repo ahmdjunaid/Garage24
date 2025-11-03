@@ -1,11 +1,12 @@
 export const SERVER_ERROR = "Internal server error.";
 
 //User messages
-export const USER_NOT_FOUND = "User not found";
+export const USER_NOT_FOUND = "Account doesn't found";
 export const USER_ID_REQUIRED = "User ID is required";
 export const USER_STATUS_UPDATE_FAILED = "Failed to update user status";
 export const USER_STATUS_CHANGED = "User status changed successfully";
 export const USER_ALREADY_EXISTS = "User already exists";
+export const REGISTRATION_ALREADY_INITATED = "Your account registration is already in progress. Please try again later.";
 export const ACCOUNT_IS_BLOCKED = "This account is blocked by Admin.";
 export const SIGNUP_SESSION_EXPIRED = "Signup session expired"
 

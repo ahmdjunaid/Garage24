@@ -35,25 +35,4 @@ export class MechanicController implements IMechanicController {
         .json({ message: err?.message || SERVER_ERROR });
     }
   };
-
-  register = async (req: Request, res: Response) => {
-      try {
-        const { garageId, userId } = req.body
-
-        if(!garageId || !userId){
-          throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
-        }
-
-        const response = await this._mechanicService.register(garageId, userId)
-
-        res.status(HttpStatus.OK).json({response})
-        
-      } catch (error) {
-        console.error(error,'Error from register')
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
-    }
-  }
 }

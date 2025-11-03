@@ -24,6 +24,7 @@ export interface IGarage {
   imageUrl: string;
   mobileNumber: string;
   isRSAEnabled: boolean;
+  isDeleted: boolean;
 }
 
 export interface GetMappedGarageResponse{

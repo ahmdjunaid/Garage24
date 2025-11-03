@@ -15,6 +15,7 @@ import {
   OTP_SENT_SUCCESSFULLY,
   OTP_VERIFIED_SUCCESSFULLY,
   PASSWORD_RESET_SUCCESSFULLY,
+  REGISTRATION_ALREADY_INITATED,
   SIGNUP_SESSION_EXPIRED,
   USER_ALREADY_EXISTS,
   USER_NOT_FOUND,
@@ -38,9 +39,14 @@ export class AuthService implements IAuthService {
 
   async register(name: string, email: string, password: string, role: Role) {
     const existUser = await this._authRepository.findByEmail(email);
-    if (existUser) {
-      throw { status: HttpStatus.NOT_FOUND, message: USER_ALREADY_EXISTS };
-    }
+    if (existUser) throw { status: HttpStatus.NOT_FOUND, message: USER_ALREADY_EXISTS };
+
+    const redisDataKey = `userData:${email}`;
+    const redisOtpKey = `otp:${email}`;
+
+    const initiatedProcess = await redisClient.get(redisDataKey)
+
+    if(initiatedProcess) throw { status: HttpStatus.NOT_FOUND, message: REGISTRATION_ALREADY_INITATED };
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -55,14 +61,11 @@ export class AuthService implements IAuthService {
       hashedPassword,
     };
 
-    const redisDataKey = `userData:${email}`;
-    const redisOtpKey = `otp:${email}`;
-
     await redisClient.setEx(redisDataKey, 600, JSON.stringify(userData));
     await redisClient.setEx(redisOtpKey, 120, hashedOtp);
 
     await sendOtpEmail(email, otp);
-    return { message: "OTP sent for email verification." };
+    return { message: OTP_SENT_SUCCESSFULLY };
   }
 
   async login(email: string, password: string) {
@@ -105,6 +108,7 @@ export class AuthService implements IAuthService {
     const response = {
       message: OTP_VERIFIED_SUCCESSFULLY,
       token: "",
+      userId: ""
     };
 
     switch (context) {
@@ -116,7 +120,8 @@ export class AuthService implements IAuthService {
             message: SIGNUP_SESSION_EXPIRED,
           };
 
-          await this._authRepository.register(JSON.parse(userData));
+          const {user} = await this._authRepository.register(JSON.parse(userData));
+          response.userId = user._id as string;
         break;
       }
       case "other": {
@@ -155,10 +160,16 @@ export class AuthService implements IAuthService {
     return { status: HttpStatus.OK, message: OTP_SENT_SUCCESSFULLY };
   }
 
-  async resendOtp(email: string) {
-    const user = await this._authRepository.findByEmail(email);
+  async resendOtp(email: string, context: "register" | "other") {
 
-    if (!user) {
+    const redisDataKey = `userData:${email}`;
+    
+  const userExist =
+    context === "register"
+      ? await redisClient.get(redisDataKey)
+      : await this._authRepository.findByEmail(email);
+    
+    if (!userExist) {
       throw { status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND };
     }
 

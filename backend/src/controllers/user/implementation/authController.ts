@@ -83,11 +83,12 @@ export class Authcontroller implements IAuthController {
   verifyOtp = async (req: Request, res: Response) => {
     try {
       const { email, otp, context } = req.body;
-      const { token, message } = await this._authService.verifyOtp(email, otp, context);
+      const { token, message, userId } = await this._authService.verifyOtp(email, otp, context);
 
       res.status(HttpStatus.OK).json({
         message: message,
         token,
+        userId
       });
     } catch (error) {
       const err = error as Error;
@@ -137,7 +138,7 @@ export class Authcontroller implements IAuthController {
 
   resendOtp = async (req: Request, res: Response) => {
     try {
-      const { email } = req.body;
+      const { email, context } = req.body;
 
       const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
@@ -145,7 +146,7 @@ export class Authcontroller implements IAuthController {
         throw { status: HttpStatus.BAD_REQUEST, message: INVALID_EMAIL };
       }
 
-      const { message } = await this._authService.resendOtp(email);
+      const { message } = await this._authService.resendOtp(email, context);
 
       res.status(HttpStatus.OK).json({
         success: true,

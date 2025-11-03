@@ -11,14 +11,7 @@ export class MechanicService implements IMechanicService {
     private _mechanicRepository: IMechanicRepository,
     private _authRepository: IAuthRepository
   ) {}
-  async register(garageId: string, userId: string) {
-    const { message } = await this._mechanicRepository.register({
-      garageId,
-      userId,
-    });
-    return { message: message };
-  }
-
+  
   async onboarding(
     name: string,
     userId: string,

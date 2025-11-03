@@ -81,8 +81,27 @@ export class GarageController implements IGarageController {
     }
   };
 
-  getAllMechanics = async (req: Request, res: Response) => {
+  registerMechanic = async (req: Request, res: Response) => {
+    try {
+      const { garageId, userId } = req.body;
 
+      if (!garageId || !userId) {
+        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+      }
+
+      const response = await this._garageService.registerMechanic(garageId, userId);
+
+      res.status(HttpStatus.OK).json({ response });
+    } catch (error) {
+      console.error(error, "Error from register");
+      const err = error as Error;
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: err?.message || SERVER_ERROR });
+    }
+  };
+
+  getAllMechanics = async (req: Request, res: Response) => {
     try {
       const { page = 1, limit = 10, searchQuery = "" } = req.query;
       const garageId = req.user?.id;
@@ -139,7 +158,7 @@ export class GarageController implements IGarageController {
         throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
       }
 
-      const response = await this._garageService.deleteUser(userId)
+      const response = await this._garageService.deleteUser(userId);
       res.status(HttpStatus.ACCEPTED).json({ message: response.message });
     } catch (error) {
       console.error(error);
@@ -148,5 +167,5 @@ export class GarageController implements IGarageController {
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: err?.message || SERVER_ERROR });
     }
-  }
+  };
 }

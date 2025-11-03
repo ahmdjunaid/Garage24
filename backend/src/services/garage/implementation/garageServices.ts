@@ -10,7 +10,7 @@ import { GetMappedMechanicResponse } from "../../../types/mechanic";
 import { GetPaginationQuery } from "../../../types/common";
 import { mechanicDataMapping } from "../../../utils/dto/mechanicDto";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import { USER_STATUS_UPDATE_FAILED } from "../../../constants/messages";
+import { USER_NOT_FOUND, USER_STATUS_UPDATE_FAILED } from "../../../constants/messages";
 
 export class GarageService implements IGarageService {
   constructor(
@@ -81,10 +81,23 @@ export class GarageService implements IGarageService {
     };
   }
 
+  async registerMechanic(garageId: string, userId: string) {
+    const user = await this._authRepository.findById(userId)
+    if(!user) throw {status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND}
+
+    const { message } = await this._mechanicRepository.register({
+      garageId,
+      userId,
+      name: user.name
+    });
+    return { message: message };
+  }
+
   async getAllMechanics(
     query: GetPaginationQuery
   ): Promise<GetMappedMechanicResponse> {
     const response = await this._mechanicRepository.getAllMechanics(query);
+
     const mappedResponse = {
       mechanics: response.mechanics.map((mechanic) =>
         mechanicDataMapping(mechanic)
@@ -98,7 +111,7 @@ export class GarageService implements IGarageService {
 
   async toggleStatus(userId: string, action: string) {
     const data = {
-      isBlocked: action === "Block" ? true : false,
+      isBlocked: action === "block" ? true : false,
     };
     const response = await this._authRepository.findByIdAndUpdate(userId, data);
 
@@ -113,9 +126,8 @@ export class GarageService implements IGarageService {
   }
 
   async deleteUser(userId: string): Promise<{ message: string }> {
-
-    await this._mechanicRepository.findOneAndDelete({userId});
-    const response = await this._authRepository.findByIdAndDelete(userId);
+    await this._mechanicRepository.findOneAndUpdate(userId, { isDeleted:true });
+    const response = await this._authRepository.findByIdAndUpdate(userId, { isDeleted:true });
 
     if (!response) {
       throw {

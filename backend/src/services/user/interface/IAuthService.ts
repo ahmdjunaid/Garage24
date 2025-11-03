@@ -22,6 +22,7 @@ export default interface IAuthService {
   ): Promise<{
     message: string;
     token: string;
+    userId: string
   }>;
 
   forgotPassword(
@@ -31,7 +32,8 @@ export default interface IAuthService {
   }>;
 
   resendOtp(
-    email: string
+    email: string,
+    context: "register" | "other"
   ): Promise<{
     message:string
   }>;

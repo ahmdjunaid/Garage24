@@ -16,7 +16,6 @@ const authRepository = new AuthRepository()
 const mechanicService = new MechanicService(mechanicRepository, authRepository)
 const mechanicController = new MechanicController(mechanicService)
 
-router.route('/register').post(verifyJWT,authorizeRoles("mechanic"),mechanicController.register)
 router.route('/onboarding').post(verifyJWT,authorizeRoles("mechanic"),uploadImage,mechanicController.onboarding)
 
 export default router;

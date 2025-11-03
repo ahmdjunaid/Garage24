@@ -35,6 +35,7 @@ const garageSchema = new Schema<IGarage>(
     imageUrl: { type: String, required: true },
     mobileNumber: { type: String, required: true },
     isRSAEnabled: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

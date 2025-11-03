@@ -19,6 +19,7 @@ const garageController = new GarageController(garageService)
 
 router.route('/onboarding').post(verifyJWT,authorizeRoles("garage"),uploadImage,garageController.onboarding)
 router.route('/get-address').get(verifyJWT,authorizeRoles("garage"),garageController.getAddressFromCoordinates)
+router.route('/register-mechanic').post(verifyJWT,authorizeRoles("garage"),garageController.registerMechanic)
 router.route('/mechanics').get(verifyJWT,authorizeRoles("garage"),garageController.getAllMechanics)
 router.route('/mechanic/:userId')
             .patch(verifyJWT,authorizeRoles("garage"),garageController.toggleStatus)

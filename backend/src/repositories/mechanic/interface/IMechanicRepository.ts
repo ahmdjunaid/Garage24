@@ -6,6 +6,7 @@ export interface IMechanicRepository {
   register(mechanicData: {
     garageId: string;
     userId: string;
+    name:string;
   }): Promise<{
     message: string;
   }>;

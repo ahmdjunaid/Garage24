@@ -12,10 +12,15 @@ export class MechanicRepository
   constructor() {
     super(Mechanic);
   }
-  async register(mechanicData: { garageId: string; userId: string }) {
+  async register(mechanicData: {
+    garageId: string;
+    userId: string;
+    name: string;
+  }) {
     const mechanicToSave = {
       garageId: new Types.ObjectId(mechanicData.garageId),
       userId: new Types.ObjectId(mechanicData.userId),
+      name: mechanicData.name,
     };
 
     await this.create(mechanicToSave);
@@ -47,7 +52,9 @@ export class MechanicRepository
     return { mechanics, totalMechanics, totalPages };
   }
 
-  async findOneAndDelete(filter:FilterQuery<IMechanic>): Promise<IMechanic | null> {
+  async findOneAndDelete(
+    filter: FilterQuery<IMechanic>
+  ): Promise<IMechanic | null> {
     return await this.model.findOneAndDelete(filter);
   }
 }
