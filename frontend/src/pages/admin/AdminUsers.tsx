@@ -118,7 +118,7 @@ const AdminUser = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <AdminHeader
           text={"Users"}
-          searchPlaceholder={"Search user..."}
+          searchPlaceholder={"Search User..."}
           setSearchQuery={setSearchQuery}
         />
         {/* Content Area */}

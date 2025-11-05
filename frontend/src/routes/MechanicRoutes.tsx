@@ -9,8 +9,8 @@ import PageNotFound from "../pages/auth/PageNotFound";
 const MechanicRoute: React.FC = () => {
   return (
     <Routes>
-      <Route path="/onboarding" element={<MechanicOnboarding/>} />
       <Route element={<ProtectedRoute requiredRoles={["mechanic"]} />}>
+        <Route path="/onboarding" element={<MechanicOnboarding/>} />
         <Route path="/" element={<MechanicHome />} />
         <Route path="*" element={<PageNotFound/>}/>
       </Route>

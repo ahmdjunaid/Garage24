@@ -9,7 +9,7 @@ interface AuthState {
 
 interface LoginPayload {
   user: User;
-  token: string;
+  token: string | null;
 }
 
 const initialState: AuthState = {

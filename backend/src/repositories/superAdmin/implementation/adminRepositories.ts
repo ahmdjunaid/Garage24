@@ -4,11 +4,14 @@ import User from "../../../models/user";
 import { Garage } from "../../../models/garage";
 import { IAdminRepository } from "../interface/IAdminRepository";
 import { GetUserResponse, IUser } from "../../../types/user";
+import { Plan, PlanDocument } from "../../../models/plan";
+import { GetMappedPlanResponse, IPlan } from "../../../types/plan";
 
 export class AdminRepository implements IAdminRepository {
   constructor(
     private userModel: typeof User,
-    private garageModel: typeof Garage
+    private garageModel: typeof Garage,
+    private planModel: typeof Plan
   ) {}
 
   async getAllUsers({
@@ -64,4 +67,29 @@ export class AdminRepository implements IAdminRepository {
   async findByIdAndUpdate(userId: string, data: Partial<IUser>) {
     return await this.userModel.findByIdAndUpdate(userId, data, { new: true });
   }
+
+  async createPlan(data: Partial<IPlan>): Promise<PlanDocument | null> {
+      return await this.planModel.create(data)
+  }
+
+    async getAllPlans({
+      page,
+      limit,
+      searchQuery,
+    }: GetPaginationQuery): Promise<GetMappedPlanResponse> {
+      const skip = (page - 1) * limit;
+      const searchFilter = searchQuery
+        ? { name: { $regex: searchQuery, $options: "i" } }
+        : {};
+  
+      const plans = await this.planModel.find(searchFilter)
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt : -1 });
+  
+      const totalPlans = await this.planModel.countDocuments(searchFilter);
+      const totalPages = Math.ceil(totalPlans / limit);
+  
+      return { plans, totalPlans, totalPages };
+    }
 }

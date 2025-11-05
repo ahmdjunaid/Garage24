@@ -4,15 +4,17 @@ import React, { useEffect, useState } from "react";
 import logo from "../../assets/icons/Logo.png";
 import Modal from "../../components/layouts/Modal";
 import AuthButton from "../../components/elements/AuthButton";
-import type { ILocation } from "../../types/UserTypes";
+import type { ILocation, User } from "../../types/UserTypes";
 import type { RootState } from "../../redux/store/store";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { validateTime } from "../../utils/validateTime";
 import { fetchAddressApi, onboardingApi } from "../../services/garage";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import { daysOfWeek, getTimeOptions } from "../../constants/constantDatas";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { login } from "../../redux/slice/userSlice";
+import { mobileRegex } from "../../constants/commonRegex";
 
 const markerIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
@@ -27,7 +29,9 @@ const Registration = () => {
   const [endTime, setEndTime] = useState<string>("");
   const [timeError, setTimeError] = useState<string>("");
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(
+    null
+  );
   const [imageError, setImageError] = useState<string>("");
   const [selectedHolidays, setSelectedHolidays] = useState<string[]>([]);
   const [mobile, setMobile] = useState<string>("");
@@ -39,13 +43,13 @@ const Registration = () => {
   const [district, setDistrict] = useState<string>("");
   const [state, setState] = useState<string>("");
   const [pincode, setPincode] = useState<string>("");
-  const [locationError, setLocationError] = useState<string>("")
+  const [locationError, setLocationError] = useState<string>("");
 
   const { user, token } = useSelector((state: RootState) => state.auth);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch()
   const timeOptions = getTimeOptions();
-
 
   //checking needed
   useEffect(() => {
@@ -63,7 +67,11 @@ const Registration = () => {
   useEffect(() => {
     const getAddress = async () => {
       if (location) {
-        const address = await fetchAddressApi(location.lat, location.lng, token);
+        const address = await fetchAddressApi(
+          location.lat,
+          location.lng,
+          token
+        );
 
         setCity(address.city);
         setDistrict(address.district);
@@ -97,14 +105,12 @@ const Registration = () => {
     setMobileError("");
     setImageError("");
     setPlanError("");
-    setLocationError("")
+    setLocationError("");
 
     if (!validateTime(startTime, endTime)) {
       setTimeError("Select a valid timing.");
       hasError = true;
     }
-
-    const mobileRegex = /^[6-9]\d{9}$/;
 
     if (!mobileRegex.test(mobile)) {
       setMobileError("Enter a valid mobile number.");
@@ -121,9 +127,9 @@ const Registration = () => {
       hasError = true;
     }
 
-    if(!location || !city){
-      setLocationError("Select your location from the map.")
-      hasError = true
+    if (!location || !city) {
+      setLocationError("Select your location from the map.");
+      hasError = true;
     }
 
     if (hasError) return;
@@ -143,7 +149,7 @@ const Registration = () => {
 
       const address = { city, district, state, pincode };
 
-      formData.append("name", user?.name || "")
+      formData.append("name", user?.name || "");
       formData.append("garageId", user?._id || "");
       formData.append("plan", plan);
       formData.append("startTime", startTime);
@@ -159,7 +165,12 @@ const Registration = () => {
       }
 
       await onboardingApi(formData, token);
-
+      dispatch(
+        login({
+          user: { ...user, isOnboardingRequired: false } as User,
+          token,
+        })
+      );
       successToast("Successfully submitted");
       setSubmitting(false);
       setShowConfirm(false);
@@ -168,10 +179,9 @@ const Registration = () => {
         navigate("/garage");
       }, 2000);
     } catch (error) {
-      if(error instanceof Error)
-        errorToast(error.message);
-        console.error(error);
-        setSubmitting(false);
+      if (error instanceof Error) errorToast(error.message);
+      console.error(error);
+      setSubmitting(false);
     }
   };
 
@@ -302,19 +312,20 @@ const Registration = () => {
                     {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
                   </p>
                   <p className="text-sm text-gray-500 mt-2">
-                    <strong>City: </strong>{city}, 
-                    <strong> District:</strong>{district},
-                    <strong> State: </strong>{state}
+                    <strong>City: </strong>
+                    {city},<strong> District:</strong>
+                    {district},<strong> State: </strong>
+                    {state}
                   </p>
                 </>
               )}
               {locationError ? (
-                    <p className="text-red-600 font-light text-sm ">
-                      {locationError}
-                    </p>
-                  ) : (
-                    ""
-                  )}
+                <p className="text-red-600 font-light text-sm ">
+                  {locationError}
+                </p>
+              ) : (
+                ""
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

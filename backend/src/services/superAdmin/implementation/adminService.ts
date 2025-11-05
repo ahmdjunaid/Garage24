@@ -6,7 +6,11 @@ import { usersDataMapping } from "../../../utils/dto/usersDto";
 import { garageDataMapping } from "../../../utils/dto/garagesDto";
 import { GetMappedGarageResponse, IGarage } from "../../../types/garage";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import { USER_STATUS_UPDATE_FAILED } from "../../../constants/messages";
+import {
+  ERROR_WHILE_CREATINGPLAN,
+  USER_STATUS_UPDATE_FAILED,
+} from "../../../constants/messages";
+import { GetMappedPlanResponse, IPlan } from "../../../types/plan";
 
 export class AdminService implements IAdminService {
   constructor(private _adminRepository: IAdminRepository) {}
@@ -60,4 +64,31 @@ export class AdminService implements IAdminService {
 
     return { message: `${action}ed successfull` };
   }
+
+  async createPlan(data: Partial<IPlan>): Promise<{ message: string }> {
+    const response = await this._adminRepository.createPlan(data);
+
+    if (!response) {
+      throw {
+        status: HttpStatus.BAD_REQUEST,
+        message: ERROR_WHILE_CREATINGPLAN,
+      };
+    }
+
+    return { message: "Plan created successfully" };
+  }
+
+  async getAllPlans(
+      query: GetPaginationQuery
+    ): Promise<GetMappedPlanResponse> {
+      const response = await this._adminRepository.getAllPlans(query);
+  
+      const mappedResponse = {
+        plans: response.plans,
+        totalPlans: response.totalPlans,
+        totalPages: response.totalPages,
+      };
+  
+      return mappedResponse;
+    }
 }

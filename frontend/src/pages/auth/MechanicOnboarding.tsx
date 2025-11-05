@@ -1,11 +1,13 @@
 import React, { useState, useRef } from "react";
 import logo from "../../assets/icons/Logo.png";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../redux/store/store";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import { onboardingMechanicApi } from "../../services/mechanic";
 import { useNavigate } from "react-router-dom";
 import { mobileRegex, passwordRegex } from "../../constants/commonRegex";
+import { login } from "../../redux/slice/userSlice";
+import type { User } from "../../types/UserTypes";
 
 const MechanicOnboarding = () => {
   const [oneTimePassword, setOneTimePassword] = useState<string>("");
@@ -22,6 +24,7 @@ const MechanicOnboarding = () => {
   const [mobileError, setMobileError] = useState<string>("");
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -94,7 +97,7 @@ const MechanicOnboarding = () => {
     }
 
     if (!preview) {
-      setPreviewError("Upload a profile image");
+      setPreviewError("Upload image");
       hasError = true;
     }
 
@@ -105,8 +108,8 @@ const MechanicOnboarding = () => {
 
     if (!hasError) {
       const formData = new FormData();
-      
-      formData.append("name", user?.name || "")
+
+      formData.append("name", user?.name || "");
       formData.append("userId", user?._id || "");
       formData.append("mobile", mobile);
       formData.append("newPassword", newPassword);
@@ -118,14 +121,19 @@ const MechanicOnboarding = () => {
       }
 
       try {
-        await onboardingMechanicApi(formData,token);
-
+        await onboardingMechanicApi(formData, token);
+        dispatch(
+          login({
+            user: { ...user, isOnboardingRequired: false } as User,
+            token,
+          })
+        );
         successToast("Registration success");
         setTimeout(() => {
           navigate("/mechanic");
         }, 2000);
       } catch (error) {
-        if(error instanceof Error) errorToast(error.message);
+        if (error instanceof Error) errorToast(error.message);
         console.error(error);
       }
     }

@@ -11,8 +11,8 @@ const GarageRoutes = () => {
   return (
     <Routes>
       <Route path="/registration" element={<SignUp role={'garage'}/>} />
-      <Route path="/onboarding" element={<Onboarding />} />
       <Route element={<ProtectedRoute requiredRoles={["garage"]} />}>
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/" element={<GarageHome />} />
         <Route path="/mechanics" element={<GarageMechanic />} />
         <Route path="*" element={<PageNotFound/>}/>

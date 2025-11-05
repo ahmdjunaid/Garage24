@@ -6,15 +6,18 @@ import { AdminService } from "../services/superAdmin/implementation/adminService
 import { AdminController } from "../controllers/superAdmin/implementation/adminController"
 import { verifyJWT } from "../middleware/jwt"
 import { authorizeRoles } from "../middleware/authorizeRoles"
+import { Plan } from "../models/plan"
 
 const router = express.Router()
 
-const adminRepository = new AdminRepository(User,Garage)
+const adminRepository = new AdminRepository(User,Garage,Plan)
 const adminService = new AdminService(adminRepository)
 const adminController = new AdminController(adminService)
 
 router.route('/users').get(verifyJWT,authorizeRoles("admin"),adminController.getAllUsers)
 router.route('/garages').get(verifyJWT,authorizeRoles("admin"),adminController.getAllGarages)
 router.route('/toggle-status/:userId').patch(verifyJWT,authorizeRoles("admin"),adminController.toggleStatus)
+router.route('/create-plan').post(verifyJWT, authorizeRoles("admin"), adminController.createPlans)
+router.route('/plans').get(verifyJWT,authorizeRoles("admin"),adminController.getAllPlans)
 
 export default router;

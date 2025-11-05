@@ -27,9 +27,11 @@ export const INVALID_OTP_EXPIRATION = "OTP expiration time is invalid";
 export const ERROR_WHILE_FORGOT_PASS='Password reset failed'
 export const ERROR_WHILE_RESEND_OTP='Error while resend OTP.'
 export const FORGOT_PASSWORD_EMAIL_SENT =
-  "Email sent successfully for forgot password";
+"Email sent successfully for forgot password";
 export const PASSWORD_RESET_SUCCESSFULLY = "Password reset successfully";
 export const NO_REFRESH_TOKEN_FOUND = "No refresh token found";
 export const INVALID_TOKEN = "Invalid token";
 export const GOOGLE_AUTH_ERROR="Error while google authentication"
 
+// plan messages
+export const ERROR_WHILE_CREATINGPLAN = "Error while creating plan."

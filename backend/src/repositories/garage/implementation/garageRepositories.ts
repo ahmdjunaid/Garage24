@@ -48,13 +48,13 @@ export class GarageRepository
       ? { name: { $regex: searchQuery, $options: "i" } }
       : {};
 
-    const garages = await Garage.find(searchFilter)
+    const garages = await this.model.find(searchFilter)
       .populate("garageId")
       .skip(skip)
       .limit(limit)
       .sort({ "garageId.createdAt": -1 });
 
-    const totalGarages = await Garage.countDocuments(searchFilter);
+    const totalGarages = await this.model.countDocuments(searchFilter);
     const totalPages = Math.ceil(totalGarages / limit);
 
     return { garages, totalGarages, totalPages };

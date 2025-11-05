@@ -4,4 +4,6 @@ export default interface IAdminController {
     getAllGarages(req:Request, res:Response): Promise<void>;
     getAllUsers(req:Request, res:Response): Promise<void>;
     toggleStatus(req:Request, res:Response): Promise<void>;
+    createPlans(req:Request, res:Response): Promise<void>;
+    getAllPlans(req:Request, res:Response): Promise<void>;
 }

@@ -28,7 +28,7 @@ export class MechanicRepository
   }
 
   async findOneAndUpdate(userId: string, data: Partial<IMechanic>) {
-    return await Mechanic.findOneAndUpdate({ userId: userId }, data, {
+    return await this.model.findOneAndUpdate({ userId: userId }, data, {
       new: true,
     });
   }
@@ -40,13 +40,13 @@ export class MechanicRepository
       ...(searchQuery && { name: { $regex: searchQuery, $options: "i" } }),
     };
 
-    const mechanics = await Mechanic.find(searchFilter)
+    const mechanics = await this.model.find(searchFilter)
       .populate("userId")
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
 
-    const totalMechanics = await Mechanic.countDocuments(searchFilter);
+    const totalMechanics = await this.model.countDocuments(searchFilter);
     const totalPages = Math.ceil(totalMechanics / limit);
 
     return { mechanics, totalMechanics, totalPages };
