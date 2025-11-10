@@ -1,12 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import AdminSidebar from "../../components/elements/AdminSidebar";
+import AdminSidebar from "../../components/layouts/AdminSidebar";
 import AdminTable, {
   type TableColumn,
-} from "../../components/elements/AdminTable";
-import { errorToast, successToast } from "../../utils/notificationAudio";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../redux/store/store";
-import AdminHeader from "../../components/elements/AdminHeader";
+} from "../../components/layouts/AdminTable";
+import AdminHeader from "../../components/layouts/AdminHeader";
 import _ from "lodash";
 import { ConfirmModal } from "../../components/modal/ConfirmModal";
 import type { ActionPayload } from "../../types/CommonTypes";
@@ -23,16 +20,13 @@ const AdminPlans = () => {
   const [action, setAction] = useState<ActionPayload | null>(null);
   const plansPerPage = 5;
 
-  const { token } = useSelector((state: RootState) => state.auth);
-
   const fetchPlans = useCallback(
-    async (currentPage: number, searchQuery: string, token: string | null) => {
+    async (currentPage: number, searchQuery: string) => {
       try {
         const response = await fetchAllPlansApi(
           currentPage,
           plansPerPage,
-          searchQuery,
-          token
+          searchQuery
         );
         setPlans(response.plans);
         setTotalPages(response.totalPages);
@@ -45,23 +39,23 @@ const AdminPlans = () => {
 
   const debouncedFetch = useMemo(
     () =>
-      _.debounce((page: number, query: string, token: string | null) => {
-        fetchPlans(page, query, token);
+      _.debounce((page: number, query: string) => {
+        fetchPlans(page, query);
       }, 300),
     [fetchPlans]
   );
 
   useEffect(() => {
     if (!searchQuery) {
-      fetchPlans(currentPage, "", token);
+      fetchPlans(currentPage, "");
     } else {
-      debouncedFetch(currentPage, searchQuery, token);
+      debouncedFetch(currentPage, searchQuery);
     }
 
     return () => {
       debouncedFetch.cancel();
     };
-  }, [currentPage, token, searchQuery, fetchPlans, debouncedFetch]);
+  }, [currentPage, searchQuery, fetchPlans, debouncedFetch]);
 
   const handleConfirm = async () => {
     // if (!action) return;
@@ -137,7 +131,6 @@ const AdminPlans = () => {
           <AddPlans
             isOpen={showModal}
             onClose={() => setShowModal(false)}
-            token={token}
             onCreated={() => {
               setShowModal(false);
             }}

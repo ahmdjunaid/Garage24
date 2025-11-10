@@ -10,28 +10,38 @@ import { GetMappedMechanicResponse } from "../../../types/mechanic";
 import { GetPaginationQuery } from "../../../types/common";
 import { mechanicDataMapping } from "../../../utils/dto/mechanicDto";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import { USER_NOT_FOUND, USER_STATUS_UPDATE_FAILED } from "../../../constants/messages";
+import {
+  USER_NOT_FOUND,
+  USER_STATUS_UPDATE_FAILED,
+} from "../../../constants/messages";
+import { deleteLocalFile } from "../../../helper/helper";
+import { IAdminRepository } from "../../../repositories/superAdmin/interface/IAdminRepository";
 
 export class GarageService implements IGarageService {
   constructor(
     private _garageRepository: IGarageRepository,
     private _authRepository: IAuthRepository,
-    private _mechanicRepository: IMechanicRepository
+    private _mechanicRepository: IMechanicRepository,
+    private _adminRepository: IAdminRepository
   ) {}
   async onboarding(
     name: string,
     garageId: string,
     location: { lat: number; lng: number },
     address: IAddress,
-    plan: string,
     startTime: string,
     endTime: string,
     selectedHolidays: string[],
     image: Express.Multer.File,
+    document: Express.Multer.File,
     mobile: string,
     isRSAEnabled: boolean
   ) {
     const imageUrl = await uploadFile(image, "garages");
+    const docUrl = await uploadFile(document, "garages");
+
+    if (image?.path) deleteLocalFile(image.path);
+    if (document?.path) deleteLocalFile(document.path);
 
     const convertedGarageId = new mongoose.Types.ObjectId(garageId);
     const latitude = Number(location.lat);
@@ -43,11 +53,11 @@ export class GarageService implements IGarageService {
       latitude,
       longitude,
       address,
-      plan,
       startTime,
       endTime,
       selectedHolidays,
       imageUrl,
+      docUrl,
       mobileNumber: mobile,
       isRSAEnabled,
     });
@@ -82,13 +92,13 @@ export class GarageService implements IGarageService {
   }
 
   async registerMechanic(garageId: string, userId: string) {
-    const user = await this._authRepository.findById(userId)
-    if(!user) throw {status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND}
+    const user = await this._authRepository.findById(userId);
+    if (!user) throw { status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND };
 
     const { message } = await this._mechanicRepository.register({
       garageId,
       userId,
-      name: user.name
+      name: user.name,
     });
     return { message: message };
   }
@@ -108,7 +118,12 @@ export class GarageService implements IGarageService {
 
     return mappedResponse;
   }
-
+  /**
+   *
+   * @param userId
+   * @param action
+   * @returns
+   */
   async toggleStatus(userId: string, action: string) {
     const data = {
       isBlocked: action === "block" ? true : false,
@@ -126,8 +141,12 @@ export class GarageService implements IGarageService {
   }
 
   async deleteUser(userId: string): Promise<{ message: string }> {
-    await this._mechanicRepository.findOneAndUpdate(userId, { isDeleted:true });
-    const response = await this._authRepository.findByIdAndUpdate(userId, { isDeleted:true });
+    await this._mechanicRepository.findOneAndUpdate(userId, {
+      isDeleted: true,
+    });
+    const response = await this._authRepository.findByIdAndUpdate(userId, {
+      isDeleted: true,
+    });
 
     if (!response) {
       throw {
@@ -137,5 +156,22 @@ export class GarageService implements IGarageService {
     }
 
     return { message: "Deleted successfull" };
+  }
+
+  async getApprovalStatus(userId: string) {
+    const garage = await this._garageRepository.findOne({ garageId: userId });
+
+    if (!garage) {
+      return { hasGarage: false, isApproved: false, hasActivePlan: false };
+    }
+
+    const now = new Date()
+    const hasActivePlan = garage?.plan?.some((plan) => plan.expiresAt > now) 
+
+    return {
+      hasGarage: true,
+      isApproved: garage.isApproved,
+      hasActivePlan
+    };
   }
 }

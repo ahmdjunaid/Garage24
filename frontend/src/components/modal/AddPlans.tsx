@@ -9,7 +9,6 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreated: () => void;
-  token: string | null
 }
 
 export interface PlanData {
@@ -20,7 +19,7 @@ export interface PlanData {
   noOfServices: number;
 }
 
-const AddPlans: React.FC<ModalProps> = ({ isOpen, onClose, onCreated, token }) => {
+const AddPlans: React.FC<ModalProps> = ({ isOpen, onClose, onCreated }) => {
   const [name, setName] = useState<string>("");
   const [nameError, setNameError] = useState<string>("");
 
@@ -91,7 +90,7 @@ const AddPlans: React.FC<ModalProps> = ({ isOpen, onClose, onCreated, token }) =
         noOfServices: servicesValue,
       };
 
-      await createPlanApi(data, token);
+      await createPlanApi(data);
 
       successToast('New plan created.')
       onCreated();
@@ -146,16 +145,12 @@ const AddPlans: React.FC<ModalProps> = ({ isOpen, onClose, onCreated, token }) =
         {/* Validity */}
         <div>
           <label className="block mb-2 text-sm font-medium">Validity:</label>
-          <select
+          <input
             value={validity}
+            placeholder="Enter no. of days"
             onChange={(e) => setValidity(e.target.value)}
             className="w-full bg-[#1c1c1c] border border-transparent focus:border-red-600 rounded-md px-4 py-3 text-gray-200 placeholder-gray-500 focus:outline-none transition"
-          >
-            <option value="">Select duration</option>
-            <option value="30">30 Days</option>
-            <option value="180">180 Days</option>
-            <option value="365">365 Days</option>
-          </select>
+          />
           {validityError && (
             <p className="text-red-600 text-sm">{validityError}</p>
           )}

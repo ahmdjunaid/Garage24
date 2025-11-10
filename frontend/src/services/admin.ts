@@ -4,11 +4,9 @@ import { ADMIN_BASE_ROUTE } from "../constants/apiRoutes";
 import type { PlanData } from "../components/modal/AddPlans";
 
 
-export const fetchAllUsersApi = async (page = 1, limit = 5, searchQuery =  '',token: string | null) => {
+export const fetchAllUsersApi = async (page = 1, limit = 5, searchQuery =  '') => {
   try {
-    const response = await api.get(`/${ADMIN_BASE_ROUTE}/users?page=${page}&limit=${limit}&searchQuery=${searchQuery}`, {
-      headers: { AuthorizationToken: `Bearer ${token}` },
-    });
+    const response = await api.get(`/${ADMIN_BASE_ROUTE}/users?page=${page}&limit=${limit}&searchQuery=${searchQuery}`);
     
     return response.data;
   } catch (error) {
@@ -23,11 +21,9 @@ export const fetchAllUsersApi = async (page = 1, limit = 5, searchQuery =  '',to
   }
 };
 
-export const fetchAllGaragesApi = async (page = 1, limit = 5, searchQuery =  '',token: string | null) => {
+export const fetchAllGaragesApi = async (page = 1, limit = 5, searchQuery =  '') => {
   try {
-    const response = await api.get(`/${ADMIN_BASE_ROUTE}/garages?page=${page}&limit=${limit}&searchQuery=${searchQuery}`, {
-      headers: { AuthorizationToken: `Bearer ${token}` },
-    });
+    const response = await api.get(`/${ADMIN_BASE_ROUTE}/garages?page=${page}&limit=${limit}&searchQuery=${searchQuery}`);
     
     return response.data;
   } catch (error) {
@@ -42,13 +38,9 @@ export const fetchAllGaragesApi = async (page = 1, limit = 5, searchQuery =  '',
   }
 };
 
-export const toggleStatusApi = async ( userId: string, action: string, token: string | null) => {
+export const toggleStatusApi = async ( userId: string, action: string) => {
   try {
-    const response = await api.patch(`/${ADMIN_BASE_ROUTE}/toggle-status/${userId}`, {action: action}, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-    });
+    const response = await api.patch(`/${ADMIN_BASE_ROUTE}/toggle-status/${userId}`, {action: action});
 
     return response.data;
   } catch (error) {
@@ -63,13 +55,9 @@ export const toggleStatusApi = async ( userId: string, action: string, token: st
   }
 };
 
-export const createPlanApi = async (data:PlanData, token:string | null) => {
+export const createPlanApi = async (data:PlanData) => {
   try {
-    const response = await api.post(`/${ADMIN_BASE_ROUTE}/create-plan`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-    });
+    const response = await api.post(`/${ADMIN_BASE_ROUTE}/create-plan`, data);
 
     return response.data;
   } catch (error) {
@@ -84,11 +72,9 @@ export const createPlanApi = async (data:PlanData, token:string | null) => {
   }
 };
 
-export const fetchAllPlansApi = async (page = 1, limit = 5, searchQuery =  '',token: string | null) => {
+export const fetchAllPlansApi = async (page = 1, limit = 5, searchQuery =  '') => {
   try {
-    const response = await api.get(`/${ADMIN_BASE_ROUTE}/plans?page=${page}&limit=${limit}&searchQuery=${searchQuery}`, {
-      headers: { AuthorizationToken: `Bearer ${token}` },
-    });
+    const response = await api.get(`/${ADMIN_BASE_ROUTE}/plans?page=${page}&limit=${limit}&searchQuery=${searchQuery}`);
     
     return response.data;
   } catch (error) {

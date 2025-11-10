@@ -69,27 +69,32 @@ export class AdminRepository implements IAdminRepository {
   }
 
   async createPlan(data: Partial<IPlan>): Promise<PlanDocument | null> {
-      return await this.planModel.create(data)
+    return await this.planModel.create(data);
   }
 
-    async getAllPlans({
-      page,
-      limit,
-      searchQuery,
-    }: GetPaginationQuery): Promise<GetMappedPlanResponse> {
-      const skip = (page - 1) * limit;
-      const searchFilter = searchQuery
-        ? { name: { $regex: searchQuery, $options: "i" } }
-        : {};
-  
-      const plans = await this.planModel.find(searchFilter)
-        .skip(skip)
-        .limit(limit)
-        .sort({ createdAt : -1 });
-  
-      const totalPlans = await this.planModel.countDocuments(searchFilter);
-      const totalPages = Math.ceil(totalPlans / limit);
-  
-      return { plans, totalPlans, totalPages };
-    }
+  async getAllPlans({
+    page,
+    limit,
+    searchQuery,
+  }: GetPaginationQuery): Promise<GetMappedPlanResponse> {
+    const skip = (page - 1) * limit;
+    const searchFilter = searchQuery
+      ? { name: { $regex: searchQuery, $options: "i" } }
+      : {};
+
+    const plans = await this.planModel
+      .find(searchFilter)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    const totalPlans = await this.planModel.countDocuments(searchFilter);
+    const totalPages = Math.ceil(totalPlans / limit);
+
+    return { plans, totalPlans, totalPages };
+  }
+
+  async getPlanById(id: string): Promise<IPlan | null> {
+      return await this.planModel.findById(id)
+  }
 }

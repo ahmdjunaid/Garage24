@@ -117,11 +117,11 @@ const MechanicOnboarding = () => {
       skills.forEach((skill) => formData.append("skills", skill));
 
       if (file instanceof File) {
-        formData.append("image", file);
+        formData.append("profile", file);
       }
 
       try {
-        await onboardingMechanicApi(formData, token);
+        await onboardingMechanicApi(formData);
         dispatch(
           login({
             user: { ...user, isOnboardingRequired: false } as User,

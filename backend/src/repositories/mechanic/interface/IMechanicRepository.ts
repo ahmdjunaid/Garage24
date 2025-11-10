@@ -17,5 +17,5 @@ export interface IMechanicRepository {
   ): Promise< HydratedDocument<IMechanic> | null>;
 
   getAllMechanics({ id ,page, limit, searchQuery }:GetPaginationQuery):Promise<GetMechanicResponse>;
-  findOneAndDelete(filter:FilterQuery<IMechanic>):Promise<IMechanic | null>
+  findOneAndDelete(filter:FilterQuery<IMechanic>):Promise<IMechanic | null>;
 }

@@ -7,4 +7,5 @@ export default interface IGarageController {
     getAllMechanics(req:Request, res:Response): Promise<void>;
     toggleStatus(req:Request, res:Response): Promise<void>;
     deleteMechanic(req:Request, res:Response): Promise<void>;
+    getApprovalStatus(req:Request, res:Response): Promise<void>;
 }

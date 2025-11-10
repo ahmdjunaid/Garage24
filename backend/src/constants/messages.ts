@@ -34,4 +34,5 @@ export const INVALID_TOKEN = "Invalid token";
 export const GOOGLE_AUTH_ERROR="Error while google authentication"
 
 // plan messages
+export const PLAN_NOT_FOUND = "Plan not found!"
 export const ERROR_WHILE_CREATINGPLAN = "Error while creating plan."

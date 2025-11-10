@@ -9,4 +9,5 @@ export default interface IAdminService {
   toggleStatus(userId:string,action: string): Promise<{message:string}>;
   createPlan(data: Partial<IPlan>): Promise<{message: string}>;
   getAllPlans(query: GetPaginationQuery):Promise<GetMappedPlanResponse>;
+  getPlanById(id: string):Promise<IPlan | null>;
 }

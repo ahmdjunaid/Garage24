@@ -1,5 +1,4 @@
 export interface IPlan {
-  _id: string;
   name: string;
   price: number;
   validity: number;

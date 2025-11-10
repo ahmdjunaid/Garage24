@@ -1,15 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import AdminSidebar from "../../components/elements/AdminSidebar";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../redux/store/store";
-import AdminHeader from "../../components/elements/AdminHeader";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import AdminSidebar from "../../components/layouts/AdminSidebar";
+import AdminHeader from "../../components/layouts/AdminHeader";
 import { fetchAllUsersApi, toggleStatusApi } from "../../services/admin";
 import profilePlaceholder from "../../assets/icons/profile-placeholder.jpg";
 import _ from "lodash";
 import type { IUsersMappedData } from "../../types/UserTypes";
 import { errorToast, successToast } from "../../utils/notificationAudio";
-import type { TableColumn } from "../../components/elements/AdminTable";
-import AdminTable from "../../components/elements/AdminTable";
+import type { TableColumn } from "../../components/layouts/AdminTable";
+import AdminTable from "../../components/layouts/AdminTable";
 import type { ActionPayload } from "../../types/CommonTypes";
 import { ConfirmModal } from "../../components/modal/ConfirmModal";
 
@@ -21,16 +19,13 @@ const AdminUser = () => {
   const [action, setAction] = useState<ActionPayload | null>(null);
   const usersPerPage = 5;
 
-  const { token } = useSelector((state: RootState) => state.auth);
-
   const fetchUsers = useCallback(
-    async (currentPage: number, searchQuery: string, token: string | null) => {
+    async (currentPage: number, searchQuery: string) => {
       try {
         const response = await fetchAllUsersApi(
           currentPage,
           usersPerPage,
           searchQuery,
-          token
         );
         setUsers(response.users);
         setTotalPages(response.totalPages);
@@ -43,30 +38,30 @@ const AdminUser = () => {
 
   const debouncedFetch = useMemo(
     () =>
-      _.debounce((page: number, query: string, token: string | null) => {
-        fetchUsers(page, query, token);
+      _.debounce((page: number, query: string) => {
+        fetchUsers(page, query);
       }, 300),
     [fetchUsers]
   );
 
   useEffect(() => {
     if (!searchQuery) {
-      fetchUsers(currentPage, "", token);
+      fetchUsers(currentPage, "");
     } else {
-      debouncedFetch(currentPage, searchQuery, token);
+      debouncedFetch(currentPage, searchQuery);
     }
 
     return () => {
       debouncedFetch.cancel();
     };
-  }, [currentPage, searchQuery, token, fetchUsers, debouncedFetch]);
+  }, [currentPage, searchQuery, fetchUsers, debouncedFetch]);
 
   const handleConfirm = async () => {
 
     if(!action) return
 
     try {
-      await toggleStatusApi(action.id, action.action, token);
+      await toggleStatusApi(action.id, action.action);
       setUsers((prev) =>
         prev.map((m) =>
           m._id === action.id ? { ...m, isBlocked: action.action === "block" } : m

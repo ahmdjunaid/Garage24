@@ -1,6 +1,6 @@
 import multer from "multer";
-import path from "path"
-import fs from "fs"
+import path from "path";
+import fs from "fs";
 
 const tempDir = path.join(__dirname,"..", "uploads", "temp");
 
@@ -23,4 +23,11 @@ export const upload = multer({
   }
 });
 
-export const uploadImage = upload.single("image");
+export const uploadProfile = upload.single("profile");
+
+export const uploadOnboardingImages = upload.fields([
+  { name: "image", maxCount: 1 },
+  { name: "document", maxCount: 1 },
+]);
+
+export const uploadGallery = upload.array("images", 5);

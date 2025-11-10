@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import AdminSidebar from "../../components/elements/AdminSidebar";
+import AdminSidebar from "../../components/layouts/AdminSidebar";
 import AdminTable, {
   type TableColumn,
-} from "../../components/elements/AdminTable";
+} from "../../components/layouts/AdminTable";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import {
   deleteMechanic,
@@ -12,7 +12,7 @@ import {
 } from "../../services/garage";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../redux/store/store";
-import AdminHeader from "../../components/elements/AdminHeader";
+import AdminHeader from "../../components/layouts/AdminHeader";
 import _ from "lodash";
 import type { IMechanic } from "../../types/MechanicTypes";
 import RegisterMechanic, {
@@ -34,14 +34,14 @@ const GarageMechanic = () => {
   const [action, setAction] = useState<ActionPayload | null>(null);
   const mechanicsPerPage = 5;
 
-  const { user, token } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state.auth);
   const garageId = user?._id;
 
   const handleMechanicRegister = async (userId: string) => {
     try {
-      await registerMechanicApi({ garageId, userId }, token);
+      await registerMechanicApi({ garageId, userId });
       successToast("Mechanic account created successfully.");
-      fetchMechanics(currentPage, searchQuery, token);
+      fetchMechanics(currentPage, searchQuery);
     } catch (error) {
       if (error instanceof Error)
         errorToast(error.message || "Error while creating new mechanic");
@@ -49,14 +49,13 @@ const GarageMechanic = () => {
   };
 
   const fetchMechanics = useCallback(
-    async (currentPage: number, searchQuery: string, token: string | null) => {
+    async (currentPage: number, searchQuery: string) => {
       try {
         console.log(searchQuery)
         const response = await fetchMechanicsApi(
           currentPage,
           mechanicsPerPage,
-          searchQuery,
-          token
+          searchQuery
         );
 
         setMechanics(response.mechanics);
@@ -70,23 +69,23 @@ const GarageMechanic = () => {
 
   const debouncedFetch = useMemo(
     () =>
-      _.debounce((page: number, query: string, token: string | null) => {
-        fetchMechanics(page, query, token);
+      _.debounce((page: number, query: string) => {
+        fetchMechanics(page, query);
       }, 300),
     [fetchMechanics]
   );
 
   useEffect(() => {
     if (!searchQuery) {
-      fetchMechanics(currentPage, "", token);
+      fetchMechanics(currentPage, "");
     } else {
-      debouncedFetch(currentPage, searchQuery, token);
+      debouncedFetch(currentPage, searchQuery);
     }
 
     return () => {
       debouncedFetch.cancel();
     };
-  }, [currentPage, token, searchQuery, fetchMechanics, debouncedFetch]);
+  }, [currentPage, searchQuery, fetchMechanics, debouncedFetch]);
 
   const handleConfirm = async () => {
     if (!action) return;
@@ -95,11 +94,11 @@ const GarageMechanic = () => {
 
     try {
       if (act === "delete") {
-        await deleteMechanic(id, token);
+        await deleteMechanic(id);
         setMechanics((prev) => prev.filter((m) => m.userId !== id));
         successToast("Deleted successfully");
       } else if (act === "block" || act === "unblock") {
-        await toggleUserStatusApi(id, act, token);
+        await toggleUserStatusApi(id, act);
         setMechanics((prev) =>
           prev.map((m) =>
             m.userId === id ? { ...m, isBlocked: act === "block" } : m

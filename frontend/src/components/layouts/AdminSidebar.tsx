@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
-  MessageSquare,
+  MessageSquare, ChevronRight
 } from "lucide-react";
 import whiteLogo from "../../assets/icons/logo-white.png";
 import { logoutApi } from "../../services/auth";
@@ -107,8 +107,8 @@ const menuItems = getMenuItems(role)
             src="https://api.dicebear.com/7.x/avataaars/svg?seed=KR"
             alt="Profile"
             className="w-10 h-10 rounded-full bg-gray-600 ring-2 ring-red-600"
-          /> */}
-          {/* <div className="flex-1">
+          />
+          <div className="flex-1">
             <div className="font-semibold text-sm">KR Garage</div>
             <div className="text-xs text-gray-400 flex items-center gap-1 group-hover:text-red-400 transition-colors">
               View Profile <ChevronRight className="w-3 h-3" />

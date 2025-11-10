@@ -5,13 +5,14 @@ import HttpStatus from "../../../constants/httpStatusCodes";
 import { USER_NOT_FOUND } from "../../../constants/messages";
 import bcrypt from "bcrypt";
 import { uploadFile } from "../../../config/s3Service";
+import { deleteLocalFile } from "../../../helper/helper";
 
 export class MechanicService implements IMechanicService {
   constructor(
     private _mechanicRepository: IMechanicRepository,
     private _authRepository: IAuthRepository
   ) {}
-  
+
   async onboarding(
     name: string,
     userId: string,
@@ -41,6 +42,7 @@ export class MechanicService implements IMechanicService {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     const imageUrl = await uploadFile(image,"profile")
+    if (image?.path) deleteLocalFile(image.path);
 
     const data = {
       name,

@@ -106,12 +106,9 @@ export const resendOtpApi = async (data: { email: string, context: "register" | 
   }
 };
 
-export const resetPasswordApi = async (data: { email: string, password: string}, token: string ) => {
-  console.log(data, token, 'From reset api')
+export const resetPasswordApi = async (data: { email: string, password: string}) => {
   try {
-    await api.post(`/${AUTH_BASE_ROUTE}/reset-password`, data,
-      {headers: {AuthorizationToken: `Bearer ${token}`}}
-    );
+    await api.post(`/${AUTH_BASE_ROUTE}/reset-password`, data);
 
     return { success: true, message: "Password reset successful. Please login with your new credentials." };
   } catch (error) {

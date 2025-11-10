@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Input from "../../components/elements/Input";
 import AuthButton from "../../components/elements/AuthButton";
 import emailIcon from "../../assets/icons/email.svg";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../redux/store/store";
 import type { Role } from "../../types/UserTypes";
 import { forgotPasswordApi } from "../../services/auth";
@@ -13,6 +13,7 @@ import OtpModalLight from "../../components/modal/OtpModalLight";
 import ResetPassModal from "../../components/modal/ResetPassModal";
 import { emailRegex } from "../../constants/commonRegex";
 import Spinner from "../../components/elements/Spinner";
+import { setAccessToken } from "../../redux/slice/userSlice";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState<string>("");
@@ -21,11 +22,10 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showReset, setShowReset] = useState<boolean>(false);
-  const [token, setToken] = useState<string | null>(null);
-
   
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
+  const dispatch = useDispatch()
 
   useEffect(() => {
     if (isAuthenticated && user?.role) {
@@ -156,7 +156,7 @@ const ForgotPassword = () => {
             context="other"
             email={email}
             onVerified={(token)=>{
-              setToken(token)
+              dispatch(setAccessToken(token))
               setShowReset(true)
             }}
           />
@@ -166,7 +166,6 @@ const ForgotPassword = () => {
             isOpen={showReset}
             onClose={()=>setShowReset(false)}
             email={email}
-            token={token}
           />
 
           {/* Right side - Image */}

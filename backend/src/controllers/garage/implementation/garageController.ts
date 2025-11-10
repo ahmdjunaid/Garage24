@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import IGarageController from "../interface/IGarageController";
 import IGarageService from "../../../services/garage/interface/IGarageService";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import { ALL_FIELDS_REQUIRED, SERVER_ERROR } from "../../../constants/messages";
+import { ALL_FIELDS_REQUIRED, SERVER_ERROR, USER_ID_REQUIRED } from "../../../constants/messages";
 import { GetPaginationQuery } from "../../../types/common";
 
 export class GarageController implements IGarageController {
@@ -10,22 +10,28 @@ export class GarageController implements IGarageController {
 
   onboarding = async (req: Request, res: Response) => {
     try {
-      const { name, garageId, plan, startTime, endTime, mobile, isRSAEnabled } =
+      const { name, garageId, startTime, endTime, mobile, isRSAEnabled } =
         req.body;
       const location = JSON.parse(req.body.location);
       const address = JSON.parse(req.body.address);
       const selectedHolidays = JSON.parse(req.body.selectedHolidays);
-      const image = req.file as Express.Multer.File;
 
+      let image: Express.Multer.File | undefined;
+      let document: Express.Multer.File | undefined;
+
+      if (req.files && !Array.isArray(req.files)) {
+        image = req.files["image"]?.[0] as Express.Multer.File;
+        document = req.files["document"]?.[0] as Express.Multer.File;
+      }
       if (
         !name ||
         !garageId ||
         !location ||
-        !plan ||
         !startTime ||
         !endTime ||
         !selectedHolidays ||
         !image ||
+        !document ||
         !mobile ||
         !isRSAEnabled ||
         !address
@@ -38,11 +44,11 @@ export class GarageController implements IGarageController {
         garageId,
         location,
         address,
-        plan,
         startTime,
         endTime,
         selectedHolidays,
         image,
+        document,
         mobile,
         isRSAEnabled
       );
@@ -89,7 +95,10 @@ export class GarageController implements IGarageController {
         throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
       }
 
-      const response = await this._garageService.registerMechanic(garageId, userId);
+      const response = await this._garageService.registerMechanic(
+        garageId,
+        userId
+      );
 
       res.status(HttpStatus.OK).json({ response });
     } catch (error) {
@@ -168,4 +177,25 @@ export class GarageController implements IGarageController {
         .json({ message: err?.message || SERVER_ERROR });
     }
   };
+
+  getApprovalStatus = async (req: Request, res: Response) => {
+      try {
+        const userId = req.user?.id
+
+        if(!userId){
+          throw {status:HttpStatus.BAD_REQUEST, message: USER_ID_REQUIRED}
+        }
+        
+        const data = await this._garageService.getApprovalStatus(userId)
+
+        res.status(HttpStatus.OK).json(data)
+        
+      } catch (error) {
+        console.error(error);
+      const err = error as Error;
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: err?.message || SERVER_ERROR });
+      }
+  }
 }

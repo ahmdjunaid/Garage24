@@ -1,3 +1,5 @@
+import type { IPlan } from "./PlanTypes";
+
 export interface ILocation {
   type: "Point";
   coordinates: [number, number];
@@ -20,7 +22,7 @@ export interface IMappedGarageData {
   isBlocked:boolean;
   location?: ILocation;
   address?: IAddress;
-  plan?: string;
+  plan?: Partial<IPlan>;
   startTime?: string;
   endTime?: string;
   selectedHolidays?: string[];

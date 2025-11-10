@@ -18,11 +18,11 @@ export class GarageRepository
     latitude: number;
     longitude: number;
     address: IAddress;
-    plan: string;
     startTime: string;
     endTime: string;
     selectedHolidays: string[];
     imageUrl: string;
+    docUrl: string;
     mobileNumber: string;
     isRSAEnabled: boolean;
   }) {
@@ -62,5 +62,9 @@ export class GarageRepository
 
   async findOneAndDelete(filter:FilterQuery<IGarage>): Promise<IGarage | null> {
     return await this.model.findOneAndDelete(filter);
+  }
+
+  async findOne(filter: FilterQuery<IGarage>): Promise<IGarage | null> {
+      return await this.getByFilter(filter);
   }
 }

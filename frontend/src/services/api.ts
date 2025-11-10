@@ -17,10 +17,9 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = config.headers.AuthorizationToken;
+    const token = store.getState().auth.token;
     if (token) {
-      config.headers.Authorization = `${token}`;
-      delete config.headers.AuthorizationToken;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },

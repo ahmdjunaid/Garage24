@@ -4,12 +4,10 @@ import { MECHANIC_BASE_ROUTE } from "../constants/apiRoutes";
 
 export const onboardingMechanicApi = async (
   data: FormData,
-  token: string | null
 ) => {
   try {
     const response = await api.post(`/${MECHANIC_BASE_ROUTE}/onboarding`, data, {
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "multipart/form-data",
       },
     });

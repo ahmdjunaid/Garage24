@@ -9,10 +9,10 @@ export class MechanicController implements IMechanicController {
 
   onboarding = async (req: Request, res: Response) => {
     try {
-      const { name ,userId, skills, mobile, password, newPassword } = req.body;
+      const { name, userId, skills, mobile, password, newPassword } = req.body;
       const image = req.file as Express.Multer.File;
-      
-      if ( !name || !userId || !skills || !mobile || !image ) {
+
+      if (!name || !userId || !skills || !mobile || !image) {
         throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
       }
 
@@ -25,10 +25,10 @@ export class MechanicController implements IMechanicController {
         password,
         newPassword
       );
-      
+
       res.status(HttpStatus.OK).json({ mechanic: response.mechanic });
     } catch (error) {
-      console.error(error,'Error from onboariding')
+      console.error(error, "Error from onboariding");
       const err = error as Error;
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -8,7 +8,7 @@ export interface IPlan extends Document {
   isDeleted: boolean;
 }
 
-export interface GetMappedPlanResponse{
+export interface GetMappedPlanResponse {
   plans:IPlan[]
   totalPlans: number;
   totalPages: number;

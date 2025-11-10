@@ -12,14 +12,12 @@ interface ModalProps {
   isOpen: boolean;
   email: string;
   onClose: () => void;
-  token: string | null;
 }
 
 const ResetPassModal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   email,
-  token,
 }) => {
   const [passwordError, setPasswordError] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -56,8 +54,7 @@ const ResetPassModal: React.FC<ModalProps> = ({
     }
 
     try {
-      if (token) {
-        const res = await resetPasswordApi({ email, password }, token);
+        const res = await resetPasswordApi({ email, password });
         successToast(res.message || "Password reset successfull.");
 
         setTimeout(() => {
@@ -66,7 +63,6 @@ const ResetPassModal: React.FC<ModalProps> = ({
           setPassword("");
           setCPassword("");
         }, 2000);
-      }
     } catch (error) {
       if (error instanceof Error) {
         errorToast(error.message);

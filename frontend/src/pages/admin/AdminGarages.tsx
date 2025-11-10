@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import AdminSidebar from "../../components/elements/AdminSidebar";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../redux/store/store";
-import AdminHeader from "../../components/elements/AdminHeader";
+import AdminSidebar from "../../components/layouts/AdminSidebar";
+import AdminHeader from "../../components/layouts/AdminHeader";
 import { fetchAllGaragesApi, toggleStatusApi } from "../../services/admin";
 import profilePlaceholder from "../../assets/icons/profile-placeholder.jpg";
 import _ from "lodash";
@@ -10,7 +8,7 @@ import type { IMappedGarageData } from "../../types/GarageTypes";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import AdminTable, {
   type TableColumn,
-} from "../../components/elements/AdminTable";
+} from "../../components/layouts/AdminTable";
 import { ConfirmModal } from "../../components/modal/ConfirmModal";
 import type { ActionPayload } from "../../types/CommonTypes";
 
@@ -22,18 +20,16 @@ const AdminGarages = () => {
   const [action, setAction] = useState<ActionPayload | null>(null);
   const garagesPerPage = 5;
 
-  const { token } = useSelector((state: RootState) => state.auth);
-
   const fetchGarages = useCallback(
-    async (currentPage: number, searchQuery: string, token: string | null) => {
+    async (currentPage: number, searchQuery: string) => {
       try {
         const response = await fetchAllGaragesApi(
           currentPage,
           garagesPerPage,
-          searchQuery,
-          token
+          searchQuery
         );
         setGarages(response.garages);
+        console.log(response.garages,'res-garages')
         setTotalPages(response.totalPages);
       } catch (error) {
         console.error("Error from page:", error);
@@ -44,30 +40,30 @@ const AdminGarages = () => {
 
   const debouncedFetch = useMemo(
     () =>
-      _.debounce((page: number, query: string, token: string | null) => {
-        fetchGarages(page, query, token);
+      _.debounce((page: number, query: string) => {
+        fetchGarages(page, query);
       }, 300),
     [fetchGarages]
   );
 
   useEffect(() => {
     if (!searchQuery) {
-      fetchGarages(currentPage, "", token);
+      fetchGarages(currentPage, "");
     } else {
-      debouncedFetch(currentPage, searchQuery, token);
+      debouncedFetch(currentPage, searchQuery);
     }
 
     return () => {
       debouncedFetch.cancel();
     };
-  }, [currentPage, searchQuery, token, fetchGarages, debouncedFetch]);
+  }, [currentPage, searchQuery, fetchGarages, debouncedFetch]);
 
   const handleConfirm = async () => {
 
     if(!action) return;
 
     try {
-      await toggleStatusApi(action.id, action.action, token);
+      await toggleStatusApi(action.id, action.action);
       setGarages((prev) =>
         prev.map((m) =>
           m._id === action.id ? { ...m, isBlocked: action.action === "block" } : m
@@ -102,7 +98,7 @@ const AdminGarages = () => {
       render: (g) => (
         <span
           className={`px-3 py-1 rounded-full text-xs font-medium ${
-            g.isBlocked
+            g.isBlocked || g.plan.name
               ? "bg-red-900 text-red-300"
               : "bg-green-900 text-green-300"
           }`}

@@ -9,16 +9,17 @@ export interface IGarageRepository {
     latitude: number,
     longitude: number,
     address: IAddress,
-    plan: string,
     startTime: string,
     endTime:string,
     selectedHolidays: string[],
     imageUrl: string,
+    docUrl:string,
     mobileNumber: string,
     isRSAEnabled: boolean,
   }
   ): Promise<{ garageData: IGarage }>;
 
   getAllGarages({ page, limit, searchQuery }:GetPaginationQuery):Promise<GetMappedGarageResponse>;
-  findOneAndDelete(filter:FilterQuery<IGarage>):Promise<IGarage | null>
+  findOneAndDelete(filter: FilterQuery<IGarage>):Promise<IGarage | null>
+  findOne(filter: FilterQuery<IGarage>):Promise<IGarage | null>
 }

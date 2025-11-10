@@ -8,6 +8,7 @@ import { GetMappedGarageResponse, IGarage } from "../../../types/garage";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import {
   ERROR_WHILE_CREATINGPLAN,
+  PLAN_NOT_FOUND,
   USER_STATUS_UPDATE_FAILED,
 } from "../../../constants/messages";
 import { GetMappedPlanResponse, IPlan } from "../../../types/plan";
@@ -90,5 +91,13 @@ export class AdminService implements IAdminService {
       };
   
       return mappedResponse;
+    }
+
+    async getPlanById(id: string): Promise<IPlan | null> {
+        const plan = await this._adminRepository.getPlanById(id)
+
+        if(!plan) throw { status: HttpStatus.NOT_FOUND, message: PLAN_NOT_FOUND }
+
+        return plan;
     }
 }

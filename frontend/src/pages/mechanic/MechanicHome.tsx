@@ -1,5 +1,5 @@
-import AdminSidebar from "../../components/elements/AdminSidebar";
-import AdminHeader from "../../components/elements/AdminHeader";
+import AdminSidebar from "../../components/layouts/AdminSidebar";
+import AdminHeader from "../../components/layouts/AdminHeader";
 
 const MechanicHome = () => {
 

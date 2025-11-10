@@ -13,7 +13,6 @@ export const errorHandler = (
   const message = err.message || "Something went wrong";
 
   res.status(statusCode).json({
-    success: false,
-    message,
+    message
   });
 };

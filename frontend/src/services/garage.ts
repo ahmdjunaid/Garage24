@@ -2,11 +2,10 @@ import { AxiosError } from "axios";
 import api from "./api";
 import { GARAGE_BASE_ROUTE } from "../constants/apiRoutes";
 
-export const onboardingApi = async (data: FormData, token: string) => {
+export const onboardingApi = async (data: FormData) => {
   try {
     const response = await api.post(`/${GARAGE_BASE_ROUTE}/onboarding`, data, {
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "multipart/form-data",
       },
     });
@@ -28,13 +27,10 @@ export const registerMechanicApi = async (
   data: {
     garageId: string | undefined;
     userId: string;
-  },
-  token: string | null
+  }
 ) => {
   try {
-    const response = await api.post(`/${GARAGE_BASE_ROUTE}/register-mechanic`, data, {
-      headers: { AuthorizationToken: `Bearer ${token}` },
-    });
+    const response = await api.post(`/${GARAGE_BASE_ROUTE}/register-mechanic`, data);
 
     return response.data;
   } catch (error) {
@@ -49,11 +45,9 @@ export const registerMechanicApi = async (
   }
 };
 
-export const fetchAddressApi = async (lat: number, lng: number, token: string | null) => {
+export const fetchAddressApi = async (lat: number, lng: number) => {
   try {
-    const response = await api.get(`/${GARAGE_BASE_ROUTE}/get-address?lat=${lat}&lng=${lng}`, {
-      headers: { AuthorizationToken: `Bearer ${token}` },
-    });
+    const response = await api.get(`/${GARAGE_BASE_ROUTE}/get-address?lat=${lat}&lng=${lng}`);
     
     return response.data;
   } catch (error) {
@@ -68,11 +62,9 @@ export const fetchAddressApi = async (lat: number, lng: number, token: string | 
   }
 };
 
-export const fetchMechanicsApi = async (page = 1, limit = 5, searchQuery =  '',token: string | null) => {
+export const fetchMechanicsApi = async (page = 1, limit = 5, searchQuery =  '',) => {
   try {
-    const response = await api.get(`/${GARAGE_BASE_ROUTE}/mechanics?page=${page}&limit=${limit}&searchQuery=${searchQuery}`, {
-      headers: { AuthorizationToken: `Bearer ${token}` },
-    });
+    const response = await api.get(`/${GARAGE_BASE_ROUTE}/mechanics?page=${page}&limit=${limit}&searchQuery=${searchQuery}`);
     
     return response.data;
   } catch (error) {
@@ -87,13 +79,9 @@ export const fetchMechanicsApi = async (page = 1, limit = 5, searchQuery =  '',t
   }
 };
 
-export const toggleUserStatusApi = async ( userId: string, action: string, token: string | null) => {
+export const toggleUserStatusApi = async ( userId: string, action: string) => {
   try {
-    const response = await api.patch(`/${GARAGE_BASE_ROUTE}/mechanic/${userId}`, {action: action}, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-    });
+    const response = await api.patch(`/${GARAGE_BASE_ROUTE}/mechanic/${userId}`, {action: action});
 
     return response.data;
   } catch (error) {
@@ -108,18 +96,31 @@ export const toggleUserStatusApi = async ( userId: string, action: string, token
   }
 };
 
-export const deleteMechanic = async ( userId: string, token: string | null) => {
+export const deleteMechanic = async ( userId: string) => {
   try {
-    const response = await api.delete(`/${GARAGE_BASE_ROUTE}/mechanic/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-    });
+    const response = await api.delete(`/${GARAGE_BASE_ROUTE}/mechanic/${userId}`);
 
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
       console.error("deleteMechanic Error:", error.response);
+      throw new Error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
+    throw new Error("Something went wrong. Please try again.");
+  }
+};
+
+export const fetchGarageStatusApi = async () => {
+  try {
+    const response = await api.get(`/${GARAGE_BASE_ROUTE}/get-status`);
+    return response.data;
+
+  } catch (error) {
+ if (error instanceof AxiosError) {
+      console.error("Error while fetching:", error.response);
       throw new Error(
         error.response?.data?.message ||
           "Something went wrong. Please try again."
