@@ -8,4 +8,5 @@ export default interface IGarageController {
     toggleStatus(req:Request, res:Response): Promise<void>;
     deleteMechanic(req:Request, res:Response): Promise<void>;
     getApprovalStatus(req:Request, res:Response): Promise<void>;
+    getAllPlans(req:Request, res:Response): Promise<void>;
 }

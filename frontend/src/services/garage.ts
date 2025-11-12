@@ -129,3 +129,26 @@ export const fetchGarageStatusApi = async () => {
     throw new Error("Something went wrong. Please try again.");
   }
 };
+
+export const fetchAllPlansApi = async (
+  page = 1,
+  limit = 5,
+  searchQuery = ""
+) => {
+  try {
+    const response = await api.get(
+      `/${GARAGE_BASE_ROUTE}/plans?page=${page}&limit=${limit}&searchQuery=${searchQuery}`
+    );
+
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error("Error while fetching plans:", error.response);
+      throw new Error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
+    throw new Error("Something went wrong. Please try again.");
+  }
+};

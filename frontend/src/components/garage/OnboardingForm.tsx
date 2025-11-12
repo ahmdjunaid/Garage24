@@ -128,7 +128,7 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
       const address = { city, district, state, pincode };
 
       formData.append("name", user?.name || "");
-      formData.append("garageId", user?._id || "");
+      formData.append("userId", user?._id || "");
       formData.append("startTime", startTime);
       formData.append("endTime", endTime);
       formData.append("mobile", mobile);

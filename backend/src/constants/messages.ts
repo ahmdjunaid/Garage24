@@ -36,3 +36,9 @@ export const GOOGLE_AUTH_ERROR="Error while google authentication"
 // plan messages
 export const PLAN_NOT_FOUND = "Plan not found!"
 export const ERROR_WHILE_CREATINGPLAN = "Error while creating plan."
+export const PLAN_ALREADY_EXIST = "Plan with this name already exists."
+export const PLAN_CREATED_SUCCESS = "Plan created successfully."
+
+//garage messages
+export const GARAGE_APPROVAL_FAILED = "Error while approval/rejection"
+export const GARAGE_NOT_FOUND = "Garage not found!"

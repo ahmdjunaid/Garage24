@@ -53,7 +53,7 @@ export class AdminRepository implements IAdminRepository {
 
     const garages = await this.garageModel
       .find(searchFilter)
-      .populate("garageId")
+      .populate("userId")
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
@@ -95,6 +95,12 @@ export class AdminRepository implements IAdminRepository {
   }
 
   async getPlanById(id: string): Promise<IPlan | null> {
-      return await this.planModel.findById(id)
+    return await this.planModel.findById(id);
+  }
+
+  async getPlanByName(name: string): Promise<IPlan | null> {
+    return await this.planModel.findOne({
+      name: { $regex: new RegExp(name, "i") },
+    });
   }
 }

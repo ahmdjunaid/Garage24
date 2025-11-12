@@ -5,6 +5,8 @@ import type { RootState } from "../redux/store/store";
 import { Navigate, Outlet, useNavigate } from "react-router-dom";
 import { fetchGarageStatusApi } from "../services/garage";
 import Spinner from "../components/elements/Spinner";
+import type { approvalStatus } from "../types/GarageTypes";
+import { errorToast } from "../utils/notificationAudio";
 
 interface ProtectedRouteProps {
   requiredRoles: Role[];
@@ -20,19 +22,23 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   );
   const navigate = useNavigate();
 
-  const [garageApproved, setGarageApproved] = useState<boolean | null>(null);
+  const [approvalStatus, setApprovalStatus] = useState<approvalStatus | null>(
+    null
+  );
+  const [hasActivePlan, setHasActivePlan] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const verifyGarage = async () => {
       try {
         if (checkGarageApproval && user?.role === "garage") {
-          const { data } = await fetchGarageStatusApi();
-          setGarageApproved(data.isApproved);
+          const data = await fetchGarageStatusApi();
+          setApprovalStatus(data.approvalStatus);
+          setHasActivePlan(data.hasActivePlan);
         }
       } catch (err) {
         console.error("Error checking garage approval:", err);
-        setGarageApproved(false);
+        setApprovalStatus(null);
       } finally {
         setLoading(false);
       }
@@ -57,16 +63,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     if (
       !user.isOnboardingRequired &&
       currentPath.endsWith(onboardingPath) &&
-      (role !== "garage" || garageApproved === true)
+      role !== "garage" &&
+      role !== "mechanic"
     ) {
       navigate(basePath, { replace: true });
     }
-  }, [user, navigate, garageApproved]);
+  }, [user, navigate]);
 
   if (!isAuthenticated || !token) {
     return <Navigate to="/login" replace />;
   }
-
 
   const role = user?.role as Role;
   if (requiredRoles.length && !requiredRoles.includes(role)) {
@@ -78,11 +84,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       return <Spinner loading={loading} />;
     }
 
-    if (
-      user.isOnboardingRequired === false &&
-      garageApproved === false
-    ) {
+    if (user.isOnboardingRequired === false && approvalStatus === "pending") {
       return <Navigate to="/garage/onboarding" replace />;
+    }
+  }
+
+  if (user?.role === "garage" && !hasActivePlan) {
+    if (window.location.pathname !== "/garage/plans") {
+      errorToast("You dont have a valid plan to proceed.")
+      return <Navigate to="/garage/plans" replace />;
     }
   }
 

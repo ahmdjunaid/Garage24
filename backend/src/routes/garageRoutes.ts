@@ -30,5 +30,7 @@ router.route('/mechanic/:userId')
             .patch(verifyJWT,authorizeRoles("garage"),garageController.toggleStatus)
             .delete(verifyJWT,authorizeRoles("garage"),garageController.deleteMechanic)
 router.route('/get-status').get(verifyJWT,authorizeRoles("garage"),garageController.getApprovalStatus)
+router.route('/plans').get(verifyJWT,authorizeRoles("garage"),garageController.getAllPlans)
+router.route('/create-checkout-session').post(garageController.createCheckoutSession)
 
 export default router;

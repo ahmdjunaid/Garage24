@@ -1,11 +1,12 @@
 import { GarageStatusResponse, IAddress, IGarage } from "../../../types/garage";
 import { GetMappedMechanicResponse} from "../../../types/mechanic";
 import { GetPaginationQuery } from "../../../types/common";
+import { GetMappedPlanResponse, ICheckoutSession } from "../../../types/plan";
 
 export default interface IGarageService {
   onboarding(
     name: string,
-    garageId: string,
+    userId: string,
     location: { lat: number; lng: number },
     address: IAddress,
     startTime: string,
@@ -21,5 +22,7 @@ export default interface IGarageService {
   getAllMechanics(query: GetPaginationQuery):Promise<GetMappedMechanicResponse>;
   toggleStatus(userId:string,action: string):Promise<{message:string}>;
   deleteUser(userId: string):Promise<{message:string}>;
-  getApprovalStatus(userId: string):Promise<GarageStatusResponse>
+  getApprovalStatus(userId: string):Promise<GarageStatusResponse>;
+  getAllPlans(query: GetPaginationQuery):Promise<GetMappedPlanResponse>;
+  createCheckoutSession(data: ICheckoutSession):Promise<{ url: string }>
 }

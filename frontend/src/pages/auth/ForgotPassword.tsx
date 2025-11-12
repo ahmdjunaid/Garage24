@@ -155,8 +155,8 @@ const ForgotPassword = () => {
             onClose={()=>setShowModal(false)}
             context="other"
             email={email}
-            onVerified={(token)=>{
-              dispatch(setAccessToken(token))
+            onVerified={(accessToken)=>{
+              dispatch(setAccessToken(accessToken))
               setShowReset(true)
             }}
           />

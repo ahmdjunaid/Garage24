@@ -2,15 +2,20 @@ import { Request, Response } from "express";
 import IGarageController from "../interface/IGarageController";
 import IGarageService from "../../../services/garage/interface/IGarageService";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import { ALL_FIELDS_REQUIRED, SERVER_ERROR, USER_ID_REQUIRED } from "../../../constants/messages";
+import {
+  ALL_FIELDS_REQUIRED,
+  SERVER_ERROR,
+  USER_ID_REQUIRED,
+} from "../../../constants/messages";
 import { GetPaginationQuery } from "../../../types/common";
+import { ICheckoutSession } from "../../../types/plan";
 
 export class GarageController implements IGarageController {
   constructor(private _garageService: IGarageService) {}
 
   onboarding = async (req: Request, res: Response) => {
     try {
-      const { name, garageId, startTime, endTime, mobile, isRSAEnabled } =
+      const { name, userId, startTime, endTime, mobile, isRSAEnabled } =
         req.body;
       const location = JSON.parse(req.body.location);
       const address = JSON.parse(req.body.address);
@@ -25,7 +30,7 @@ export class GarageController implements IGarageController {
       }
       if (
         !name ||
-        !garageId ||
+        !userId ||
         !location ||
         !startTime ||
         !endTime ||
@@ -41,7 +46,7 @@ export class GarageController implements IGarageController {
 
       const response = await this._garageService.onboarding(
         name,
-        garageId,
+        userId,
         location,
         address,
         startTime,
@@ -179,23 +184,60 @@ export class GarageController implements IGarageController {
   };
 
   getApprovalStatus = async (req: Request, res: Response) => {
-      try {
-        const userId = req.user?.id
+    try {
+      const userId = req.user?.id;
 
-        if(!userId){
-          throw {status:HttpStatus.BAD_REQUEST, message: USER_ID_REQUIRED}
-        }
-        
-        const data = await this._garageService.getApprovalStatus(userId)
+      if (!userId) {
+        throw { status: HttpStatus.BAD_REQUEST, message: USER_ID_REQUIRED };
+      }
 
-        res.status(HttpStatus.OK).json(data)
-        
-      } catch (error) {
-        console.error(error);
+      const data = await this._garageService.getApprovalStatus(userId);
+
+      res.status(HttpStatus.OK).json(data);
+    } catch (error) {
+      console.error(error);
       const err = error as Error;
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: err?.message || SERVER_ERROR });
-      }
-  }
+    }
+  };
+
+  getAllPlans = async (req: Request, res: Response) => {
+    try {
+      const { page = 1, limit = 10, searchQuery = "" } = req.query;
+
+      const query: GetPaginationQuery = {
+        page: Number(page),
+        limit: Number(limit),
+        searchQuery: String(searchQuery),
+      };
+
+      const response = await this._garageService.getAllPlans(query);
+
+      res.status(HttpStatus.OK).json({
+        plans: response.plans,
+        totalPlans: response.totalPlans,
+        totalPages: response.totalPages,
+      });
+    } catch (error) {
+      console.error(error);
+      const err = error as Error;
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: err?.message || SERVER_ERROR });
+    }
+  };
+
+  createCheckoutSession = async (req: Request, res: Response) => {
+    try {
+      const session = await this._garageService.createCheckoutSession(req.body);
+      res.status(HttpStatus.OK).json(session);
+    } catch (error) {
+      const err = error as Error;
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: err.message || "Error creating checkout session" });
+    }
+  };
 }

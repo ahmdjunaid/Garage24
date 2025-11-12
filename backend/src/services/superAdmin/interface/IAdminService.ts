@@ -1,6 +1,6 @@
 import { GetPaginationQuery } from "../../../types/common";
 import { GetMappedUsersResponse } from "../../../types/admin";
-import { GetMappedGarageResponse } from "../../../types/garage";
+import { GetMappedGarageResponse, IGarage } from "../../../types/garage";
 import { GetMappedPlanResponse, IPlan } from "../../../types/plan";
 
 export default interface IAdminService {
@@ -10,4 +10,6 @@ export default interface IAdminService {
   createPlan(data: Partial<IPlan>): Promise<{message: string}>;
   getAllPlans(query: GetPaginationQuery):Promise<GetMappedPlanResponse>;
   getPlanById(id: string):Promise<IPlan | null>;
+  garageApproval(userId:string,action: string): Promise<{message:string}>;
+  getGarageById(id: string):Promise<IGarage | null>;
 }

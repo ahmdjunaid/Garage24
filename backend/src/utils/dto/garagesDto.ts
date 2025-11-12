@@ -3,7 +3,7 @@ import { IAddress, ILocation } from "../../types/garage";
 
 export interface IMappedGarageData {
   _id: string;
-  garageId: ObjectId;
+  userId: ObjectId;
   name: string;
   email: string;
   role: string;
@@ -15,16 +15,17 @@ export interface IMappedGarageData {
   endTime?: string;
   selectedHolidays?: string[];
   imageUrl?: string;
+  docUrl?: string;
   mobileNumber?: string;
   isRSAEnabled?: boolean;
-  isApproved?: boolean;
+  approvalStatus?: string;
 }
 
 export const garageDataMapping = (garage: any): IMappedGarageData => {
-  const garageDetails = garage.garageId;
+  const garageDetails = garage.userId;
   return {
     _id: garageDetails._id,
-    garageId: garageDetails.Id,
+    userId: garageDetails.Id,
     name: garageDetails.name,
     email: garageDetails.email,
     role: garageDetails.role,
@@ -36,8 +37,9 @@ export const garageDataMapping = (garage: any): IMappedGarageData => {
     endTime: garage?.endTime,
     selectedHolidays: garage?.selectedHolidays,
     imageUrl: garage?.imageUrl,
+    docUrl: garage?.docUrl,
     mobileNumber: garage?.mobileNumber,
     isRSAEnabled: garage?.isRSAEnabled,
-    isApproved: garage?.isApproved,
+    approvalStatus: garage?.approvalStatus,
   };
 };

@@ -16,6 +16,8 @@ import {
 } from "../../../constants/messages";
 import { deleteLocalFile } from "../../../helper/helper";
 import { IAdminRepository } from "../../../repositories/superAdmin/interface/IAdminRepository";
+import { GetMappedPlanResponse, ICheckoutSession } from "../../../types/plan";
+import { stripe } from "../../../config/stripe";
 
 export class GarageService implements IGarageService {
   constructor(
@@ -26,7 +28,7 @@ export class GarageService implements IGarageService {
   ) {}
   async onboarding(
     name: string,
-    garageId: string,
+    userId: string,
     location: { lat: number; lng: number },
     address: IAddress,
     startTime: string,
@@ -43,13 +45,13 @@ export class GarageService implements IGarageService {
     if (image?.path) deleteLocalFile(image.path);
     if (document?.path) deleteLocalFile(document.path);
 
-    const convertedGarageId = new mongoose.Types.ObjectId(garageId);
+    const convertedUserId = new mongoose.Types.ObjectId(userId);
     const latitude = Number(location.lat);
     const longitude = Number(location.lng);
 
     const garageData = await this._garageRepository.onboarding({
       name,
-      garageId: convertedGarageId,
+      userId: convertedUserId,
       latitude,
       longitude,
       address,
@@ -62,7 +64,7 @@ export class GarageService implements IGarageService {
       isRSAEnabled,
     });
 
-    await this._authRepository.findOneAndUpdate(garageId, {
+    await this._authRepository.findOneAndUpdate(userId, {
       isOnboardingRequired: false,
     });
     return garageData;
@@ -159,19 +161,62 @@ export class GarageService implements IGarageService {
   }
 
   async getApprovalStatus(userId: string) {
-    const garage = await this._garageRepository.findOne({ garageId: userId });
+    const garage = await this._garageRepository.findOne({ userId: userId });
 
     if (!garage) {
-      return { hasGarage: false, isApproved: false, hasActivePlan: false };
+      return { hasGarage: false, approvalStatus: "", hasActivePlan: false };
     }
 
-    const now = new Date()
-    const hasActivePlan = garage?.plan?.some((plan) => plan.expiresAt > now) 
+    const now = new Date();
+    const hasActivePlan = garage?.plan?.some((plan) => plan.expiresAt > now);
 
     return {
       hasGarage: true,
-      isApproved: garage.isApproved,
-      hasActivePlan
+      approvalStatus: garage.approvalStatus,
+      hasActivePlan,
     };
   }
+
+  async getAllPlans(query: GetPaginationQuery): Promise<GetMappedPlanResponse> {
+    const response = await this._adminRepository.getAllPlans(query);
+
+    const mappedResponse = {
+      plans: response.plans,
+      totalPlans: response.totalPlans,
+      totalPages: response.totalPages,
+    };
+
+    return mappedResponse;
+  }
+
+  async createCheckoutSession (data: ICheckoutSession) {
+    const { garageId, planId, planName, planPrice } = data;
+
+    if (!garageId || !planId || !planName || !planPrice) {
+      throw {
+        status: HttpStatus.BAD_REQUEST,
+        message: "Missing required fields",
+      };
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "inr",
+            product_data: { name: planName },
+            unit_amount: planPrice * 100,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: `${process.env.CLIENT_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_URL}/payment-cancelled`,
+      metadata: { garageId, planId },
+    });
+
+    return { url: session.url! };
+  };
 }

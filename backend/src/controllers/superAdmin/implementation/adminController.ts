@@ -91,15 +91,15 @@ export class AdminController implements IAdminController {
 
       const data = { name, price, validity, noOfMechanics, noOfServices };
 
-      const message = this._adminService.createPlan(data);
+      const message = await this._adminService.createPlan(data);
 
       res.status(HttpStatus.OK).json({ message });
     } catch (error) {
-      console.error(error);
+      console.error(error); 
       const err = error as Error;
       res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+        .status(err.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: err.message || SERVER_ERROR });
     }
   };
 
@@ -127,5 +127,46 @@ export class AdminController implements IAdminController {
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: err?.message || SERVER_ERROR });
     }
-  }
+  };
+
+  garageApproval = async (req: Request, res: Response) => {
+    try {
+      const { action } = req.body;
+      const userId = req.params.userId;
+
+      if (!userId || !action) {
+        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+      }
+
+      const response = await this._adminService.garageApproval(userId, action);
+
+      res.status(HttpStatus.ACCEPTED).json({ message: response.message });
+    } catch (error) {
+      console.error(error);
+      const err = error as Error;
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: err?.message || SERVER_ERROR });
+    }
+  };
+
+  getGarageById = async (req: Request, res: Response) => {
+    try {
+      const userId = req.query.garageId as string;
+
+      if (!userId) {
+        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+      }
+
+      const response = await this._adminService.getGarageById(userId);
+
+      res.status(HttpStatus.ACCEPTED).json({ garage: response });
+    } catch (error) {
+      console.error(error);
+      const err = error as Error;
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: err?.message || SERVER_ERROR });
+    }
+  };
 }

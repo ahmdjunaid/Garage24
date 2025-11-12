@@ -20,7 +20,7 @@ const LocationSchema = new Schema<ILocation>(
 const garageSchema = new Schema<IGarage>(
   {
     name: { type: String, required: true },
-    garageId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     location: { type: LocationSchema, required: true },
     address: {
       city: { type: String },
@@ -46,7 +46,11 @@ const garageSchema = new Schema<IGarage>(
     docUrl: { type: String, required: true },
     mobileNumber: { type: String, required: true },
     isRSAEnabled: { type: Boolean, default: false },
-    isApproved: { type: Boolean, default: false },
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }

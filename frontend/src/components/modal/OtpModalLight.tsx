@@ -14,7 +14,7 @@ interface ModalProps {
   email: string;
   context: "register" | "other"
   onClose: () => void;
-  onVerified: (token:string) => void;
+  onVerified: (accessToken:string) => void;
 }
 
 const OtpModalLight: React.FC<ModalProps> = ({
@@ -42,6 +42,7 @@ const OtpModalLight: React.FC<ModalProps> = ({
       setTimeout(() => {
         onClose();
         setOtp("");
+        console.log(res?.token,'toeknnnnnn')
         onVerified(res?.token)
       }, 2000);
     } catch (error) {

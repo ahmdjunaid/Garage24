@@ -6,6 +6,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import GarageHome from "../pages/garages/GarageHome";
 import GarageMechanic from "../pages/garages/GarageMechanic";
 import PageNotFound from "../pages/auth/PageNotFound";
+import GaragePlans from "../pages/garages/GaragePlans";
 
 const GarageRoutes = () => {
   return (
@@ -17,6 +18,7 @@ const GarageRoutes = () => {
       <Route element={<ProtectedRoute requiredRoles={['garage']} checkGarageApproval={true} />}>
         <Route path="/" element={<GarageHome />} />
         <Route path="/mechanics" element={<GarageMechanic />} />
+        <Route path="/plans" element={<GaragePlans />} />
         <Route path="*" element={<PageNotFound/>}/>
       </Route>
     </Routes>

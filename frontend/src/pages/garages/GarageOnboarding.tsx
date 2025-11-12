@@ -5,35 +5,56 @@ import UnderReview from "../../components/garage/UnderReview";
 import OnboardingForm from "../../components/garage/OnboardingForm";
 import Spinner from "../../components/elements/Spinner";
 import { fetchGarageStatusApi } from "../../services/garage";
+import type { approvalStatus } from "../../types/GarageTypes";
+import { errorToast } from "../../utils/notificationAudio";
+
+interface GarageStatus {
+  hasGarage: boolean;
+  approvalStatus: approvalStatus;
+  hasActivePlan?: boolean;
+}
 
 const GarageOnboarding = () => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const [garageStatus, setGarageStatus] = useState<{ hasGarage: boolean; isApproved: boolean } | null>(null);
+  const [garageStatus, setGarageStatus] = useState<GarageStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const [formSubmitted, setFormSubmitted] = useState<boolean>(false)
+  const [showUnderReview, setShowUnderReview] = useState(false);
+
+  const fetchStatus = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchGarageStatusApi();
+      setGarageStatus(data);
+    } catch (err) {
+      console.error("Error fetching garage status:", err);
+      errorToast("Failed to load garage status");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchStatus = async () => {
-      try {
-        const data = await fetchGarageStatusApi();
-        setGarageStatus(data);
-        setFormSubmitted(true)
-      } catch (err) {
-        console.error("Error fetching garage status:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchStatus();
   }, [user]);
 
-  if (loading) return <Spinner loading={loading}/>;
+  const handleOnboardingSubmit = async () => {
+    try {
+      setShowUnderReview(true);
+    } catch (err) {
+      console.error("Error on submit:", err);
+    }
+  };
 
-  if (garageStatus?.hasGarage && !garageStatus.isApproved && !user?.isOnboardingRequired && formSubmitted) {
+  if (loading) return <Spinner loading={loading} />;
+
+  if (
+    showUnderReview ||
+    (garageStatus?.hasGarage && garageStatus.approvalStatus === "pending")
+  ) {
     return <UnderReview />;
   }
 
-  return <OnboardingForm handleSubmit={()=>setFormSubmitted(true)}/>;
+  return <OnboardingForm handleSubmit={handleOnboardingSubmit} />;
 };
 
 export default GarageOnboarding;

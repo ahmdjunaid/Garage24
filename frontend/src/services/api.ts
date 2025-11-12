@@ -49,14 +49,14 @@ api.interceptors.response.use(
       try {
         const response = await api.post(`/${AUTH_BASE_ROUTE}/refresh-token`);
 
-        const newAccessToken = response.data.accessToken;
-        if(newAccessToken){
-          store.dispatch(setAccessToken(newAccessToken));
+        const accessToken = response.data.accessToken;
+        if(accessToken){
+          store.dispatch(setAccessToken(accessToken));
         }
 
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         api.defaults.headers.common["Authorization"] =
-          `Bearer ${newAccessToken}`;
+          `Bearer ${accessToken}`;
 
         return api(originalRequest);
       } catch (Refresherror) {

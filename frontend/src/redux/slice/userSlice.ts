@@ -44,7 +44,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
     },
     setAccessToken: (state, action) => {
-      state.token = action.payload.newAccessToken;
+      state.token = action.payload;
     }
   },
 });

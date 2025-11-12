@@ -1,4 +1,4 @@
-import { GetMappedGarageResponse } from "../../../types/garage";
+import { GetMappedGarageResponse, IGarage } from "../../../types/garage";
 import { GetPaginationQuery } from "../../../types/common";
 import { GetUserResponse, IUser } from "../../../types/user";
 import { UserDocument } from "../../../models/user";
@@ -12,4 +12,5 @@ export interface IAdminRepository {
   createPlan( data: Partial<IPlan> ): Promise< PlanDocument | null >;
   getAllPlans({ page, limit, searchQuery }:GetPaginationQuery):Promise<GetMappedPlanResponse>;
   getPlanById(id: string):Promise<IPlan | null>;
+  getPlanByName(name: string):Promise<IPlan | null>;
 }

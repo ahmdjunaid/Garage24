@@ -5,6 +5,8 @@ export interface ILocation {
   coordinates: [number, number];
 }
 
+export type approvalStatus = "pending" | "approved" | "rejected";
+
 export interface IAddress {
   city: { type: string };
   district: { type: string }
@@ -24,7 +26,7 @@ export interface IPlanSnapshot {
 
 export interface IGarage {
   name: string;
-  garageId: ObjectId;
+  userId: ObjectId;
   location: ILocation;
   address: IAddress;
   plan?: IPlanSnapshot[];
@@ -36,7 +38,7 @@ export interface IGarage {
   mobileNumber: string;
   isRSAEnabled: boolean;
   isDeleted?: boolean;
-  isApproved?: boolean;
+  approvalStatus?: approvalStatus;
 }
 
 export interface GetMappedGarageResponse{
@@ -47,6 +49,6 @@ export interface GetMappedGarageResponse{
 
 export interface GarageStatusResponse {
   hasGarage: boolean;
-  isApproved: boolean | undefined;
+  approvalStatus: string | undefined;
   hasActivePlan: boolean | undefined
 }

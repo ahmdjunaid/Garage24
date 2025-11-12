@@ -29,6 +29,7 @@ const AdminPlans = () => {
           searchQuery
         );
         setPlans(response.plans);
+        console.log(response.plans,'res.plans')
         setTotalPages(response.totalPages);
       } catch (error) {
         console.error("Error from page:", error);
@@ -86,8 +87,8 @@ const AdminPlans = () => {
 
   const columns: TableColumn<IPlan>[] = [
     { key: "name", label: "Name" },
-    { key: "validity", label: "Validity" },
-    { key: "price", label: "Price" },
+    { key: "validity", label: "Validity (Days)" },
+    { key: "price", label: "Price in INR" },
     { key: "noOfMechanics", label: "No. of Mechanics" },
     { key: "noOfServices", label: "No. of Services" },
     {
@@ -133,6 +134,7 @@ const AdminPlans = () => {
             onClose={() => setShowModal(false)}
             onCreated={() => {
               setShowModal(false);
+              fetchPlans(currentPage, searchQuery)
             }}
           />
 

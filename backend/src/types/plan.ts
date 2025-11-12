@@ -9,7 +9,14 @@ export interface IPlan extends Document {
 }
 
 export interface GetMappedPlanResponse {
-  plans:IPlan[]
+  plans: IPlan[];
   totalPlans: number;
   totalPages: number;
+}
+
+export interface ICheckoutSession {
+  garageId: string;
+  planId: string;
+  planName: string;
+  planPrice: number;
 }

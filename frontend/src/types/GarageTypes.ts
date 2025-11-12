@@ -12,10 +12,16 @@ export interface IAddress {
   pincode: { type: string };
 }
 
+export type approvalStatus = "pending" | "approved" | "rejected";
+
+export interface ApprovalPayload {
+  id: string, name:string, action: approvalStatus
+}
+
 
 export interface IMappedGarageData {
   _id: string;
-  garageId: string;
+  userId: string;
   name: string;
   email: string;
   role:string;
@@ -29,4 +35,5 @@ export interface IMappedGarageData {
   imageUrl?: string;
   mobileNumber?: string;
   isRSAEnabled?: boolean;
+  approvalStatus?:approvalStatus;
 }
