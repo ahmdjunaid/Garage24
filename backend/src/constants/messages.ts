@@ -42,3 +42,7 @@ export const PLAN_CREATED_SUCCESS = "Plan created successfully."
 //garage messages
 export const GARAGE_APPROVAL_FAILED = "Error while approval/rejection"
 export const GARAGE_NOT_FOUND = "Garage not found!"
+
+//mechanic
+export const EMAIL_ALREADY_EXIST = "Email already exist, Try with another email!"
+export const INVALID_INPUT = "Invalid input!"

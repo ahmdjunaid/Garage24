@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchGarageByIdApi, garageApprovalApi } from "../../services/admin";
+import { fetchGarageByIdApi, garageApprovalApi } from "../../services/adminServices";
 import Spinner from "../elements/Spinner";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import { ConfirmModal } from "./ConfirmModal";

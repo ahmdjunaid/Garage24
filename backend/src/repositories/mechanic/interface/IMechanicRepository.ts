@@ -6,7 +6,7 @@ export interface IMechanicRepository {
   register(mechanicData: {
     garageId: string;
     userId: string;
-    name:string;
+    name: string;
   }): Promise<{
     message: string;
   }>;
@@ -18,4 +18,5 @@ export interface IMechanicRepository {
 
   getAllMechanics({ id ,page, limit, searchQuery }:GetPaginationQuery):Promise<GetMechanicResponse>;
   findOneAndDelete(filter:FilterQuery<IMechanic>):Promise<IMechanic | null>;
+  findById(id: string): Promise<IMechanic | null>;
 }

@@ -3,7 +3,7 @@ import DarkModal from "../layouts/DarkModal";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import Spinner from "../elements/Spinner";
 import { nameRegex } from "../../constants/commonRegex";
-import { createPlanApi } from "../../services/admin";
+import { createPlanApi } from "../../services/adminServices";
 
 interface ModalProps {
   isOpen: boolean;

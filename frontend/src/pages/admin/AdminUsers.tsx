@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminSidebar from "../../components/layouts/AdminSidebar";
 import AdminHeader from "../../components/layouts/AdminHeader";
-import { fetchAllUsersApi, toggleStatusApi } from "../../services/admin";
+import { fetchAllUsersApi, toggleStatusApi } from "../../services/adminServices";
 import profilePlaceholder from "../../assets/icons/profile-placeholder.jpg";
 import _ from "lodash";
 import type { IUsersMappedData } from "../../types/UserTypes";
@@ -10,6 +10,7 @@ import type { TableColumn } from "../../components/layouts/AdminTable";
 import AdminTable from "../../components/layouts/AdminTable";
 import type { ActionPayload } from "../../types/CommonTypes";
 import { ConfirmModal } from "../../components/modal/ConfirmModal";
+import Pagination from "../../components/layouts/Pagination";
 
 const AdminUser = () => {
   const [users, setUsers] = useState<IUsersMappedData[]>([]);
@@ -151,27 +152,11 @@ const AdminUser = () => {
           />
 
           {/* Pagination */}
-          <div className="px-6 py-5 flex items-center justify-center gap-4">
-            <button
-              className="w-8 h-8 rounded-full border-2 border-red-600 flex items-center justify-center hover:bg-red-600 transition-all text-red-600 hover:text-white hover:scale-110 shadow-lg shadow-red-900/30"
-              onClick={() => setCurrentPage((c) => (c > 1 ? c - 1 : c))}
-            >
-              ‹
-            </button>
-            <span className="text-sm text-gray-400">
-              Page{" "}
-              <span className="text-red-400 font-semibold">{currentPage}</span>{" "}
-              of <span className="text-gray-300">{totalPages}</span>
-            </span>
-            <button
-              className="w-8 h-8 rounded-full border-2 border-red-600 flex items-center justify-center hover:bg-red-600 transition-all text-red-600 hover:text-white hover:scale-110 shadow-lg shadow-red-900/30"
-              onClick={() =>
-                setCurrentPage((c) => (c < totalPages ? c + 1 : c))
-              }
-            >
-              ›
-            </button>
-          </div>
+          <Pagination 
+            currentPage={currentPage}
+            totalPages={totalPages}
+            setCurrentPage={setCurrentPage}
+          />
         </div>
       </div>
     </div>

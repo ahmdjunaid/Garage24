@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import { useNavigate } from "react-router-dom";
-import { fetchGarageStatusApi } from "../../services/garage";
+import { fetchGarageStatusApi } from "../../services/garageServices";
 import logo from "../../assets/icons/Logo.png";
-import { logoutApi } from "../../services/auth";
+import { logoutApi } from "../../services/authServices";
 import { useDispatch } from "react-redux";
 import { logout } from "../../redux/slice/userSlice";
 

@@ -5,15 +5,8 @@ import mongoose from "mongoose";
 import { uploadFile } from "../../../config/s3Service";
 import axios from "axios";
 import { IAddress } from "../../../types/garage";
-import { IMechanicRepository } from "../../../repositories/mechanic/interface/IMechanicRepository";
-import { GetMappedMechanicResponse } from "../../../types/mechanic";
 import { GetPaginationQuery } from "../../../types/common";
-import { mechanicDataMapping } from "../../../utils/dto/mechanicDto";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import {
-  USER_NOT_FOUND,
-  USER_STATUS_UPDATE_FAILED,
-} from "../../../constants/messages";
 import { deleteLocalFile } from "../../../helper/helper";
 import { IAdminRepository } from "../../../repositories/superAdmin/interface/IAdminRepository";
 import { GetMappedPlanResponse, ICheckoutSession } from "../../../types/plan";
@@ -23,7 +16,6 @@ export class GarageService implements IGarageService {
   constructor(
     private _garageRepository: IGarageRepository,
     private _authRepository: IAuthRepository,
-    private _mechanicRepository: IMechanicRepository,
     private _adminRepository: IAdminRepository
   ) {}
   async onboarding(
@@ -91,73 +83,6 @@ export class GarageService implements IGarageService {
       state: data.address?.state || "",
       pincode: data.address?.postcode || "",
     };
-  }
-
-  async registerMechanic(garageId: string, userId: string) {
-    const user = await this._authRepository.findById(userId);
-    if (!user) throw { status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND };
-
-    const { message } = await this._mechanicRepository.register({
-      garageId,
-      userId,
-      name: user.name,
-    });
-    return { message: message };
-  }
-
-  async getAllMechanics(
-    query: GetPaginationQuery
-  ): Promise<GetMappedMechanicResponse> {
-    const response = await this._mechanicRepository.getAllMechanics(query);
-
-    const mappedResponse = {
-      mechanics: response.mechanics.map((mechanic) =>
-        mechanicDataMapping(mechanic)
-      ),
-      totalMechanics: response.totalMechanics,
-      totalPages: response.totalPages,
-    };
-
-    return mappedResponse;
-  }
-  /**
-   *
-   * @param userId
-   * @param action
-   * @returns
-   */
-  async toggleStatus(userId: string, action: string) {
-    const data = {
-      isBlocked: action === "block" ? true : false,
-    };
-    const response = await this._authRepository.findByIdAndUpdate(userId, data);
-
-    if (!response) {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: USER_STATUS_UPDATE_FAILED,
-      };
-    }
-
-    return { message: `${action}ed successfull` };
-  }
-
-  async deleteUser(userId: string): Promise<{ message: string }> {
-    await this._mechanicRepository.findOneAndUpdate(userId, {
-      isDeleted: true,
-    });
-    const response = await this._authRepository.findByIdAndUpdate(userId, {
-      isDeleted: true,
-    });
-
-    if (!response) {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: USER_STATUS_UPDATE_FAILED,
-      };
-    }
-
-    return { message: "Deleted successfull" };
   }
 
   async getApprovalStatus(userId: string) {

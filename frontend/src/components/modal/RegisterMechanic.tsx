@@ -1,36 +1,26 @@
 import React, { useState } from "react";
 import DarkModal from "../layouts/DarkModal";
-import { signUpApi } from "../../services/auth";
-import { errorToast } from "../../utils/notificationAudio";
+import { errorToast, successToast } from "../../utils/notificationAudio";
 import Spinner from "../elements/Spinner";
-import { emailRegex, nameRegex, passwordRegex } from "../../constants/commonRegex";
+import { emailRegex, nameRegex } from "../../constants/commonRegex";
+import { registerMechanicApi } from "../../services/garageServices";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreated: (data:registerData) => void;
-}
-
-export interface registerData {
-    name: string;
-    email: string;
-    password: string;
-    role: string;
+  onCreated: () => void;
 }
 
 const RegisterMechanic:React.FC<ModalProps> = ({ isOpen, onClose, onCreated}) => {
       const [name, setName] = useState<string>("");
       const [email, setEmail] = useState<string>("");
-      const [password, setPassword] = useState<string>("");
       const [nameError, setNameError] = useState<string>("");
       const [emailError, setEmailError] = useState<string>("");
-      const [passwordError, setPasswordError] = useState<string>("");
       const [loading, setLoading] = useState<boolean>(false)
 
   const handleSubmit = async () => {
     setNameError("");
     setEmailError("");
-    setPasswordError("");
     let hasError = false;
     
     if (!nameRegex.test(name)) {
@@ -43,25 +33,18 @@ const RegisterMechanic:React.FC<ModalProps> = ({ isOpen, onClose, onCreated}) =>
       hasError = true;
     }
     
-    if (!passwordRegex.test(password)) {
-      setPasswordError(
-        "Password must be 8+ chars with uppercase, lowercase, number, and special character."
-      );
-      hasError = true;
-    }
-    
     if (!hasError) {
       try {
         setLoading(true)
-        const data = { name, email, password, role: "mechanic" }
-        await signUpApi(data);
+        const data = { name, email, role: "mechanic" }
+        await registerMechanicApi(data);
 
-        onCreated(data)
+        successToast("New mechanic added to your garage.")
+        onCreated()
 
         setTimeout(() => {
           setName("");
           setEmail("");
-          setPassword("");
           setLoading(false)
         }, 2000);
       } catch (error) {
@@ -81,7 +64,7 @@ const RegisterMechanic:React.FC<ModalProps> = ({ isOpen, onClose, onCreated}) =>
       <div className="text-white mt-5 rounded-2xl w-full max-w-md">
         <h2 className="text-xl font-semibold mb-6">Add Mechanic</h2>
         {/* Name */}
-        <div>
+        <div className="space-y-5">
           <label className="block mb-2 text-sm font-medium">Name:</label>
           <input
             type="text"
@@ -95,11 +78,6 @@ const RegisterMechanic:React.FC<ModalProps> = ({ isOpen, onClose, onCreated}) =>
           ) : (
             ""
           )}
-        </div>
-
-        {/* Login credentials */}
-        <div className="mt-6">
-          <h3 className="text-lg font-medium mb-4">Login credentials:</h3>
 
           {/* Email */}
           <label className="block mb-2 text-sm font-medium">Email ID:</label>
@@ -115,25 +93,8 @@ const RegisterMechanic:React.FC<ModalProps> = ({ isOpen, onClose, onCreated}) =>
           ) : (
             ""
           )}
-
-          {/* Password */}
-          <label className="block mt-6 mb-2 text-sm font-medium">
-            One-Time Password:
-          </label>
-          <input
-            type="text"
-            placeholder="Enter a temporory password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-[#1c1c1c] border border-transparent focus:border-red-600 rounded-md px-4 py-3 text-gray-200 placeholder-gray-500 focus:outline-none transition"
-          />
-          {passwordError ? (
-            <p className="text-red-600 font-light text-sm ">{passwordError}</p>
-          ) : (
-            ""
-          )}
         </div>
-
+        
         {/* Buttons */}
         <div className="flex justify-end gap-3 mt-8">
           <button

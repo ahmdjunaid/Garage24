@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
-import MechanicOnboarding from "../pages/auth/MechanicOnboarding";
+import MechanicOnboarding from "../pages/mechanic/MechanicOnboarding";
 import MechanicHome from "../pages/mechanic/MechanicHome";
 import PageNotFound from "../pages/auth/PageNotFound";
 

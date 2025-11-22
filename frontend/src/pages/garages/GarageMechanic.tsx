@@ -7,57 +7,38 @@ import { errorToast, successToast } from "../../utils/notificationAudio";
 import {
   deleteMechanic,
   fetchMechanicsApi,
-  registerMechanicApi,
+  resendInvitation,
   toggleUserStatusApi,
-} from "../../services/garage";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../redux/store/store";
+} from "../../services/garageServices";
 import AdminHeader from "../../components/layouts/AdminHeader";
 import _ from "lodash";
 import type { IMechanic } from "../../types/MechanicTypes";
-import RegisterMechanic, {
-  type registerData,
-} from "../../components/modal/RegisterMechanic";
-import OtpModalDark from "../../components/modal/OtpModalDark";
+import RegisterMechanic from "../../components/modal/RegisterMechanic";
 import { ConfirmModal } from "../../components/modal/ConfirmModal";
 import type { ActionPayload } from "../../types/CommonTypes";
 import profilePlaceholder from "../../assets/icons/profile-placeholder.jpg";
+import Spinner from "../../components/elements/Spinner";
+import Pagination from "../../components/layouts/Pagination";
 
 const GarageMechanic = () => {
   const [mechanics, setMechanics] = useState<IMechanic[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [showOtpModal, setShowOtpModal] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [newUser, setNewUser] = useState<registerData | null>(null);
   const [action, setAction] = useState<ActionPayload | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const mechanicsPerPage = 5;
-
-  const { user } = useSelector((state: RootState) => state.auth);
-  const garageId = user?._id;
-
-  const handleMechanicRegister = async (userId: string) => {
-    try {
-      await registerMechanicApi({ garageId, userId });
-      successToast("Mechanic account created successfully.");
-      fetchMechanics(currentPage, searchQuery);
-    } catch (error) {
-      if (error instanceof Error)
-        errorToast(error.message || "Error while creating new mechanic");
-    }
-  };
 
   const fetchMechanics = useCallback(
     async (currentPage: number, searchQuery: string) => {
       try {
-        console.log(searchQuery)
         const response = await fetchMechanicsApi(
           currentPage,
           mechanicsPerPage,
           searchQuery
         );
-
+        console.log(response.mechanics, "mechanics");
         setMechanics(response.mechanics);
         setTotalPages(response.totalPages);
       } catch (error) {
@@ -105,12 +86,18 @@ const GarageMechanic = () => {
           )
         );
         successToast(`${act}ed successfully`);
+      } else if (act === "Resend Invite") {
+        setLoading(true);
+        await resendInvitation(action.id);
+        successToast("Invitation mail resend successfully!");
       }
 
       setAction(null);
     } catch (error) {
       if (error instanceof Error) errorToast(error.message);
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -165,25 +152,14 @@ const GarageMechanic = () => {
               Add Mechanics
             </button>
           </div>
+
           {/* Register Mechanic */}
           <RegisterMechanic
             isOpen={showModal}
             onClose={() => setShowModal(false)}
-            onCreated={(data) => {
-              setNewUser(data);
+            onCreated={() => {
               setShowModal(false);
-              setShowOtpModal(true);
-            }}
-          />
-
-          {/* OTP Modal */}
-          <OtpModalDark
-            isOpen={showOtpModal}
-            onClose={() => setShowOtpModal(false)}
-            context="register"
-            email={newUser?.email}
-            onVerified={(userId) => {
-              handleMechanicRegister(userId);
+              fetchMechanics(currentPage, searchQuery);
             }}
           />
 
@@ -194,31 +170,63 @@ const GarageMechanic = () => {
             renderActions={(m) => {
               return (
                 <div className="flex gap-3">
-                  <button
-                    className="text-blue-400 hover:text-blue-300"
-                    onClick={() =>
-                      setAction({
-                        id: m.userId,
-                        name: m.name,
-                        action: m.isBlocked ? "unblock" : "block",
-                      })
-                    }
-                  >
-                    {m.isBlocked ? "Unblock" : "Block"}
-                  </button>
+                  {m.isOnboardingRequired ? (
+                    <>
+                      <button
+                        className="text-blue-400 hover:text-blue-300"
+                        onClick={() =>
+                          setAction({
+                            id: m.userId,
+                            name: m.name,
+                            action: "Resend Invite",
+                          })
+                        }
+                      >
+                        Resend Invite
+                      </button>
 
-                  <button
-                    className="text-red-400 hover:text-red-300"
-                    onClick={() =>
-                      setAction({
-                        id: m.userId,
-                        name: m.name,
-                        action: "delete",
-                      })
-                    }
-                  >
-                    Delete
-                  </button>
+                      <button
+                        className="text-red-400 hover:text-red-300"
+                        onClick={() =>
+                          setAction({
+                            id: m.userId,
+                            name: m.name,
+                            action: "delete",
+                          })
+                        }
+                      >
+                        Delete
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        className="text-blue-400 hover:text-blue-300"
+                        onClick={() =>
+                          setAction({
+                            id: m.userId,
+                            name: m.name,
+                            action: m.isBlocked ? "unblock" : "block",
+                          })
+                        }
+                      >
+                        {m.isBlocked ? "Unblock" : "Block"}
+                      </button>
+
+                      <button
+                        className="text-red-400 hover:text-red-300"
+                        onClick={() =>
+                          setAction({
+                            id: m.userId,
+                            name: m.name,
+                            action: "delete",
+                          })
+                        }
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </div>
               );
             }}
@@ -232,28 +240,14 @@ const GarageMechanic = () => {
             onCancel={() => setAction(null)}
           />
 
+          <Spinner loading={loading} />
+
           {/* Pagination */}
-          <div className="px-6 py-5 flex items-center justify-center gap-4">
-            <button
-              className="w-8 h-8 rounded-full border-2 border-red-600 flex items-center justify-center hover:bg-red-600 transition-all text-red-600 hover:text-white hover:scale-110 shadow-lg shadow-red-900/30"
-              onClick={() => setCurrentPage((c) => (c > 1 ? c - 1 : c))}
-            >
-              ‹
-            </button>
-            <span className="text-sm text-gray-400">
-              Page{" "}
-              <span className="text-red-400 font-semibold">{currentPage}</span>{" "}
-              of <span className="text-gray-300">{totalPages}</span>
-            </span>
-            <button
-              className="w-8 h-8 rounded-full border-2 border-red-600 flex items-center justify-center hover:bg-red-600 transition-all text-red-600 hover:text-white hover:scale-110 shadow-lg shadow-red-900/30"
-              onClick={() =>
-                setCurrentPage((c) => (c < totalPages ? c + 1 : c))
-              }
-            >
-              ›
-            </button>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            setCurrentPage={setCurrentPage}
+          />
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import DarkModal from "../layouts/DarkModal";
-import { resendOtpApi, verifyOtpApi } from "../../services/auth";
+import { resendOtpApi, verifyOtpApi } from "../../services/authServices";
 import { useOtpTimer } from "../../hooks/useOtpTimer";
 import { otpRegex } from "../../constants/commonRegex";
 import { successToast } from "../../utils/notificationAudio";

@@ -8,7 +8,7 @@ import passwordIcon from "../../assets/icons/password.svg";
 import emailIcon from "../../assets/icons/email.svg";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../redux/store/store";
-import { googleLoginApi, loginApi } from "../../services/auth";
+import { googleLoginApi, loginApi } from "../../services/authServices";
 import { login } from "../../redux/slice/userSlice";
 import type { Role } from "../../types/UserTypes";
 import { errorToast } from "../../utils/notificationAudio";

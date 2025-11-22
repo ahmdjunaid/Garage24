@@ -23,16 +23,16 @@ export const onboardingApi = async (data: FormData) => {
   }
 };
 
-export const registerMechanicApi = async (
-  data: {
-    garageId: string | undefined;
-    userId: string;
-  }
-) => {
+export const registerMechanicApi = async (data: {
+  name: string;
+  email: string;
+  role: string;
+}) => {
   try {
     const response = await api.post(`/${GARAGE_BASE_ROUTE}/register-mechanic`, data);
+    const user = response.data;
 
-    return response.data;
+    return user;
   } catch (error) {
     if (error instanceof AxiosError) {
       console.error("SignUp Error:", error.response);
@@ -144,6 +144,27 @@ export const fetchAllPlansApi = async (
   } catch (error) {
     if (error instanceof AxiosError) {
       console.error("Error while fetching plans:", error.response);
+      throw new Error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
+    throw new Error("Something went wrong. Please try again.");
+  }
+};
+
+export const resendInvitation = async (
+  id: string,
+) => {
+  try {
+    const response = await api.post(
+      `/${GARAGE_BASE_ROUTE}/resend-invitation/${id}`
+    );
+
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error("Error while resend", error.response);
       throw new Error(
         error.response?.data?.message ||
           "Something went wrong. Please try again."

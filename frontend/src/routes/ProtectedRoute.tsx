@@ -3,10 +3,9 @@ import type { Role } from "../types/UserTypes";
 import { useSelector } from "react-redux";
 import type { RootState } from "../redux/store/store";
 import { Navigate, Outlet, useNavigate } from "react-router-dom";
-import { fetchGarageStatusApi } from "../services/garage";
+import { fetchGarageStatusApi } from "../services/garageServices";
 import Spinner from "../components/elements/Spinner";
 import type { approvalStatus } from "../types/GarageTypes";
-import { errorToast } from "../utils/notificationAudio";
 
 interface ProtectedRouteProps {
   requiredRoles: Role[];
@@ -76,7 +75,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   const role = user?.role as Role;
   if (requiredRoles.length && !requiredRoles.includes(role)) {
-    return <Navigate to="/unauthorized" replace />;
+    switch (role) {
+      case "admin":
+        return <Navigate to="/admin" replace />;
+      case "garage":
+        return <Navigate to="/garage" replace />;
+      case "mechanic":
+        return <Navigate to="/mechanic" replace />;
+      case "user":
+        return <Navigate to="/" replace />;
+      default:
+        return <Navigate to="/unauthorized" replace />;
+    }
   }
 
   if (checkGarageApproval && user?.role === "garage") {
@@ -89,12 +99,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }
 
-  if (user?.role === "garage" && !hasActivePlan) {
-    if (window.location.pathname !== "/garage/plans") {
-      errorToast("You dont have a valid plan to proceed.")
-      return <Navigate to="/garage/plans" replace />;
-    }
-  }
+  // if (user?.role === "garage" && !hasActivePlan) {
+  //   if (window.location.pathname !== "/garage/plans") {
+  //     errorToast("You dont have a valid plan to proceed.")
+  //     return <Navigate to="/garage/plans" replace />;
+  //   }
+  // }
 
   return <Outlet />;
 };

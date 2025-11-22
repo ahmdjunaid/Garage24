@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import logo from "../../assets/icons/Logo.png";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../redux/store/store";
 import { errorToast, successToast } from "../../utils/notificationAudio";
-import { onboardingMechanicApi } from "../../services/mechanic";
+import { onboardingMechanicApi } from "../../services/mechanicServices";
 import { useNavigate } from "react-router-dom";
 import { mobileRegex, passwordRegex } from "../../constants/commonRegex";
 import { login } from "../../redux/slice/userSlice";
@@ -29,6 +29,12 @@ const MechanicOnboarding = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { user, token } = useSelector((state: RootState) => state.auth);
+
+  useEffect(()=>{
+    if(!user?.isOnboardingRequired){
+      navigate('/mechanic')
+    }
+  },[user,navigate])
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -301,13 +307,13 @@ const MechanicOnboarding = () => {
             {/* Password Change Section */}
             <div className="bg-gray-200 rounded-xl p-4 sm:p-6 mt-6 sm:mt-8">
               <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
-                Change One-Time Password
+                Change Temporary Password
               </h2>
 
               <div className="space-y-3 sm:space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    One-Time Password
+                    Temporary Password
                   </label>
                   <input
                     type="password"

@@ -38,6 +38,7 @@ export class MechanicRepository
     const searchFilter = {
       garageId: id,
       ...(searchQuery && { name: { $regex: searchQuery, $options: "i" } }),
+      isDeleted: false
     };
 
     const mechanics = await this.model.find(searchFilter)
@@ -56,5 +57,9 @@ export class MechanicRepository
     filter: FilterQuery<IMechanic>
   ): Promise<IMechanic | null> {
     return await this.model.findOneAndDelete(filter);
+  }
+
+  async findById(id: string): Promise<IMechanic | null> {
+      return await this.findById(id)
   }
 }

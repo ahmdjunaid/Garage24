@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { logout } from "../../redux/slice/userSlice";
-import { logoutApi } from "../../services/auth";
+import { logoutApi } from "../../services/authServices";
 
 const HomePage = () => {
   const dispatch = useDispatch();

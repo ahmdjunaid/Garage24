@@ -8,7 +8,6 @@ import {
   USER_ID_REQUIRED,
 } from "../../../constants/messages";
 import { GetPaginationQuery } from "../../../types/common";
-import { ICheckoutSession } from "../../../types/plan";
 
 export class GarageController implements IGarageController {
   constructor(private _garageService: IGarageService) {}
@@ -83,97 +82,6 @@ export class GarageController implements IGarageController {
         lng
       );
       res.json(response);
-    } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
-    }
-  };
-
-  registerMechanic = async (req: Request, res: Response) => {
-    try {
-      const { garageId, userId } = req.body;
-
-      if (!garageId || !userId) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
-      }
-
-      const response = await this._garageService.registerMechanic(
-        garageId,
-        userId
-      );
-
-      res.status(HttpStatus.OK).json({ response });
-    } catch (error) {
-      console.error(error, "Error from register");
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
-    }
-  };
-
-  getAllMechanics = async (req: Request, res: Response) => {
-    try {
-      const { page = 1, limit = 10, searchQuery = "" } = req.query;
-      const garageId = req.user?.id;
-
-      const query: GetPaginationQuery = {
-        id: String(garageId),
-        page: Number(page),
-        limit: Number(limit),
-        searchQuery: String(searchQuery),
-      };
-
-      const response = await this._garageService.getAllMechanics(query);
-
-      res.status(HttpStatus.OK).json({
-        mechanics: response.mechanics,
-        totalMechanics: response.totalMechanics,
-        totalPages: response.totalPages,
-      });
-    } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
-    }
-  };
-
-  toggleStatus = async (req: Request, res: Response) => {
-    try {
-      const { action } = req.body;
-      const userId = req.params.userId;
-
-      if (!userId || !action) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
-      }
-
-      const response = await this._garageService.toggleStatus(userId, action);
-
-      res.status(HttpStatus.ACCEPTED).json({ message: response.message });
-    } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
-    }
-  };
-
-  deleteMechanic = async (req: Request, res: Response) => {
-    try {
-      const userId = req.params.userId;
-
-      if (!userId) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
-      }
-
-      const response = await this._garageService.deleteUser(userId);
-      res.status(HttpStatus.ACCEPTED).json({ message: response.message });
     } catch (error) {
       console.error(error);
       const err = error as Error;

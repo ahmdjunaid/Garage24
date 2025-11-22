@@ -8,7 +8,7 @@ import passwordIcon from "../../assets/icons/password.svg";
 import emailIcon from "../../assets/icons/email.svg";
 import userIcon from "../../assets/icons/user.svg";
 import companyIcon from "../../assets/icons/company.svg";
-import { googleLoginApi, signUpApi } from "../../services/auth";
+import { googleLoginApi, signUpApi } from "../../services/authServices";
 import Spinner from "../../components/elements/Spinner";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../redux/store/store";

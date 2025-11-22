@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Modal from "../layouts/Modal";
 import Input from "../elements/Input";
 import AuthButton from "../elements/AuthButton";
-import { resendOtpApi, verifyOtpApi } from "../../services/auth";
+import { resendOtpApi, verifyOtpApi } from "../../services/authServices";
 import { successToast } from "../../utils/notificationAudio";
 import { OTP_VERIFIED } from "../../constants/messages";
 import passwordIcon from "../../assets/icons/password.svg";

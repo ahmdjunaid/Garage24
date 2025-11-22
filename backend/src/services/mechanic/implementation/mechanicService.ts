@@ -2,10 +2,21 @@ import { IAuthRepository } from "../../../repositories/user/interface/IUserRepos
 import IMechanicService from "../interface/IMechanicService";
 import { IMechanicRepository } from "../../../repositories/mechanic/interface/IMechanicRepository";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import { USER_NOT_FOUND } from "../../../constants/messages";
+import {
+  EMAIL_ALREADY_EXIST,
+  USER_NOT_FOUND,
+  USER_STATUS_UPDATE_FAILED,
+} from "../../../constants/messages";
 import bcrypt from "bcrypt";
 import { uploadFile } from "../../../config/s3Service";
 import { deleteLocalFile } from "../../../helper/helper";
+import { GetPaginationQuery } from "../../../types/common";
+import { GetMappedMechanicResponse } from "../../../types/mechanic";
+import { mechanicDataMapping } from "../../../utils/dto/mechanicDto";
+import { generateCustomId } from "../../../utils/generateUniqueIds";
+import { generatePassword } from "../../../utils/generatePassword";
+import { sentMechanicInvitation } from "../../../utils/sendOtp";
+const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
 
 export class MechanicService implements IMechanicService {
   constructor(
@@ -41,7 +52,7 @@ export class MechanicService implements IMechanicService {
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    const imageUrl = await uploadFile(image,"profile")
+    const imageUrl = await uploadFile(image, "profile");
     if (image?.path) deleteLocalFile(image.path);
 
     const data = {
@@ -49,19 +60,125 @@ export class MechanicService implements IMechanicService {
       skills,
       imageUrl,
       mobileNumber,
-    };    
+    };
 
     const mechanicData = await this._mechanicRepository.findOneAndUpdate(
       userId,
       data
     );
-    if (!mechanicData) throw {status: HttpStatus.NOT_FOUND, message: "Mechanic not found"};
+    if (!mechanicData)
+      throw { status: HttpStatus.NOT_FOUND, message: "Mechanic not found" };
 
     await this._authRepository.findOneAndUpdate(userId, {
       isOnboardingRequired: false,
-      password: hashedPassword
+      password: hashedPassword,
     });
 
     return { message: "Updated successfully", mechanic: mechanicData };
+  }
+
+async registerMechanic(
+  name: string,
+  email: string,
+  role: string,
+  garageId: string
+) {
+
+  const userExists = await this._authRepository.findByEmail(email);
+  if (userExists) {
+    throw { status: HttpStatus.BAD_REQUEST, message: EMAIL_ALREADY_EXIST };
+  }
+
+  const customId = generateCustomId("mechanic");
+  const password = generatePassword();
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+  const { user } = await this._authRepository.register({
+    Id: customId,
+    name,
+    email,
+    role,
+    hashedPassword,
+  });
+
+  await this._mechanicRepository.register({
+    userId: user._id as string,
+    garageId,
+    name: user.name
+  });
+  await sentMechanicInvitation(email, password, user.name)
+  return { message: "Mechanic created successfully" };
+}
+
+
+  async getAllMechanics(
+    query: GetPaginationQuery
+  ): Promise<GetMappedMechanicResponse> {
+    const response = await this._mechanicRepository.getAllMechanics(query);
+
+    const mappedResponse = {
+      mechanics: response.mechanics.map((mechanic) =>
+        mechanicDataMapping(mechanic)
+      ),
+      totalMechanics: response.totalMechanics,
+      totalPages: response.totalPages,
+    };
+
+    return mappedResponse;
+  }
+  /**
+   *
+   * @param userId
+   * @param action
+   * @returns
+   */
+  async toggleStatus(userId: string, action: string) {
+    const data = {
+      isBlocked: action === "block" ? true : false,
+    };
+    const response = await this._authRepository.findByIdAndUpdate(userId, data);
+
+    if (!response) {
+      throw {
+        status: HttpStatus.BAD_REQUEST,
+        message: USER_STATUS_UPDATE_FAILED,
+      };
+    }
+
+    return { message: `${action}ed successfull` };
+  }
+
+  async deleteUser(userId: string): Promise<{ message: string }> {
+    await this._mechanicRepository.findOneAndUpdate(userId, {
+      isDeleted: true,
+    });
+    const response = await this._authRepository.findByIdAndUpdate(userId, {
+      isDeleted: true,
+    });
+
+    if (!response) {
+      throw {
+        status: HttpStatus.BAD_REQUEST,
+        message: USER_STATUS_UPDATE_FAILED,
+      };
+    }
+
+    return { message: "Deleted successfull" };
+  }
+
+  async resendMechanicInvite(mechanicId: string): Promise<{ message:string }> {
+    const mechanic = await this._authRepository.findById(mechanicId)
+    if(!mechanic){
+      throw {status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND}
+    }
+
+    const password = generatePassword()
+    const hashedPassword = await bcrypt.hash(password, saltRounds)
+
+    await this._authRepository.findByIdAndUpdate(mechanicId, {password: hashedPassword})
+
+    await sentMechanicInvitation(mechanic.email, password, mechanic.name)
+
+    return { message: "Invitation resend successfull" }
   }
 }

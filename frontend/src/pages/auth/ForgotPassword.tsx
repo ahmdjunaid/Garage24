@@ -8,7 +8,7 @@ import emailIcon from "../../assets/icons/email.svg";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../redux/store/store";
 import type { Role } from "../../types/UserTypes";
-import { forgotPasswordApi } from "../../services/auth";
+import { forgotPasswordApi } from "../../services/authServices";
 import OtpModalLight from "../../components/modal/OtpModalLight";
 import ResetPassModal from "../../components/modal/ResetPassModal";
 import { emailRegex } from "../../constants/commonRegex";

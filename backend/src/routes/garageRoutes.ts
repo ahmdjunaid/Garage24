@@ -11,24 +11,30 @@ import { AdminRepository } from "../repositories/superAdmin/implementation/admin
 import User from "../models/user";
 import { Garage } from "../models/garage";
 import { Plan } from "../models/plan";
+import { MechanicService } from "../services/mechanic/implementation/mechanicService";
+import { MechanicController } from "../controllers/mechanic/implementation/mechanicController";
 
 
 const router = express.Router()
 
 const garageRepository = new GarageRepository()
 const authRepository = new AuthRepository()
-const mechanicRepository = new MechanicRepository()
 const adminRepository = new AdminRepository(User, Garage, Plan)
-const garageService = new GarageService(garageRepository, authRepository, mechanicRepository, adminRepository)
+const garageService = new GarageService(garageRepository, authRepository, adminRepository)
 const garageController = new GarageController(garageService)
+
+const mechanicRepository = new MechanicRepository()
+const mechanicService = new MechanicService(mechanicRepository, authRepository)
+const mechanicController = new MechanicController(mechanicService)
 
 router.route('/onboarding').post(verifyJWT,authorizeRoles("garage"),uploadOnboardingImages,garageController.onboarding)
 router.route('/get-address').get(verifyJWT,authorizeRoles("garage"),garageController.getAddressFromCoordinates)
-router.route('/register-mechanic').post(verifyJWT,authorizeRoles("garage"),garageController.registerMechanic)
-router.route('/mechanics').get(verifyJWT,authorizeRoles("garage"),garageController.getAllMechanics)
+router.route('/register-mechanic').post(verifyJWT,authorizeRoles("garage"),mechanicController.registerMechanic)
+router.route('/resend-invitation/:mechanicId').post(verifyJWT,authorizeRoles("garage"),mechanicController.resendMechanicInvite)
+router.route('/mechanics').get(verifyJWT,authorizeRoles("garage"),mechanicController.getAllMechanics)
 router.route('/mechanic/:userId')
-            .patch(verifyJWT,authorizeRoles("garage"),garageController.toggleStatus)
-            .delete(verifyJWT,authorizeRoles("garage"),garageController.deleteMechanic)
+            .patch(verifyJWT,authorizeRoles("garage"),mechanicController.toggleStatus)
+            .delete(verifyJWT,authorizeRoles("garage"),mechanicController.deleteMechanic)
 router.route('/get-status').get(verifyJWT,authorizeRoles("garage"),garageController.getApprovalStatus)
 router.route('/plans').get(verifyJWT,authorizeRoles("garage"),garageController.getAllPlans)
 router.route('/create-checkout-session').post(garageController.createCheckoutSession)

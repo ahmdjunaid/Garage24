@@ -7,7 +7,7 @@ import type { ILocation, User } from "../../types/UserTypes";
 import type { RootState } from "../../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { validateTime } from "../../utils/validateTime";
-import { fetchAddressApi, onboardingApi } from "../../services/garage";
+import { fetchAddressApi, onboardingApi } from "../../services/garageServices";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import { daysOfWeek, getTimeOptions } from "../../constants/constantDatas";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";

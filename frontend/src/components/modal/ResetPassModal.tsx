@@ -3,7 +3,7 @@ import Modal from "../layouts/Modal";
 import Input from "../elements/Input";
 import AuthButton from "../elements/AuthButton";
 import passwordIcon from "../../assets/icons/password.svg";
-import { resetPasswordApi } from "../../services/auth";
+import { resetPasswordApi } from "../../services/authServices";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import { passwordRegex } from "../../constants/commonRegex";
 import { useNavigate } from "react-router-dom";

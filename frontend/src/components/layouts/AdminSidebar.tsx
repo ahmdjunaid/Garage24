@@ -4,7 +4,7 @@ import {
   MessageSquare, ChevronRight
 } from "lucide-react";
 import whiteLogo from "../../assets/icons/logo-white.png";
-import { logoutApi } from "../../services/auth";
+import { logoutApi } from "../../services/authServices";
 import { logout } from "../../redux/slice/userSlice";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import { useDispatch } from "react-redux";
