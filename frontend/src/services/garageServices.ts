@@ -1,6 +1,6 @@
 import { AxiosError } from "axios";
 import api from "./api";
-import { GARAGE_BASE_ROUTE } from "../constants/apiRoutes";
+import { GARAGE_BASE_ROUTE, STRIPE_BASE_ROUTE } from "../constants/apiRoutes";
 
 export const onboardingApi = async (data: FormData) => {
   try {
@@ -165,6 +165,60 @@ export const resendInvitation = async (
   } catch (error) {
     if (error instanceof AxiosError) {
       console.error("Error while resend", error.response);
+      throw new Error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
+    throw new Error("Something went wrong. Please try again.");
+  }
+};
+
+export const subscribePlanApi = async (data:{planId:string, planName:string, planPrice:number}) => {
+  try {
+    const response = await api.post(
+      `/${STRIPE_BASE_ROUTE}/create-subscribe-session`, data);
+
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error("Error while create-session", error.response);
+      throw new Error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
+    throw new Error("Something went wrong. Please try again.");
+  }
+};
+
+export const retriveTransactionApi = async (sessionId:string) => {
+  try {
+    const response = await api.get(
+      `/${STRIPE_BASE_ROUTE}/session/${sessionId}`);
+
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error("Error while fetching-session", error.response);
+      throw new Error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
+    throw new Error("Something went wrong. Please try again.");
+  }
+};
+
+export const getCurrentSubscriptionApi = async (garageId:string) => {
+  try {
+    const response = await api.get(
+      `/${GARAGE_BASE_ROUTE}/get-current-plan/${garageId}`);
+
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error("Error while fetching-currentPln", error.response);
       throw new Error(
         error.response?.data?.message ||
           "Something went wrong. Please try again."

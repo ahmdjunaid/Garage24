@@ -31,11 +31,15 @@ import {
 import crypto from "crypto";
 import axios from "axios";
 import redisClient from "../../../config/redisClient";
+import { injectable, inject } from "inversify";
+import { TYPES } from "../../../DI/types";
 
 const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
 
+@injectable()
 export class AuthService implements IAuthService {
-  constructor(private _authRepository: IAuthRepository) {}
+  constructor(
+    @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository) {}
 
   async register(name: string, email: string, password: string, role: Role) {
     const existUser = await this._authRepository.findByEmail(email);

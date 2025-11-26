@@ -1,16 +1,14 @@
-import { ObjectId } from "mongoose";
-import { IAddress, ILocation } from "../../types/garage";
+import { IAddress, ILocation, IPopulatedGarage } from "../../types/garage";
 
 export interface IMappedGarageData {
   _id: string;
-  userId: ObjectId;
+  userId: string;
   name: string;
   email: string;
   role: string;
   isBlocked: boolean;
   location?: ILocation;
   address?: IAddress;
-  plan?: string;
   startTime?: string;
   endTime?: string;
   selectedHolidays?: string[];
@@ -21,10 +19,10 @@ export interface IMappedGarageData {
   approvalStatus?: string;
 }
 
-export const garageDataMapping = (garage: any): IMappedGarageData => {
+export const garageDataMapping = (garage: IPopulatedGarage): IMappedGarageData => {
   const garageDetails = garage.userId;
   return {
-    _id: garageDetails._id,
+    _id: garageDetails._id.toString(),
     userId: garageDetails.Id,
     name: garageDetails.name,
     email: garageDetails.email,
@@ -32,7 +30,6 @@ export const garageDataMapping = (garage: any): IMappedGarageData => {
     isBlocked: garageDetails.isBlocked,
     location: garage?.location,
     address: garage?.address,
-    plan: garage?.plan?.name,
     startTime: garage?.startTime,
     endTime: garage?.endTime,
     selectedHolidays: garage?.selectedHolidays,

@@ -1,4 +1,6 @@
 import { ObjectId } from "mongodb";
+import { IUser } from "./user";
+import { Types } from "mongoose";
 
 export interface ILocation {
   type: "Point";
@@ -14,22 +16,27 @@ export interface IAddress {
   pincode: { type: string };
 }
 
-export interface IPlanSnapshot {
-  name: string;
-  price: number;
-  validity: number;
-  noOfMechanics: number;
-  noOfServices: number;
-  purchasedAt: Date;
-  expiresAt: Date;
-}
-
 export interface IGarage {
   name: string;
   userId: ObjectId;
   location: ILocation;
   address: IAddress;
-  plan?: IPlanSnapshot[];
+  startTime: string;
+  endTime: string;
+  selectedHolidays: string[];
+  imageUrl: string;
+  docUrl: string;
+  mobileNumber: string;
+  isRSAEnabled: boolean;
+  isDeleted?: boolean;
+  approvalStatus?: approvalStatus;
+}
+
+export interface IPopulatedGarage {
+  name: string;
+  userId: IUser & Document & { _id: Types.ObjectId }; 
+  location: ILocation;
+  address: IAddress;
   startTime: string;
   endTime: string;
   selectedHolidays: string[];
@@ -50,5 +57,4 @@ export interface GetMappedGarageResponse{
 export interface GarageStatusResponse {
   hasGarage: boolean;
   approvalStatus: string | undefined;
-  hasActivePlan: boolean | undefined
 }

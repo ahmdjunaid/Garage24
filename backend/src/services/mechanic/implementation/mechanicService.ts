@@ -16,12 +16,15 @@ import { mechanicDataMapping } from "../../../utils/dto/mechanicDto";
 import { generateCustomId } from "../../../utils/generateUniqueIds";
 import { generatePassword } from "../../../utils/generatePassword";
 import { sentMechanicInvitation } from "../../../utils/sendOtp";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../../../DI/types";
 const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
 
+@injectable()
 export class MechanicService implements IMechanicService {
   constructor(
-    private _mechanicRepository: IMechanicRepository,
-    private _authRepository: IAuthRepository
+    @inject(TYPES.MechanicRepository) private _mechanicRepository: IMechanicRepository,
+    @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository
   ) {}
 
   async onboarding(
@@ -77,39 +80,45 @@ export class MechanicService implements IMechanicService {
     return { message: "Updated successfully", mechanic: mechanicData };
   }
 
-async registerMechanic(
-  name: string,
-  email: string,
-  role: string,
-  garageId: string
-) {
+  async registerMechanic(
+    name: string,
+    email: string,
+    role: string,
+    garageId: string,
+    allowedMechanics: number
+  ) {
+    const userExists = await this._authRepository.findByEmail(email);
+    if (userExists) {
+      throw { status: HttpStatus.BAD_REQUEST, message: EMAIL_ALREADY_EXIST };
+    }
 
-  const userExists = await this._authRepository.findByEmail(email);
-  if (userExists) {
-    throw { status: HttpStatus.BAD_REQUEST, message: EMAIL_ALREADY_EXIST };
+    const noOfMechanics = await this._authRepository.countDocuments('mechanic')
+    if(noOfMechanics >= allowedMechanics){
+      throw {
+        status:HttpStatus.BAD_REQUEST, 
+        message: `Mechanic limit reached. Your plan allows only ${allowedMechanics} mechanics.`}
+    }
+
+    const customId = generateCustomId("mechanic");
+    const password = generatePassword();
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const { user } = await this._authRepository.register({
+      Id: customId,
+      name,
+      email,
+      role,
+      hashedPassword,
+    });
+
+    await this._mechanicRepository.register({
+      userId: user._id as string,
+      garageId,
+      name: user.name,
+    });
+    await sentMechanicInvitation(email, password, user.name);
+    return { message: "Mechanic created successfully" };
   }
-
-  const customId = generateCustomId("mechanic");
-  const password = generatePassword();
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-  const { user } = await this._authRepository.register({
-    Id: customId,
-    name,
-    email,
-    role,
-    hashedPassword,
-  });
-
-  await this._mechanicRepository.register({
-    userId: user._id as string,
-    garageId,
-    name: user.name
-  });
-  await sentMechanicInvitation(email, password, user.name)
-  return { message: "Mechanic created successfully" };
-}
-
 
   async getAllMechanics(
     query: GetPaginationQuery
@@ -126,12 +135,7 @@ async registerMechanic(
 
     return mappedResponse;
   }
-  /**
-   *
-   * @param userId
-   * @param action
-   * @returns
-   */
+  
   async toggleStatus(userId: string, action: string) {
     const data = {
       isBlocked: action === "block" ? true : false,
@@ -166,19 +170,21 @@ async registerMechanic(
     return { message: "Deleted successfull" };
   }
 
-  async resendMechanicInvite(mechanicId: string): Promise<{ message:string }> {
-    const mechanic = await this._authRepository.findById(mechanicId)
-    if(!mechanic){
-      throw {status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND}
+  async resendMechanicInvite(mechanicId: string): Promise<{ message: string }> {
+    const mechanic = await this._authRepository.findById(mechanicId);
+    if (!mechanic) {
+      throw { status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND };
     }
 
-    const password = generatePassword()
-    const hashedPassword = await bcrypt.hash(password, saltRounds)
+    const password = generatePassword();
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    await this._authRepository.findByIdAndUpdate(mechanicId, {password: hashedPassword})
+    await this._authRepository.findByIdAndUpdate(mechanicId, {
+      password: hashedPassword,
+    });
 
-    await sentMechanicInvitation(mechanic.email, password, mechanic.name)
+    await sentMechanicInvitation(mechanic.email, password, mechanic.name);
 
-    return { message: "Invitation resend successfull" }
+    return { message: "Invitation resend successfull" };
   }
 }

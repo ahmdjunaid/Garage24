@@ -1,17 +1,16 @@
-import { GetMappedGarageResponse } from "../../../types/garage";
+import { IPopulatedGarage } from "../../../types/garage";
 import { GetPaginationQuery } from "../../../types/common";
 import User from "../../../models/user";
 import { Garage } from "../../../models/garage";
 import { IAdminRepository } from "../interface/IAdminRepository";
 import { GetUserResponse, IUser } from "../../../types/user";
-import { Plan, PlanDocument } from "../../../models/plan";
-import { GetMappedPlanResponse, IPlan } from "../../../types/plan";
+import { injectable, unmanaged } from "inversify";
 
+@injectable()
 export class AdminRepository implements IAdminRepository {
   constructor(
-    private userModel: typeof User,
-    private garageModel: typeof Garage,
-    private planModel: typeof Plan
+    @unmanaged() private userModel: typeof User,
+    @unmanaged() private garageModel: typeof Garage,
   ) {}
 
   async getAllUsers({
@@ -45,7 +44,7 @@ export class AdminRepository implements IAdminRepository {
     page,
     limit,
     searchQuery,
-  }: GetPaginationQuery): Promise<GetMappedGarageResponse> {
+  }: GetPaginationQuery) {
     const skip = (page - 1) * limit;
     const searchFilter = searchQuery
       ? { name: { $regex: searchQuery, $options: "i" } }
@@ -56,7 +55,8 @@ export class AdminRepository implements IAdminRepository {
       .populate("userId")
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .exec() as unknown as IPopulatedGarage[];
 
     const totalGarages = await this.garageModel.countDocuments(searchFilter);
     const totalPages = Math.ceil(totalGarages / limit);
@@ -66,41 +66,5 @@ export class AdminRepository implements IAdminRepository {
 
   async findByIdAndUpdate(userId: string, data: Partial<IUser>) {
     return await this.userModel.findByIdAndUpdate(userId, data, { new: true });
-  }
-
-  async createPlan(data: Partial<IPlan>): Promise<PlanDocument | null> {
-    return await this.planModel.create(data);
-  }
-
-  async getAllPlans({
-    page,
-    limit,
-    searchQuery,
-  }: GetPaginationQuery): Promise<GetMappedPlanResponse> {
-    const skip = (page - 1) * limit;
-    const searchFilter = searchQuery
-      ? { name: { $regex: searchQuery, $options: "i" } }
-      : {};
-
-    const plans = await this.planModel
-      .find(searchFilter)
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 });
-
-    const totalPlans = await this.planModel.countDocuments(searchFilter);
-    const totalPages = Math.ceil(totalPlans / limit);
-
-    return { plans, totalPlans, totalPages };
-  }
-
-  async getPlanById(id: string): Promise<IPlan | null> {
-    return await this.planModel.findById(id);
-  }
-
-  async getPlanByName(name: string): Promise<IPlan | null> {
-    return await this.planModel.findOne({
-      name: { $regex: new RegExp(name, "i") },
-    });
   }
 }

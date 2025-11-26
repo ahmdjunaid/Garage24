@@ -38,6 +38,7 @@ export const PLAN_NOT_FOUND = "Plan not found!"
 export const ERROR_WHILE_CREATINGPLAN = "Error while creating plan."
 export const PLAN_ALREADY_EXIST = "Plan with this name already exists."
 export const PLAN_CREATED_SUCCESS = "Plan created successfully."
+export const ERROR_WHILE_PLAN_UPDATE="An error occured while update status."
 
 //garage messages
 export const GARAGE_APPROVAL_FAILED = "Error while approval/rejection"
@@ -46,3 +47,12 @@ export const GARAGE_NOT_FOUND = "Garage not found!"
 //mechanic
 export const EMAIL_ALREADY_EXIST = "Email already exist, Try with another email!"
 export const INVALID_INPUT = "Invalid input!"
+
+
+//payment
+export const WEBHOOK_ERROR="Stripe-Signature header is missing"
+export const SUBSCRIPTION_ERROR="Error while subscribe plan, try agian."
+export const PAYMENT_DETAILS_ERROR="Error while retriving payment details, try agian."
+
+//Common
+export const ERROR_WHILE_FETCH_DATA = "Error while fetching data."

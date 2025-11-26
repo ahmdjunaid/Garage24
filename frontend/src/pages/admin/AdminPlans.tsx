@@ -9,8 +9,14 @@ import { ConfirmModal } from "../../components/modal/ConfirmModal";
 import type { ActionPayload } from "../../types/CommonTypes";
 import AddPlans from "../../components/modal/AddPlans";
 import type { IPlan } from "../../types/PlanTypes";
-import { fetchAllPlansApi } from "../../services/adminServices";
+import {
+  deletePlansApi,
+  fetchAllPlansApi,
+  togglePlanStatusApi,
+} from "../../services/adminServices";
 import Pagination from "../../components/layouts/Pagination";
+import { errorToast, successToast } from "../../utils/notificationAudio";
+import EditPlans from "../../components/modal/EditPlans";
 
 const AdminPlans = () => {
   const [plans, setPlans] = useState<IPlan[]>([]);
@@ -19,6 +25,7 @@ const AdminPlans = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [totalPages, setTotalPages] = useState<number>(1);
   const [action, setAction] = useState<ActionPayload | null>(null);
+  const [editData, setEditData] = useState<IPlan | null>(null);
   const plansPerPage = 5;
 
   const fetchPlans = useCallback(
@@ -30,7 +37,7 @@ const AdminPlans = () => {
           searchQuery
         );
         setPlans(response.plans);
-        console.log(response.plans,'res.plans')
+        console.log(response.plans, "res.plans");
         setTotalPages(response.totalPages);
       } catch (error) {
         console.error("Error from page:", error);
@@ -60,30 +67,30 @@ const AdminPlans = () => {
   }, [currentPage, searchQuery, fetchPlans, debouncedFetch]);
 
   const handleConfirm = async () => {
-    // if (!action) return;
+    if (!action) return;
 
-    // const { id, action: act } = action;
+    const { id, action: act } = action;
 
-    // try {
-    //   if (act === "delete") {
-    //     await deleteMechanic(id, token);
-    //     setMechanics((prev) => prev.filter((m) => m.userId !== id));
-    //     successToast("Deleted successfully");
-    //   } else if (act === "block" || act === "unblock") {
-    //     await toggleUserStatusApi(id, act, token);
-    //     setMechanics((prev) =>
-    //       prev.map((m) =>
-    //         m.userId === id ? { ...m, isBlocked: act === "block" } : m
-    //       )
-    //     );
-    //     successToast(`${act}ed successfully`);
-    //   }
+    try {
+      if (act === "delete") {
+        await deletePlansApi(id);
+        setPlans((prev) => prev.filter((p) => p._id !== id));
+        successToast("Deleted successfully");
+      } else if (act === "block" || act === "unblock") {
+        await togglePlanStatusApi(id, act);
+        setPlans((prev) =>
+          prev.map((p) =>
+            p._id === id ? { ...p, isBlocked: act === "block" } : p
+          )
+        );
+        successToast(`${act}ed successfully`);
+      }
 
-    //   setAction(null);
-    // } catch (error) {
-    //   if (error instanceof Error) errorToast(error.message);
-    //   console.error(error);
-    // }
+      setAction(null);
+    } catch (error) {
+      if (error instanceof Error) errorToast(error.message);
+      console.error(error);
+    }
   };
 
   const columns: TableColumn<IPlan>[] = [
@@ -135,9 +142,20 @@ const AdminPlans = () => {
             onClose={() => setShowModal(false)}
             onCreated={() => {
               setShowModal(false);
-              fetchPlans(currentPage, searchQuery)
+              fetchPlans(currentPage, searchQuery);
             }}
           />
+
+          {editData && (
+            <EditPlans
+              onClose={() => setEditData(null)}
+              onEdited={() => {
+                setEditData(null);
+                fetchPlans(currentPage, searchQuery);
+              }}
+              planData={editData}
+            />
+          )}
 
           {/* Table with glass effect */}
           <AdminTable
@@ -146,6 +164,13 @@ const AdminPlans = () => {
             renderActions={(m) => {
               return (
                 <div className="flex gap-3">
+                  <button
+                    className="text-blue-400 hover:text-blue-300"
+                    onClick={() => setEditData(m)}
+                  >
+                    Edit
+                  </button>
+
                   <button
                     className="text-blue-400 hover:text-blue-300"
                     onClick={() =>
@@ -185,7 +210,7 @@ const AdminPlans = () => {
           />
 
           {/* Pagination */}
-          <Pagination 
+          <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             setCurrentPage={setCurrentPage}

@@ -8,9 +8,14 @@ import {
   SERVER_ERROR,
 } from "../../../constants/messages";
 import { GetPaginationQuery } from "../../../types/common";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../../../DI/types";
 
+@injectable()
 export class MechanicController implements IMechanicController {
-  constructor(private _mechanicService: IMechanicService) {}
+  constructor(
+    @inject(TYPES.MechanicService) private _mechanicService: IMechanicService
+  ) {}
 
   onboarding = async (req: Request, res: Response) => {
     try {
@@ -45,6 +50,7 @@ export class MechanicController implements IMechanicController {
     try {
       const { name, email, role } = req.body;
       const garageId = req.user?.id;
+      const allowedMechanics = req.plan.noOfMechanics;
 
       if (!name || !email || !role || !garageId) {
         throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
@@ -54,7 +60,8 @@ export class MechanicController implements IMechanicController {
         name,
         email,
         role,
-        garageId
+        garageId,
+        allowedMechanics
       );
 
       res.status(HttpStatus.OK).json({ response });

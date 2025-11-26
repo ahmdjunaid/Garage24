@@ -4,6 +4,7 @@ declare global {
   namespace Express {
     export interface Request {
       user?: DecodedUser | null;
+      plan?: IPlan;
     }
   }
 }

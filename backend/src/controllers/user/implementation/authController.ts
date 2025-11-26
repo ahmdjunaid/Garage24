@@ -12,18 +12,18 @@ import {
 import IAuthService from "../../../services/user/interface/IAuthService";
 import dotenv from "dotenv";
 import { loginSchema, registerSchema } from "../../../utils/zodValidate";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../../../DI/types";
 dotenv.config();
 
 const refreshTokenMaxAge =
   Number(process.env.REFRESH_TOKEN_MAX_AGE) || 7 * 24 * 60 * 60 * 1000;
 
+@injectable()
 export class Authcontroller implements IAuthController {
-  constructor(private _authService: IAuthService) {}
-  /**
-   *
-   * @param req
-   * @param res
-   */
+  constructor(
+    @inject(TYPES.AuthService) private _authService: IAuthService) {}
+
   register = async (req: Request, res: Response) => {
     try {
       const parsed = registerSchema.safeParse(req.body);

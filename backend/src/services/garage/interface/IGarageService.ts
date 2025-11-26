@@ -1,6 +1,5 @@
 import { GarageStatusResponse, IAddress, IGarage } from "../../../types/garage";
-import { GetPaginationQuery } from "../../../types/common";
-import { GetMappedPlanResponse, ICheckoutSession } from "../../../types/plan";
+import { ISubscription } from "../../../types/subscription";
 
 export default interface IGarageService {
   onboarding(
@@ -18,6 +17,5 @@ export default interface IGarageService {
   ): Promise<{ garageData: IGarage }>;
   getAddressFromCoordinates (lat:string, lng:string):Promise<IAddress>;
   getApprovalStatus(userId: string):Promise<GarageStatusResponse>;
-  getAllPlans(query: GetPaginationQuery):Promise<GetMappedPlanResponse>;
-  createCheckoutSession(data: ICheckoutSession):Promise<{ url: string }>
+  getCurrentPlan(garageId:string): Promise<{isActive: boolean, plan: ISubscription | null}>
 }

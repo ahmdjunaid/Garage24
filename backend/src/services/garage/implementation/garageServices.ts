@@ -5,18 +5,20 @@ import mongoose from "mongoose";
 import { uploadFile } from "../../../config/s3Service";
 import axios from "axios";
 import { IAddress } from "../../../types/garage";
-import { GetPaginationQuery } from "../../../types/common";
-import HttpStatus from "../../../constants/httpStatusCodes";
 import { deleteLocalFile } from "../../../helper/helper";
-import { IAdminRepository } from "../../../repositories/superAdmin/interface/IAdminRepository";
-import { GetMappedPlanResponse, ICheckoutSession } from "../../../types/plan";
-import { stripe } from "../../../config/stripe";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../../../DI/types";
+import { ISubscriptionRepository } from "../../../repositories/subscription/interface/ISubscriptionRepository";
+import { ISubscription } from "../../../types/subscription";
 
+@injectable()
 export class GarageService implements IGarageService {
   constructor(
+    @inject(TYPES.GarageRepository)
     private _garageRepository: IGarageRepository,
-    private _authRepository: IAuthRepository,
-    private _adminRepository: IAdminRepository
+    @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository,
+    @inject(TYPES.SubscriptionRepository)
+    private _subscriptionRepository: ISubscriptionRepository
   ) {}
   async onboarding(
     name: string,
@@ -92,56 +94,21 @@ export class GarageService implements IGarageService {
       return { hasGarage: false, approvalStatus: "", hasActivePlan: false };
     }
 
-    const now = new Date();
-    const hasActivePlan = garage?.plan?.some((plan) => plan.expiresAt > now);
-
     return {
       hasGarage: true,
       approvalStatus: garage.approvalStatus,
-      hasActivePlan,
     };
   }
 
-  async getAllPlans(query: GetPaginationQuery): Promise<GetMappedPlanResponse> {
-    const response = await this._adminRepository.getAllPlans(query);
-
-    const mappedResponse = {
-      plans: response.plans,
-      totalPlans: response.totalPlans,
-      totalPages: response.totalPages,
-    };
-
-    return mappedResponse;
-  }
-
-  async createCheckoutSession (data: ICheckoutSession) {
-    const { garageId, planId, planName, planPrice } = data;
-
-    if (!garageId || !planId || !planName || !planPrice) {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: "Missing required fields",
-      };
+  async getCurrentPlan(
+    garageId: string
+  ): Promise<{ isActive: boolean; plan: ISubscription | null }> {
+    const currentPlan =
+      await this._subscriptionRepository.getSubscriptionByGarageId(garageId);
+    if (!currentPlan) {
+      return { isActive: false, plan: null };
     }
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "inr",
-            product_data: { name: planName },
-            unit_amount: planPrice * 100,
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      success_url: `${process.env.CLIENT_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/payment-cancelled`,
-      metadata: { garageId, planId },
-    });
-
-    return { url: session.url! };
-  };
+    return { isActive: true, plan: currentPlan };
+  }
 }

@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
 export type Role = "user" | "admin" | "garage" | "mechanic";
 

@@ -10,3 +10,13 @@ export interface IPlan {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface IRetriveSessionData {
+    transactionId: string | null;
+    planName: string;
+    amountPaid: number;
+    paymentMethod: string;
+    currency: string;
+    date: Date;
+    receipt_url: string;
+}

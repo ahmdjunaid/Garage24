@@ -4,9 +4,13 @@ import { ALL_FIELDS_REQUIRED, SERVER_ERROR } from "../../../constants/messages";
 import { GetPaginationQuery } from "../../../types/common";
 import IAdminController from "../interface/IAdminController";
 import IAdminService from "../../../services/superAdmin/interface/IAdminService";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../../../DI/types";
 
+@injectable()
 export class AdminController implements IAdminController {
-  constructor(private _adminService: IAdminService) {}
+  constructor(
+    @inject(TYPES.AdminService) private _adminService: IAdminService) {}
 
   getAllGarages = async (req: Request, res: Response) => {
     try {
@@ -72,54 +76,6 @@ export class AdminController implements IAdminController {
       const response = await this._adminService.toggleStatus(userId, action);
 
       res.status(HttpStatus.ACCEPTED).json({ message: response.message });
-    } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
-    }
-  };
-
-  createPlans = async (req: Request, res: Response) => {
-    try {
-      const { name, price, validity, noOfMechanics, noOfServices } = req.body;
-
-      if (!name || !price || !validity || !noOfMechanics || !noOfServices) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
-      }
-
-      const data = { name, price, validity, noOfMechanics, noOfServices };
-
-      const message = await this._adminService.createPlan(data);
-
-      res.status(HttpStatus.OK).json({ message });
-    } catch (error) {
-      console.error(error); 
-      const err = error as Error;
-      res
-        .status(err.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err.message || SERVER_ERROR });
-    }
-  };
-
-  getAllPlans = async (req: Request, res: Response) => {
-    try {
-      const { page = 1, limit = 10, searchQuery = "" } = req.query;
-
-      const query: GetPaginationQuery = {
-        page: Number(page),
-        limit: Number(limit),
-        searchQuery: String(searchQuery),
-      };
-
-      const response = await this._adminService.getAllPlans(query);
-
-      res.status(HttpStatus.OK).json({
-        plans: response.plans,
-        totalPlans: response.totalPlans,
-        totalPages: response.totalPages,
-      });
     } catch (error) {
       console.error(error);
       const err = error as Error;

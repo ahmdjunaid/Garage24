@@ -4,24 +4,22 @@ import { IAdminRepository } from "../../../repositories/superAdmin/interface/IAd
 import { GetMappedUsersResponse } from "../../../types/admin";
 import { usersDataMapping } from "../../../utils/dto/usersDto";
 import { garageDataMapping } from "../../../utils/dto/garagesDto";
-import { GetMappedGarageResponse, IGarage } from "../../../types/garage";
+import { GetMappedGarageResponse, IGarage, IPopulatedGarage } from "../../../types/garage";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import {
-  ERROR_WHILE_CREATINGPLAN,
   GARAGE_APPROVAL_FAILED,
   GARAGE_NOT_FOUND,
-  PLAN_ALREADY_EXIST,
-  PLAN_CREATED_SUCCESS,
-  PLAN_NOT_FOUND,
   USER_STATUS_UPDATE_FAILED,
 } from "../../../constants/messages";
-import { GetMappedPlanResponse, IPlan } from "../../../types/plan";
 import { IGarageRepository } from "../../../repositories/garage/interface/IGarageRepository";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../../../DI/types";
 
+@injectable()
 export class AdminService implements IAdminService {
   constructor(
-    private _adminRepository: IAdminRepository,
-    private _garageRepository: IGarageRepository
+    @inject(TYPES.AdminRepository) private _adminRepository: IAdminRepository,
+    @inject(TYPES.GarageRepository) private _garageRepository: IGarageRepository
   ) {}
 
   async getAllUsers(
@@ -42,7 +40,7 @@ export class AdminService implements IAdminService {
   ): Promise<GetMappedGarageResponse> {
     const response = await this._adminRepository.getAllGarages(query);
     const mappedResponse = {
-      garages: response.garages.map((garage: any) =>
+      garages: response.garages.map((garage: IPopulatedGarage) =>
         garageDataMapping(garage)
       ) as unknown as IGarage[],
       totalGarages: response.totalGarages,
@@ -92,46 +90,6 @@ export class AdminService implements IAdminService {
     }
 
     return { message: `${action}ed successfull` };
-  }
-
-  async createPlan(data: Partial<IPlan>): Promise<{ message: string }> {
-
-    const existing = await this._adminRepository.getPlanByName(data.name!)
-
-    if(existing){
-      throw { status: HttpStatus.CONFLICT, message: PLAN_ALREADY_EXIST}
-    }
-
-    const response = await this._adminRepository.createPlan(data);
-
-    if (!response) {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: ERROR_WHILE_CREATINGPLAN,
-      };
-    }
-
-    return { message: PLAN_CREATED_SUCCESS };
-  }
-
-  async getAllPlans(query: GetPaginationQuery): Promise<GetMappedPlanResponse> {
-    const response = await this._adminRepository.getAllPlans(query);
-
-    const mappedResponse = {
-      plans: response.plans,
-      totalPlans: response.totalPlans,
-      totalPages: response.totalPages,
-    };
-
-    return mappedResponse;
-  }
-
-  async getPlanById(id: string): Promise<IPlan | null> {
-    const plan = await this._adminRepository.getPlanById(id);
-
-    if (!plan) throw { status: HttpStatus.NOT_FOUND, message: PLAN_NOT_FOUND };
-
-    return plan;
   }
 
   async getGarageById(id: string): Promise<IGarage | null> {

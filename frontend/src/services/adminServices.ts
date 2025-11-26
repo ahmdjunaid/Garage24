@@ -2,6 +2,7 @@ import { AxiosError } from "axios";
 import api from "./api";
 import { ADMIN_BASE_ROUTE } from "../constants/apiRoutes";
 import type { PlanData } from "../components/modal/AddPlans";
+import type { IPlan } from "../types/PlanTypes";
 
 export const fetchAllUsersApi = async (
   page = 1,
@@ -139,6 +140,62 @@ export const fetchAllPlansApi = async (
   } catch (error) {
     if (error instanceof AxiosError) {
       console.error("Error while fetching plans:", error.response);
+      throw new Error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
+    throw new Error("Something went wrong. Please try again.");
+  }
+};
+
+export const togglePlanStatusApi = async (planId: string, action: string) => {
+  try {
+    const response = await api.patch(
+      `/${ADMIN_BASE_ROUTE}/toggle-plan-status/${planId}`,
+      { action: action }
+    );
+
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error("togglePlanStatus Error:", error.response);
+      throw new Error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
+    throw new Error("Something went wrong. Please try again.");
+  }
+};
+
+export const deletePlansApi = async (planId: string) => {
+  try {
+    const response = await api.delete(
+      `/${ADMIN_BASE_ROUTE}/delete-plan/${planId}`);
+
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error("delete plan Error:", error.response);
+      throw new Error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
+    throw new Error("Something went wrong. Please try again.");
+  }
+};
+
+export const updatePlanApi = async (planId: string, data: Partial<IPlan>) => {
+  try {
+    const response = await api.put(
+      `/${ADMIN_BASE_ROUTE}/plans/${planId}`, data);
+
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error("update plan Error:", error.response);
       throw new Error(
         error.response?.data?.message ||
           "Something went wrong. Please try again."

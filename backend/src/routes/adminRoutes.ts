@@ -1,27 +1,25 @@
 import express from "express"
-import { AdminRepository } from "../repositories/superAdmin/implementation/adminRepositories"
-import User from "../models/user"
-import { Garage } from "../models/garage"
-import { AdminService } from "../services/superAdmin/implementation/adminService"
 import { AdminController } from "../controllers/superAdmin/implementation/adminController"
 import { verifyJWT } from "../middleware/jwt"
 import { authorizeRoles } from "../middleware/authorizeRoles"
-import { Plan } from "../models/plan"
-import { GarageRepository } from "../repositories/garage/implementation/garageRepositories"
+import { container } from "../DI/container"
+import { TYPES } from "../DI/types"
+import { PlanController } from "../controllers/plan/implimentation/planController"
 
 const router = express.Router()
 
-const adminRepository = new AdminRepository(User,Garage,Plan)
-const garageRepository = new GarageRepository()
-const adminService = new AdminService(adminRepository, garageRepository)
-const adminController = new AdminController(adminService)
+const adminController = container.get<AdminController>(TYPES.AdminController)
+const planController = container.get<PlanController>(TYPES.PlanController)
 
 router.route('/users').get(verifyJWT,authorizeRoles("admin"),adminController.getAllUsers)
 router.route('/garages').get(verifyJWT,authorizeRoles("admin"),adminController.getAllGarages)
 router.route('/garage').get(verifyJWT,authorizeRoles("admin"),adminController.getGarageById)
 router.route('/toggle-status/:userId').patch(verifyJWT,authorizeRoles("admin"),adminController.toggleStatus)
 router.route('/garage-approval/:userId').patch(verifyJWT,authorizeRoles("admin"),adminController.garageApproval)
-router.route('/create-plan').post(verifyJWT, authorizeRoles("admin"), adminController.createPlans)
-router.route('/plans').get(verifyJWT,authorizeRoles("admin"),adminController.getAllPlans)
+router.route('/create-plan').post(verifyJWT, authorizeRoles("admin"), planController.createPlans)
+router.route('/plans').get(verifyJWT,authorizeRoles("admin"),planController.getAllPlans)
+router.route('/plans/:planId').put(verifyJWT,authorizeRoles("admin"),planController.updatePlan)
+router.route('/toggle-plan-status/:planId').patch(verifyJWT,authorizeRoles("admin"),planController.toggleStatus)
+router.route('/delete-plan/:planId').delete(verifyJWT,authorizeRoles("admin"),planController.deletePlan)
 
 export default router;

@@ -53,4 +53,8 @@ async register(userData: {
   async findByIdAndUpdate(userId: string, data: Partial<IUser>) {
       return await this.updateById(userId, data)
   }
+
+  async countDocuments(role: string) {
+    return await this.model.countDocuments({role, isDeleted:false})
+  }
 }

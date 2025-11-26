@@ -17,6 +17,7 @@ export default interface IMechanicService {
     email: string,
     role: string,
     garageId: string,
+    allowedMechanics:number
   ): Promise<{ message: string }>;
   getAllMechanics(
     query: GetPaginationQuery

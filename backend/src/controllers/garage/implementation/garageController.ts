@@ -4,13 +4,18 @@ import IGarageService from "../../../services/garage/interface/IGarageService";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import {
   ALL_FIELDS_REQUIRED,
+  ERROR_WHILE_FETCH_DATA,
   SERVER_ERROR,
   USER_ID_REQUIRED,
 } from "../../../constants/messages";
-import { GetPaginationQuery } from "../../../types/common";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../../../DI/types";
 
+@injectable()
 export class GarageController implements IGarageController {
-  constructor(private _garageService: IGarageService) {}
+  constructor(
+    @inject(TYPES.GarageService) private _garageService: IGarageService
+  ) {}
 
   onboarding = async (req: Request, res: Response) => {
     try {
@@ -111,23 +116,16 @@ export class GarageController implements IGarageController {
     }
   };
 
-  getAllPlans = async (req: Request, res: Response) => {
+  getCurrentPlan = async (req: Request, res: Response) => {
     try {
-      const { page = 1, limit = 10, searchQuery = "" } = req.query;
+      const garageId = req.params.garageId;
+      if(!garageId){
+        throw {status: HttpStatus.BAD_REQUEST, message: ERROR_WHILE_FETCH_DATA}
+      }
 
-      const query: GetPaginationQuery = {
-        page: Number(page),
-        limit: Number(limit),
-        searchQuery: String(searchQuery),
-      };
-
-      const response = await this._garageService.getAllPlans(query);
-
-      res.status(HttpStatus.OK).json({
-        plans: response.plans,
-        totalPlans: response.totalPlans,
-        totalPages: response.totalPages,
-      });
+      const response = await this._garageService.getCurrentPlan(garageId)
+      
+      res.status(HttpStatus.OK).json(response)
     } catch (error) {
       console.error(error);
       const err = error as Error;
@@ -135,17 +133,5 @@ export class GarageController implements IGarageController {
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: err?.message || SERVER_ERROR });
     }
-  };
-
-  createCheckoutSession = async (req: Request, res: Response) => {
-    try {
-      const session = await this._garageService.createCheckoutSession(req.body);
-      res.status(HttpStatus.OK).json(session);
-    } catch (error) {
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err.message || "Error creating checkout session" });
-    }
-  };
+  }
 }

@@ -1,14 +1,12 @@
 import express from "express";
 import { Authcontroller } from "../controllers/user/implementation/authController";
-import { AuthRepository } from "../repositories/user/implementation/userRepositories";
-import { AuthService } from "../services/user/implementation/authServices";
 import { verifyResetJWT } from "../middleware/jwt";
+import { container } from "../DI/container";
+import { TYPES } from "../DI/types";
 
 const router = express.Router();
 
-const authRepository = new AuthRepository();
-const authService = new AuthService(authRepository);
-const authController = new Authcontroller(authService);
+const authController = container.get<Authcontroller>(TYPES.AuthController)
 
 router.route("/signup").post(authController.register);
 router.route("/login").post(authController.login);

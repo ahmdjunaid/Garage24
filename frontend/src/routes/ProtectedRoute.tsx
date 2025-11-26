@@ -24,7 +24,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const [approvalStatus, setApprovalStatus] = useState<approvalStatus | null>(
     null
   );
-  const [hasActivePlan, setHasActivePlan] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,7 +32,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         if (checkGarageApproval && user?.role === "garage") {
           const data = await fetchGarageStatusApi();
           setApprovalStatus(data.approvalStatus);
-          setHasActivePlan(data.hasActivePlan);
         }
       } catch (err) {
         console.error("Error checking garage approval:", err);
@@ -98,13 +96,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       return <Navigate to="/garage/onboarding" replace />;
     }
   }
-
-  // if (user?.role === "garage" && !hasActivePlan) {
-  //   if (window.location.pathname !== "/garage/plans") {
-  //     errorToast("You dont have a valid plan to proceed.")
-  //     return <Navigate to="/garage/plans" replace />;
-  //   }
-  // }
 
   return <Outlet />;
 };
