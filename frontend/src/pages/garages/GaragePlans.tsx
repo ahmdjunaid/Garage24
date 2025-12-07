@@ -185,7 +185,7 @@ useEffect(() => {
                 {plans.map((plan, index) => (
                   <div
                     key={index}
-                    className={`w-[300px] rounded-2xl shadow-lg border border-red-700 p-6 bg-gradient-to-b from-[#1a1a1a] to-[#0d0d0d] hover:scale-105 hover:shadow-red-700/40 transition-all duration-300`}
+                    className={`w-[300px] rounded-2xl shadow-lg border border-red-700 p-6 bg-gradient-to-b from-[#03071e] to-[#03071e] hover:scale-105 hover:shadow-red-700/40 transition-all duration-300`}
                   >
                     <h2 className="text-2xl font-semibold mb-3 text-center">
                       {plan.name}

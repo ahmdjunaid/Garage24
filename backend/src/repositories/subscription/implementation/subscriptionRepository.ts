@@ -11,18 +11,20 @@ export class SubscriptionRepository
   constructor() {
     super(subscription);
   }
-  async create(SubscriptionData: Partial<ISubscription>) {
+  async upsertSubscription(data: Partial<ISubscription>) {
     const subscriptionToSave = {
-      garageId: new Types.ObjectId(SubscriptionData.garageId),
-      planId: new Types.ObjectId(SubscriptionData.planId),
-      startDate: SubscriptionData.startDate,
-      expiryDate: SubscriptionData.expiryDate,
-      sessionId: SubscriptionData.sessionId,
-      paymentIntent: SubscriptionData.paymentIntent,
-      paymentStatus: SubscriptionData.paymentStatus
+      garageId: new Types.ObjectId(data.garageId),
+      planId: new Types.ObjectId(data.planId),
+      startDate: data.startDate,
+      expiryDate: data.expiryDate,
+      sessionId: data.sessionId,
     };
 
-    return await this.model.create(subscriptionToSave);
+    return await this.model.findOneAndUpdate(
+      { paymentIntent: data.paymentIntent },
+      subscriptionToSave,
+      { upsert: true }
+    );
   }
 
   async getSubscriptionByGarageId(
@@ -34,10 +36,12 @@ export class SubscriptionRepository
     });
   }
 
-  async updateSubscriptionByPaymentIntent(
+  async upsertSubscriptionByPaymentIntent(
     paymentIntent: string,
     data: Partial<ISubscription>
   ): Promise<ISubscription | null> {
-    return await this.updateOneByFilter({paymentIntent:paymentIntent}, data);
+    return await this.model.findOneAndUpdate({ paymentIntent }, data, {
+      upsert: true,
+    });
   }
 }

@@ -11,7 +11,6 @@ import {
 import mongoose from "mongoose";
 import { IPlanRepository } from "../../../repositories/plan/interface/IPlanRepository";
 import { PaymentStatus } from "../../../types/payments";
-import { ISubscription } from "../../../types/subscription";
 
 @injectable()
 export class SubscriptionService implements ISubscriptionService {
@@ -20,7 +19,7 @@ export class SubscriptionService implements ISubscriptionService {
     private _subscriptionRepository: ISubscriptionRepository,
     @inject(TYPES.PlanRepository) private _planRepository: IPlanRepository
   ) {}
-  async subscribePlan(
+  async upsertPlanData(
     garageId: string,
     planId: string,
     sessionId: string,
@@ -41,7 +40,7 @@ export class SubscriptionService implements ISubscriptionService {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + plan.validity);
 
-    await this._subscriptionRepository.create({
+    await this._subscriptionRepository.upsertSubscription({
       garageId: garageIdConverted,
       planId: planIdConverted,
       startDate: new Date(),
@@ -49,27 +48,27 @@ export class SubscriptionService implements ISubscriptionService {
       sessionId,
       paymentIntent,
       status: "pending",
-      paymentStatus: "paid"
     });
 
     return { message: "Successfully subscribed" };
   }
 
-  async updatePaymentStatus(
+  async upsertPaymentStatus(
     paymentIntent: string,
     paymentStatus: PaymentStatus
   ) {
-    console.log(paymentIntent, paymentStatus,'///////////')
     const updatedSubscription =
-      await this._subscriptionRepository.updateSubscriptionByPaymentIntent(
+      await this._subscriptionRepository.upsertSubscriptionByPaymentIntent(
         paymentIntent,
         { paymentStatus }
       );
-console.log(updatedSubscription,'123455')
-    if(!updatedSubscription){
-      throw {status: HttpStatus.BAD_REQUEST, message: ERROR_WHILE_PLAN_UPDATE}
+    if (!updatedSubscription) {
+      throw {
+        status: HttpStatus.BAD_REQUEST,
+        message: ERROR_WHILE_PLAN_UPDATE,
+      };
     }
 
-    return updatedSubscription
+    return updatedSubscription;
   }
 }

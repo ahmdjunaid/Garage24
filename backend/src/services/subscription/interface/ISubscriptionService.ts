@@ -2,12 +2,12 @@ import { PaymentStatus } from "../../../types/payments";
 import { ISubscription } from "../../../types/subscription";
 
 export default interface ISubscriptionService {
-  subscribePlan(
+  upsertPlanData(
     garageId: string,
     planId: string,
     sessionId: string,
     paymentIntent: string | null,
   ): Promise<{ message: string; }>;
 
-  updatePaymentStatus(paymentIntent:string, paymentStatus: PaymentStatus):Promise<ISubscription | null>
+  upsertPaymentStatus(paymentIntent:string, paymentStatus: PaymentStatus):Promise<ISubscription | null>
 }

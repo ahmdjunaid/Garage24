@@ -12,7 +12,8 @@ import { IRetriveSessionData } from "../../../types/subscription";
 @injectable()
 export class StripeService implements IStripeService {
   constructor(
-    @inject(TYPES.SubscriptionService) private _subscriptionService: ISubscriptionService
+    @inject(TYPES.SubscriptionService)
+    private _subscriptionService: ISubscriptionService
   ) {}
 
   async createSubscribeSession(data: ICheckoutSession) {
@@ -56,11 +57,15 @@ export class StripeService implements IStripeService {
         const session = event.data.object as Stripe.Checkout.Session;
         const metadata = session.metadata;
 
-        if (!metadata?.garageId || !metadata?.planId || !session.payment_intent) {
+        if (
+          !metadata?.garageId ||
+          !metadata?.planId ||
+          !session.payment_intent
+        ) {
           throw { status: HttpStatus.BAD_REQUEST, message: SUBSCRIPTION_ERROR };
         }
 
-        await this._subscriptionService.subscribePlan(
+        await this._subscriptionService.upsertPlanData(
           metadata.garageId,
           metadata.planId,
           session.id,
@@ -69,16 +74,35 @@ export class StripeService implements IStripeService {
         break;
       }
 
-      // case "payment_intent.succeeded": {
-      //   const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      //   console.log(paymentIntent,'**********')
-      //   await this._subscriptionService.updatePaymentStatus(
-      //     paymentIntent.id,
-      //     "paid"
-      //   );
+      case "payment_intent.succeeded": {
+        const pi = event.data.object as Stripe.PaymentIntent;
+        await this._subscriptionService.upsertPaymentStatus(pi.id, "paid");
+        break;
+      }
 
-      //   break;
-      // }
+      case "payment_intent.payment_failed": {
+        const pi = event.data.object as Stripe.PaymentIntent;
+        await this._subscriptionService.upsertPaymentStatus(pi.id, "failed");
+        break;
+      }
+
+      case "checkout.session.expired": {
+        const session = event.data.object as Stripe.Checkout.Session;
+
+        const paymentIntentId = session.payment_intent;
+
+        if (!paymentIntentId) {
+          console.warn("Expired session has no payment_intent:", session.id);
+          break;
+        }
+
+        await this._subscriptionService.upsertPaymentStatus(
+          paymentIntentId.toString(),
+          "failed"
+        );
+
+        break;
+      }
 
       default:
         console.log(`Unhandled event type: ${event.type}`);

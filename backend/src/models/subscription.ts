@@ -6,20 +6,16 @@ const subscriptionSchema = new Schema<ISubscription>(
     garageId: {
       type: Schema.Types.ObjectId,
       ref: "Garage",
-      required: true,
     },
     planId: {
       type: Schema.Types.ObjectId,
       ref: "Plan",
-      required: true,
     },
     startDate: {
       type: Date,
-      required: true,
     },
     expiryDate: {
       type: Date,
-      required: true,
     },
     sessionId: {
       type: String,
