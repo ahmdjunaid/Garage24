@@ -7,6 +7,7 @@ export const TYPES = {
   MechanicRepository: Symbol.for("MechanicRepository"),
   SubscriptionRepository: Symbol.for("SubscriptionRepository"),
   PlanRepository: Symbol.for("PlanRepository"),
+  paymentRepository: Symbol.for("PaymentRepository"),
 
   // Services
   AuthService: Symbol.for("AuthService"),
@@ -16,6 +17,7 @@ export const TYPES = {
   StripeService: Symbol.for("StripeService"),
   SubscriptionService: Symbol.for("SubscriptionService"),
   PlanService: Symbol.for("PlanService"),
+  PaymentService: Symbol.for("PaymentService"),
 
   // Controllers
   AuthController: Symbol.for("AuthController"),

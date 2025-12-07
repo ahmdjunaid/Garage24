@@ -91,8 +91,8 @@ export class AuthService implements IAuthService {
       throw { status: HttpStatus.FORBIDDEN, message: INVALID_CREDENTIALS };
     }
 
-    const token = generateToken(user._id as string, user.role);
-    const refreshToken = generateRefreshToken(user._id as string, user.role);
+    const token = generateToken(user._id.toString(), user.role);
+    const refreshToken = generateRefreshToken(user._id.toString(), user.role);
 
     return { user, token, refreshToken };
   }
@@ -125,7 +125,7 @@ export class AuthService implements IAuthService {
           };
 
           const {user} = await this._authRepository.register(JSON.parse(userData));
-          response.userId = user._id as string;
+          response.userId = user._id.toString();
         break;
       }
       case "other": {
@@ -133,7 +133,7 @@ export class AuthService implements IAuthService {
         
         if(!user) throw { status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND };
 
-        const token = generateResetToken(user._id as string);
+        const token = generateResetToken(user._id.toString());
         response.token = token;
         break;
       }
@@ -225,8 +225,8 @@ export class AuthService implements IAuthService {
       user = result.user;
     }
 
-    const token = generateToken(user?._id as string, user?.role);
-    const refreshToken = generateRefreshToken(user?._id as string, user?.role);
+    const token = generateToken(user?._id.toString(), user?.role);
+    const refreshToken = generateRefreshToken(user?._id.toString(), user?.role);
 
     return { user, token, refreshToken };
   }

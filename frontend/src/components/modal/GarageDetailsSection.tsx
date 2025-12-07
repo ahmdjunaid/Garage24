@@ -260,6 +260,7 @@ const GarageDetailsSection: React.FC<GarageDetailsSectionProps> = ({
       <ConfirmModal
         isOpen={!!approval}
         message={`Are you sure want ${approval?.action} ${approval?.name}`}
+        isReasonRequired={approval?.action==='rejected'}
         onClose={() => setApproval(null)}
         onConfirm={() => handleApproval()}
         onCancel={() => setApproval(null)}

@@ -30,7 +30,7 @@ import IAdminController from "../controllers/superAdmin/interface/IAdminControll
 import IGarageController from "../controllers/garage/interface/IGarageController";
 import IMechanicController from "../controllers/mechanic/interface/IMechanicController";
 import IStripeController from "../controllers/stripe/interface/IStripeController";
-import User from "../models/user";
+import { User } from "../models/user";
 import { Garage } from "../models/garage";
 import ISubscriptionService from "../services/subscription/interface/ISubscriptionService";
 import { SubscriptionService } from "../services/subscription/implimentation/subscriptionService";
@@ -40,6 +40,10 @@ import IPlanService from "../services/plan/interface/IPlanService";
 import { PlanService } from "../services/plan/implimentation/planService";
 import IPlanController from "../controllers/plan/interface/IPlanController";
 import { PlanController } from "../controllers/plan/implimentation/planController";
+import { IPaymentRepository } from "../repositories/payment/interface/IPaymentRepositories";
+import { paymentRepository } from "../repositories/payment/implimentation/paymentRepositories";
+import IPaymentService from "../services/payment/interface/IPaymentService";
+import { PaymentService } from "../services/payment/implimentation/paymentService";
 
 const container = new Container();
 
@@ -49,7 +53,8 @@ container.bind<IAdminRepository>(TYPES.AdminRepository).toDynamicValue(() => new
 container.bind<IGarageRepository>(TYPES.GarageRepository).to(GarageRepository);
 container.bind<IMechanicRepository>(TYPES.MechanicRepository).to(MechanicRepository);
 container.bind<ISubscriptionRepository>(TYPES.SubscriptionRepository).to(SubscriptionRepository);
-container.bind<IPlanRepository>(TYPES.PlanRepository).to(PlanRepository)
+container.bind<IPlanRepository>(TYPES.PlanRepository).to(PlanRepository);
+container.bind<IPaymentRepository>(TYPES.paymentRepository).to(paymentRepository);
 
 // Services
 container.bind<IAuthService>(TYPES.AuthService).to(AuthService);
@@ -58,7 +63,8 @@ container.bind<IGarageService>(TYPES.GarageService).to(GarageService);
 container.bind<IMechanicService>(TYPES.MechanicService).to(MechanicService);
 container.bind<IStripeService>(TYPES.StripeService).to(StripeService);
 container.bind<ISubscriptionService>(TYPES.SubscriptionService).to(SubscriptionService);
-container.bind<IPlanService>(TYPES.PlanService).to(PlanService)
+container.bind<IPlanService>(TYPES.PlanService).to(PlanService);
+container.bind<IPaymentService>(TYPES.PaymentService).to(PaymentService)
 
 // Controllers
 container.bind<IAuthController>(TYPES.AuthController).to(Authcontroller);

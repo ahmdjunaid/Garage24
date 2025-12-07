@@ -50,13 +50,12 @@ api.interceptors.response.use(
         const response = await api.post(`/${AUTH_BASE_ROUTE}/refresh-token`);
 
         const accessToken = response.data.accessToken;
-        if(accessToken){
+        if (accessToken) {
           store.dispatch(setAccessToken(accessToken));
         }
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        api.defaults.headers.common["Authorization"] =
-          `Bearer ${accessToken}`;
+        api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
         return api(originalRequest);
       } catch (Refresherror) {

@@ -1,10 +1,10 @@
-import User, { UserDocument } from "../../../models/user";
+import { User, UserDocument } from "../../../models/user";
 import { IUser, Role } from "../../../types/user";
 import { BaseRepository } from "../../IBaseRepository";
 import { IAuthRepository } from "../interface/IUserRepositories";
 
 export class AuthRepository
-  extends BaseRepository<UserDocument>
+  extends BaseRepository<IUser>
   implements IAuthRepository
 {
   constructor() {

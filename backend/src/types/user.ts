@@ -1,5 +1,3 @@
-import { Document, Types } from "mongoose";
-
 export type Role = "user" | "admin" | "garage" | "mechanic";
 
 export interface ResetTokenPayload {
@@ -12,7 +10,7 @@ export interface DecodedUser {
 }
 
 
-export interface IUser extends Document {
+export interface IUser {
   Id: string;
   name: string;
   email: string;

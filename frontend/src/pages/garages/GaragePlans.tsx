@@ -27,7 +27,7 @@ const GaragePlans = () => {
   const [paymentData, setPaymentData] = useState<IRetriveSessionData|null>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [hasActivePlan, setActivePlan] = useState<boolean>(false)
-  const mechanicsPerPage = 5;
+  const plansPerPage = 6;
 
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
@@ -50,7 +50,7 @@ const GaragePlans = () => {
       try {
         const response = await fetchAllPlansApi(
           currentPage,
-          mechanicsPerPage,
+          plansPerPage,
           searchQuery
         );
         console.log(response);
@@ -60,7 +60,7 @@ const GaragePlans = () => {
         console.error("Error from page:", error);
       }
     },
-    [mechanicsPerPage]
+    [plansPerPage]
   );
 
   const debouncedFetch = useMemo(

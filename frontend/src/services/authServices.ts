@@ -11,9 +11,7 @@ export const signUpApi = async (data: {
 }) => {
   try {
     const response = await api.post(`/${AUTH_BASE_ROUTE}/signup`, data);
-    const user = response.data;
-
-    return user;
+    return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
       console.error("SignUp Error:", error.response);
@@ -29,7 +27,6 @@ export const signUpApi = async (data: {
 export const loginApi = async (data: { email: string; password: string }) => {
   try {
     const response = await api.post(`/${AUTH_BASE_ROUTE}/login`, data);
-
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -109,7 +106,6 @@ export const resendOtpApi = async (data: { email: string, context: "register" | 
 export const resetPasswordApi = async (data: { email: string, password: string}) => {
   try {
     await api.post(`/${AUTH_BASE_ROUTE}/reset-password`, data);
-
     return { success: true, message: "Password reset successful. Please login with your new credentials." };
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -126,11 +122,9 @@ export const resetPasswordApi = async (data: { email: string, password: string})
 export const googleLoginApi = async (credentialResponse: any) => {
   try {
     const accessToken = credentialResponse.access_token;
-
     const res = await api.post(GOOGLE_CALLBACK_URL, {
       accessToken,
     });
-
     return res.data;
   } catch (error) {
     if (error instanceof AxiosError) {

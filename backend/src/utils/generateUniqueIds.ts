@@ -1,5 +1,5 @@
 export const generateCustomId = (
-  entity: "user" | "admin" | "garage" | "mechanic"
+  entity: "user" | "admin" | "garage" | "mechanic" | "transaction"
 ): string => {
   let customPart;
 
@@ -11,6 +11,8 @@ export const generateCustomId = (
     customPart = "GAR";
   } else if (entity === "mechanic") {
     customPart = "MEC";
+  } else if (entity === "transaction") {
+    customPart = "TXN";
   } else {
     throw new Error("Invalid entity type");
   }

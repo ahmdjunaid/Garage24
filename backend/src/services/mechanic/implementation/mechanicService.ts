@@ -112,7 +112,7 @@ export class MechanicService implements IMechanicService {
     });
 
     await this._mechanicRepository.register({
-      userId: user._id as string,
+      userId: user._id.toString(),
       garageId,
       name: user.name,
     });

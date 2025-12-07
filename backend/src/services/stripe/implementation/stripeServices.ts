@@ -4,7 +4,6 @@ import IStripeService from "../interface/IStripeService";
 import Stripe from "stripe";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
-import IGarageService from "../../garage/interface/IGarageService";
 import ISubscriptionService from "../../subscription/interface/ISubscriptionService";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { SUBSCRIPTION_ERROR } from "../../../constants/messages";
@@ -13,9 +12,7 @@ import { IRetriveSessionData } from "../../../types/subscription";
 @injectable()
 export class StripeService implements IStripeService {
   constructor(
-    @inject(TYPES.GarageService) private _garageService: IGarageService,
-    @inject(TYPES.SubscriptionService)
-    private _subscriptionService: ISubscriptionService
+    @inject(TYPES.SubscriptionService) private _subscriptionService: ISubscriptionService
   ) {}
 
   async createSubscribeSession(data: ICheckoutSession) {
@@ -37,13 +34,13 @@ export class StripeService implements IStripeService {
         metadata: {
           garageId,
           planId,
-          planName
+          planName,
         },
       },
       metadata: {
         garageId,
         planId,
-        planName
+        planName,
       },
       mode: "payment",
       success_url: `${process.env.CLIENT_URL}/garage/plans?payment=success&session_id={CHECKOUT_SESSION_ID}`,
@@ -59,17 +56,29 @@ export class StripeService implements IStripeService {
         const session = event.data.object as Stripe.Checkout.Session;
         const metadata = session.metadata;
 
-        if (!metadata?.garageId || !metadata?.planId) {
+        if (!metadata?.garageId || !metadata?.planId || !session.payment_intent) {
           throw { status: HttpStatus.BAD_REQUEST, message: SUBSCRIPTION_ERROR };
         }
 
         await this._subscriptionService.subscribePlan(
           metadata.garageId,
           metadata.planId,
-          session.id
+          session.id,
+          session.payment_intent.toString()
         );
         break;
       }
+
+      // case "payment_intent.succeeded": {
+      //   const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      //   console.log(paymentIntent,'**********')
+      //   await this._subscriptionService.updatePaymentStatus(
+      //     paymentIntent.id,
+      //     "paid"
+      //   );
+
+      //   break;
+      // }
 
       default:
         console.log(`Unhandled event type: ${event.type}`);
@@ -86,7 +95,9 @@ export class StripeService implements IStripeService {
     }
 
     const paymentIntent = session.payment_intent as Stripe.PaymentIntent;
-    const charge = await stripe.charges.retrieve(paymentIntent.latest_charge as string);
+    const charge = await stripe.charges.retrieve(
+      paymentIntent.latest_charge as string
+    );
 
     return {
       transactionId: paymentIntent.id || null,
@@ -97,7 +108,7 @@ export class StripeService implements IStripeService {
       date: paymentIntent.created
         ? new Date(paymentIntent.created * 1000)
         : new Date(),
-      receipt_url: charge.receipt_url || null
+      receipt_url: charge.receipt_url || null,
     };
   }
 }

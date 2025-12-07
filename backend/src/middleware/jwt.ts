@@ -97,7 +97,7 @@ const verifyJWT = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-  const verifyRefreshToken = (refreshToken: string): JwtPayload | null => {
+const verifyRefreshToken = (refreshToken: string): JwtPayload | null => {
   try {
     const decoded = jwt.verify(
       refreshToken,

@@ -17,14 +17,27 @@ export class SubscriptionRepository
       planId: new Types.ObjectId(SubscriptionData.planId),
       startDate: SubscriptionData.startDate,
       expiryDate: SubscriptionData.expiryDate,
-      transactionId: SubscriptionData.transactionId,
-      paymentHistory: SubscriptionData.paymentHistory
+      sessionId: SubscriptionData.sessionId,
+      paymentIntent: SubscriptionData.paymentIntent,
+      paymentStatus: SubscriptionData.paymentStatus
     };
 
     return await this.model.create(subscriptionToSave);
   }
 
-  async getSubscriptionByGarageId(garageId: string): Promise<ISubscription | null> {
-    return await this.getByFilter({garageId, expiryDate: { $gt: new Date() }})
+  async getSubscriptionByGarageId(
+    garageId: string
+  ): Promise<ISubscription | null> {
+    return await this.getByFilter({
+      garageId,
+      expiryDate: { $gt: new Date() },
+    });
+  }
+
+  async updateSubscriptionByPaymentIntent(
+    paymentIntent: string,
+    data: Partial<ISubscription>
+  ): Promise<ISubscription | null> {
+    return await this.updateOneByFilter({paymentIntent:paymentIntent}, data);
   }
 }

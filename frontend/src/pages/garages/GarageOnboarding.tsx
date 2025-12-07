@@ -7,6 +7,7 @@ import Spinner from "../../components/elements/Spinner";
 import { fetchGarageStatusApi } from "../../services/garageServices";
 import type { approvalStatus } from "../../types/GarageTypes";
 import { errorToast } from "../../utils/notificationAudio";
+import { useNavigate } from "react-router-dom";
 
 interface GarageStatus {
   hasGarage: boolean;
@@ -20,20 +21,21 @@ const GarageOnboarding = () => {
   const [loading, setLoading] = useState(true);
   const [showUnderReview, setShowUnderReview] = useState(false);
 
-  const fetchStatus = async () => {
-    setLoading(true);
-    try {
-      const data = await fetchGarageStatusApi();
-      setGarageStatus(data);
-    } catch (err) {
-      console.error("Error fetching garage status:", err);
-      errorToast("Failed to load garage status");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const navigate = useNavigate()
 
   useEffect(() => {
+    const fetchStatus = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchGarageStatusApi();
+        setGarageStatus(data);
+      } catch (err) {
+        console.error("Error fetching garage status:", err);
+        errorToast("Failed to load garage status");
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchStatus();
   }, [user]);
 
@@ -52,6 +54,11 @@ const GarageOnboarding = () => {
     (garageStatus?.hasGarage && garageStatus.approvalStatus === "pending")
   ) {
     return <UnderReview />;
+  }
+
+  if(garageStatus?.hasGarage && garageStatus.approvalStatus === "approved"){
+    navigate('/garage')
+    return
   }
 
   return <OnboardingForm handleSubmit={handleOnboardingSubmit} />;

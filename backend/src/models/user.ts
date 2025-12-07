@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, HydratedDocument } from "mongoose";
 import { IUser } from "../types/user";
 
 const userSchema = new Schema<IUser>(
@@ -22,6 +22,5 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-export type UserDocument = IUser & Document;
-const User = mongoose.model<UserDocument>("User", userSchema);
-export default User;
+export const User = mongoose.model<IUser>("User", userSchema);
+export type UserDocument = HydratedDocument<IUser>;

@@ -10,7 +10,8 @@ import { TYPES } from "../../../DI/types";
 @injectable()
 export class AdminController implements IAdminController {
   constructor(
-    @inject(TYPES.AdminService) private _adminService: IAdminService) {}
+    @inject(TYPES.AdminService) private _adminService: IAdminService
+  ) {}
 
   getAllGarages = async (req: Request, res: Response) => {
     try {

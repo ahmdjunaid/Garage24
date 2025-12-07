@@ -9,6 +9,7 @@ interface ConfirmModalProps {
   cancelText?: string;
   isOpen: boolean;
   onClose: () => void;
+  isReasonRequired?:boolean
 }
 
 export const ConfirmModal = ({
@@ -20,6 +21,7 @@ export const ConfirmModal = ({
   cancelText = "Cancel",
   isOpen,
   onClose,
+  isReasonRequired = false
 }: ConfirmModalProps) => {
   if (!isOpen) return null;
 
@@ -27,6 +29,13 @@ export const ConfirmModal = ({
     <DarkModal isOpen={isOpen} onClose={() => onClose()}>
       {title && <h2 className="text-center text-white/50 font-bold mb-3 mt-6">{title}</h2>}
       <p className="text-gray-700 dark:text-gray-300 mb-6">{message}</p>
+      {isReasonRequired &&
+      <>
+        <label className="mb-2">Reason: </label>
+        <textarea 
+          className="text-black dark:text-black mb-6 bg-white w-full" id=""></textarea>
+        </>
+      }
       <div className="flex justify-end gap-3">
         <button
           onClick={() => {

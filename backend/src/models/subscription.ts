@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { HydratedDocument, Schema, model } from "mongoose";
 import { ISubscription } from "../types/subscription";
 
 const subscriptionSchema = new Schema<ISubscription>(
@@ -21,23 +21,27 @@ const subscriptionSchema = new Schema<ISubscription>(
       type: Date,
       required: true,
     },
-    status: {
-      type: String,
-      enum: ["pending", "active", "expired", "cancelled"],
-    },
-    transactionId: {
+    sessionId: {
       type: String,
       default: null,
     },
-    paymentHistory:{
-        amount: { type: Number, required: true },
-        transactionId: { type: String, required: true },
-        date: { type: Date, default: Date.now },
-        status: { type: String, enum: ["success", "failed", "pending"] },
-        reason: { type: String, default: null },
-      },
+    paymentIntent: {
+      type: String,
+      default: null,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "active", "expired", "cancelled"],
+      default: "pending",
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid", "failed", 'refunded'],
+      default: "pending",
+    },
   },
   { timestamps: true }
 );
 
+export type SubscriptionDocument = HydratedDocument<ISubscription>;
 export default model<ISubscription>("Subscription", subscriptionSchema);

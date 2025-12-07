@@ -1,21 +1,15 @@
 import { Types } from "mongoose";
+import { PaymentStatus } from "./payments";
 
-export interface IPaymentHistory {
-  amount: number;
-  transactionId: string;
-  date: Date;
-  status: "success" | "failed" | "pending";
-  reason: string | null;
-}
-
-export interface ISubscription extends Document {
+export interface ISubscription {
   garageId: Types.ObjectId;
   planId: Types.ObjectId;
   startDate: Date;
   expiryDate: Date;
   status: "pending" | "active" | "expired" | "cancelled";
-  transactionId?: string;
-  paymentHistory: IPaymentHistory
+  paymentStatus: PaymentStatus;
+  sessionId: string;
+  paymentIntent: string;
 }
 
 export interface IRetriveSessionData {
