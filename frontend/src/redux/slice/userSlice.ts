@@ -33,6 +33,7 @@ const authSlice = createSlice({
         role: user.role,
         isBlocked: user.isBlocked,
         isDeleted: user.isDeleted,
+        imageUrl: user.imageUrl,
         isOnboardingRequired: user.isOnboardingRequired
       };
       state.token = token;

@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
-import logo from "../../assets/icons/Logo.png";
-import banner from "../../assets/banner/LoginBanner.jpg";
+import logo from "@assets/icons/Logo.png";
+import banner from "@assets/banner/LoginBanner.jpg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import Input from "../../components/elements/Input";
-import AuthButton from "../../components/elements/AuthButton";
-import passwordIcon from "../../assets/icons/password.svg";
-import emailIcon from "../../assets/icons/email.svg";
+import Input from "@components/elements/Input";
+import AuthButton from "@components/elements/AuthButton";
+import passwordIcon from "@assets/icons/password.svg";
+import emailIcon from "@assets/icons/email.svg";
 import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "../../redux/store/store";
-import { googleLoginApi, loginApi } from "../../services/authServices";
-import { login } from "../../redux/slice/userSlice";
-import type { Role } from "../../types/UserTypes";
-import { errorToast } from "../../utils/notificationAudio";
+import type { AppDispatch, RootState } from "@/redux/store/store";
+import { googleLoginApi, loginApi } from "@/services/authServices";
+import { login } from "@/redux/slice/userSlice";
+import type { Role } from "@/types/UserTypes";
+import { errorToast } from "@/utils/notificationAudio";
 import { useGoogleLogin } from "@react-oauth/google";
-import { emailRegex, passwordRegex } from "../../constants/commonRegex";
+import { emailRegex, passwordRegex } from "@/constants/commonRegex";
 
 const Login = () => {
   const [email, setEmail] = useState<string>("");

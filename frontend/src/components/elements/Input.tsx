@@ -1,6 +1,6 @@
 import { useState } from "react";
-import showPasswordIcon from "../../assets/icons/showpassword.svg";
-import hidePasswordIcon from "../../assets/icons/hidepassword.svg";
+import showPasswordIcon from "@assets/icons/showpassword.svg";
+import hidePasswordIcon from "@assets/icons/hidepassword.svg";
 
 type InputType = {
   placeholder: string;

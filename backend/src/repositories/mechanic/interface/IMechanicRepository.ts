@@ -19,4 +19,5 @@ export interface IMechanicRepository {
   getAllMechanics({ id ,page, limit, searchQuery }:GetPaginationQuery):Promise<GetMechanicResponse>;
   findOneAndDelete(filter:FilterQuery<IMechanic>):Promise<IMechanic | null>;
   findById(id: string): Promise<IMechanic | null>;
+  countDocuments( garageId:string ): Promise<number>;
 }

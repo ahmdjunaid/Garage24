@@ -14,11 +14,9 @@ import { ISubscription } from "../../../types/subscription";
 @injectable()
 export class GarageService implements IGarageService {
   constructor(
-    @inject(TYPES.GarageRepository)
-    private _garageRepository: IGarageRepository,
+    @inject(TYPES.GarageRepository) private _garageRepository: IGarageRepository,
     @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository,
-    @inject(TYPES.SubscriptionRepository)
-    private _subscriptionRepository: ISubscriptionRepository
+    @inject(TYPES.SubscriptionRepository) private _subscriptionRepository: ISubscriptionRepository
   ) {}
   async onboarding(
     name: string,

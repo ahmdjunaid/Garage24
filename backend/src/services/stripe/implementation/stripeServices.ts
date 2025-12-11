@@ -8,12 +8,14 @@ import ISubscriptionService from "../../subscription/interface/ISubscriptionServ
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { SUBSCRIPTION_ERROR } from "../../../constants/messages";
 import { IRetriveSessionData } from "../../../types/subscription";
+import IPaymentService from "../../payment/interface/IPaymentService";
+import { Types } from "mongoose";
 
 @injectable()
 export class StripeService implements IStripeService {
   constructor(
-    @inject(TYPES.SubscriptionService)
-    private _subscriptionService: ISubscriptionService
+    @inject(TYPES.SubscriptionService) private _subscriptionService: ISubscriptionService,
+    @inject(TYPES.PaymentService) private _paymentService: IPaymentService
   ) {}
 
   async createSubscribeSession(data: ICheckoutSession) {
@@ -75,14 +77,40 @@ export class StripeService implements IStripeService {
       }
 
       case "payment_intent.succeeded": {
-        const pi = event.data.object as Stripe.PaymentIntent;
-        await this._subscriptionService.upsertPaymentStatus(pi.id, "paid");
+        try {
+          const pi = event.data.object as Stripe.PaymentIntent;
+
+          await this._subscriptionService.upsertPaymentStatus(pi.id, "paid");
+
+          await this._paymentService.create({
+            userId: new Types.ObjectId(pi.metadata.garageId),
+            paymentIntentId: pi.id,
+            amount: pi.amount / 100,
+            BillType: "subscription",
+            provider: "stripe",
+            referenceId: new Types.ObjectId(pi.metadata.planId),
+            status: "paid",
+          });
+        } catch (error) {
+          console.error("ERROR inside payment_intent.succeeded:", error);
+        }
         break;
       }
 
       case "payment_intent.payment_failed": {
         const pi = event.data.object as Stripe.PaymentIntent;
-        await this._subscriptionService.upsertPaymentStatus(pi.id, "failed");
+
+        // await this._subscriptionService.upsertPaymentStatus(pi.id, "failed");
+
+        await this._paymentService.create({
+          userId: new Types.ObjectId(pi.metadata.garageId),
+          paymentIntentId: pi.id,
+          amount: pi.amount / 100,
+          BillType: "subscription",
+          provider: "stripe",
+          referenceId: new Types.ObjectId(pi.metadata.planId),
+          status: "failed",
+        });
         break;
       }
 
@@ -96,10 +124,10 @@ export class StripeService implements IStripeService {
           break;
         }
 
-        await this._subscriptionService.upsertPaymentStatus(
-          paymentIntentId.toString(),
-          "failed"
-        );
+        // await this._subscriptionService.upsertPaymentStatus(
+        //   paymentIntentId.toString(),
+        //   "failed"
+        // );
 
         break;
       }

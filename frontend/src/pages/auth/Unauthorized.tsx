@@ -1,6 +1,6 @@
 import { Lock, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import logo from "../../assets/icons/Logo.png";
+import logo from "@assets/icons/Logo.png";
 
 
 

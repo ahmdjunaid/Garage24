@@ -1,25 +1,31 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import UserRoutes from "./routes/UserRoutes";
 import GarageRoutes from "./routes/GarageRoutes";
 import AdminRoutes from "./routes/AdminRoutes";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import MechanicRoute from "./routes/MechanicRoutes";
-
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+import { useEffect, useState } from "react";
+import Spinner from "./components/elements/Spinner";
 
 function App() {
+  const location = useLocation();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 300);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
+
   return (
     <>
-      <GoogleOAuthProvider clientId={googleClientId}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/*" element={<UserRoutes />} />
-            <Route path="/garage/*" element={<GarageRoutes />} />
-            <Route path="/admin/*" element={<AdminRoutes />} />
-            <Route path="/mechanic/*" element={<MechanicRoute/>} />
-          </Routes>
-        </BrowserRouter>
-      </GoogleOAuthProvider>
+      {loading && <Spinner loading={loading}/>}
+
+      <Routes>
+        <Route path="/*" element={<UserRoutes />} />
+        <Route path="/garage/*" element={<GarageRoutes />} />
+        <Route path="/admin/*" element={<AdminRoutes />} />
+        <Route path="/mechanic/*" element={<MechanicRoute />} />
+      </Routes>
     </>
   );
 }

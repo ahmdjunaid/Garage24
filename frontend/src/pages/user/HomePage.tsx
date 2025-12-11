@@ -1,27 +1,47 @@
-import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { logout } from "../../redux/slice/userSlice";
-import { logoutApi } from "../../services/authServices";
+import { motion } from "framer-motion";
 
-const HomePage = () => {
-  const dispatch = useDispatch();
+import UserFooter from "@components/layouts/user/layout/UserFooter";
+import UserHeader from "@components/layouts/user/layout/UserHeader";
+import UserProcess from "@components/layouts/user/section/UserProcess";
+import Garage24Testimonials from "@components/layouts/user/section/UserTestimonials";
 
-  const handleLogout = async () => {
-    const result = await logoutApi();
-
-    if (result.success) {
-      dispatch(logout());
-    }
-  };
-
+export default function HomePage() {
   return (
-    <div>
-      <p>This is user home page</p>
-      <button className="bg-red-600 p-4" onClick={handleLogout}>
-        Logout
-      </button>
-    </div>
-  );
-};
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <UserHeader />
+      </motion.div>
 
-export default HomePage;
+      <motion.div
+        initial={{ opacity: 0, y: 60 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7 }}
+      >
+        <UserProcess />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 60 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7, delay: 0.1 }}
+      >
+        <Garage24Testimonials />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
+        <UserFooter />
+      </motion.div>
+    </>
+  );
+}

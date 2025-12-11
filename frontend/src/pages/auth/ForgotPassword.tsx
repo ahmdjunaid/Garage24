@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
-import logo from "../../assets/icons/Logo.png";
-import banner from "../../assets/banner/LoginBanner.jpg";
+import logo from "@assets/icons/Logo.png";
+import banner from "@assets/banner/LoginBanner.jpg";
 import { Link, useNavigate } from "react-router-dom";
-import Input from "../../components/elements/Input";
-import AuthButton from "../../components/elements/AuthButton";
-import emailIcon from "../../assets/icons/email.svg";
+import Input from "@components/elements/Input";
+import AuthButton from "@components/elements/AuthButton";
+import emailIcon from "@assets/icons/email.svg";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../../redux/store/store";
-import type { Role } from "../../types/UserTypes";
-import { forgotPasswordApi } from "../../services/authServices";
-import OtpModalLight from "../../components/modal/OtpModalLight";
-import ResetPassModal from "../../components/modal/ResetPassModal";
-import { emailRegex } from "../../constants/commonRegex";
-import Spinner from "../../components/elements/Spinner";
-import { setAccessToken } from "../../redux/slice/userSlice";
+import type { RootState } from "@/redux/store/store";
+import type { Role } from "@/types/UserTypes";
+import { forgotPasswordApi } from "@/services/authServices";
+import OtpModalLight from "@components/modal/OtpModalLight";
+import ResetPassModal from "@components/modal/ResetPassModal";
+import { emailRegex } from "@/constants/commonRegex";
+import Spinner from "@components/elements/Spinner";
+import { setAccessToken } from "@/redux/slice/userSlice";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState<string>("");

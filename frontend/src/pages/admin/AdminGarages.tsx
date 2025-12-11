@@ -1,23 +1,23 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import AdminSidebar from "../../components/layouts/AdminSidebar";
-import AdminHeader from "../../components/layouts/AdminHeader";
+import AdminSidebar from "@components/layouts/admin/AdminSidebar";
+import AdminHeader from "@components/layouts/admin/AdminHeader";
 import {
   fetchAllGaragesApi,
   toggleStatusApi,
-} from "../../services/adminServices";
-import profilePlaceholder from "../../assets/icons/profile-placeholder.jpg";
+} from "@/services/adminServices";
+import profilePlaceholder from "@assets/icons/profile-placeholder.jpg";
 import _ from "lodash";
 import type {
   IMappedGarageData,
-} from "../../types/GarageTypes";
-import { errorToast, successToast } from "../../utils/notificationAudio";
+} from "@/types/GarageTypes";
+import { errorToast, successToast } from "@/utils/notificationAudio";
 import AdminTable, {
   type TableColumn,
-} from "../../components/layouts/AdminTable";
-import { ConfirmModal } from "../../components/modal/ConfirmModal";
-import type { ActionPayload } from "../../types/CommonTypes";
-import GarageDetailsSection from "../../components/modal/GarageDetailsSection";
-import Pagination from "../../components/layouts/Pagination";
+} from "@components/layouts/admin/AdminTable";
+import { ConfirmModal } from "@components/modal/ConfirmModal";
+import type { ActionPayload } from "@/types/CommonTypes";
+import GarageDetailsSection from "@components/modal/GarageDetailsSection";
+import Pagination from "@components/layouts/admin/Pagination";
 
 const AdminGarages = () => {
   const [garages, setGarages] = useState<IMappedGarageData[]>([]);

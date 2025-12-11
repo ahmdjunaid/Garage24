@@ -13,7 +13,6 @@ export type BillType =
 export interface IPayment {
   transactionId: string;
   provider: "stripe";
-  sessionId: string;
   paymentIntentId: string;
 
   userId: Types.ObjectId;

@@ -15,8 +15,8 @@ const UserRoutes: React.FC = () => {
       <Route path="/signup" element={<SignUp role={'user'}/>} />
       <Route path="/forgot-password" element={<ForgotPassword/>} />
       <Route path="/unauthorized" element={<UnauthorizedPage/>} />
-      <Route element={<ProtectedRoute requiredRoles={["user"]} />}>
         <Route path="/" element={<HomePage />} />
+      <Route element={<ProtectedRoute requiredRoles={["user"]} />}>
         <Route path="*" element={<PageNotFound/>}/>
       </Route>
     </Routes>

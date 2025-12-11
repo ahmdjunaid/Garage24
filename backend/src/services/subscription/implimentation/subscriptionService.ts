@@ -59,7 +59,7 @@ export class SubscriptionService implements ISubscriptionService {
   ) {
     const updatedSubscription =
       await this._subscriptionRepository.upsertSubscriptionByPaymentIntent(
-        paymentIntent,
+        { paymentIntent },
         { paymentStatus }
       );
     if (!updatedSubscription) {

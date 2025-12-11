@@ -1,20 +1,22 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import React, { useEffect, useState } from "react";
-import logo from "../../assets/icons/Logo.png";
-import AuthButton from "../elements/AuthButton";
-import type { ILocation, User } from "../../types/UserTypes";
-import type { RootState } from "../../redux/store/store";
+import logo from "@assets/icons/Logo.png";
+import AuthButton from "@components/elements/AuthButton";
+import type { ILocation, User } from "@/types/UserTypes";
+import type { RootState } from "@/redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { validateTime } from "../../utils/validateTime";
-import { fetchAddressApi, onboardingApi } from "../../services/garageServices";
-import { errorToast, successToast } from "../../utils/notificationAudio";
-import { daysOfWeek, getTimeOptions } from "../../constants/constantDatas";
+import { validateTime } from "@/utils/validateTime";
+import { fetchAddressApi, onboardingApi } from "@/services/garageServices";
+import { errorToast, successToast } from "@/utils/notificationAudio";
+import { daysOfWeek, getTimeOptions } from "@/constants/constantDatas";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import { login } from "../../redux/slice/userSlice";
-import { mobileRegex } from "../../constants/commonRegex";
-import ImageUploader from "./ImageUploader";
-import { ConfirmModalLight } from "../modal/ConfirmModalLight";
+import { login } from "@/redux/slice/userSlice";
+import { mobileRegex } from "@/constants/commonRegex";
+import ImageUploader from "@components/garage/ImageUploader";
+import { ConfirmModalLight } from "@components/modal/ConfirmModalLight";
+import MapAutoCenter from "../elements/MapAutoCenter";
+import { Locate } from "lucide-react"
 
 const markerIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
@@ -168,6 +170,18 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
     else setIsRSAEnabled(null);
   };
 
+  const handleGetLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setLocation({ lat: latitude, lng: longitude });
+      },
+      (err) => {
+        console.error("Error getting location", err);
+      }
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6 md:p-10">
       <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-lg p-8 md:p-12 space-y-10">
@@ -305,17 +319,37 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Location
               </label>
-              <div className="border-2 border-transparent focus-within:border-red-600 rounded-xl overflow-hidden">
+              {/* Button */}
+              <button
+                onClick={handleGetLocation}
+                className="
+                  flex items-center gap-2
+                  bg-blue-600 hover:bg-white 
+                  text-white hover:text-blue-600 px-4 py-2.5 
+                  rounded-lg shadow my-2
+                  transition-all duration-200
+                  "
+              >
+                <Locate size={18} />
+              </button>
+
+              {/* Map */}
+              <div className="rounded-xl overflow-hidden border border-gray-700 shadow-lg">
                 <MapContainer
                   center={[location?.lat || 11.303, location?.lng || 75.78]}
                   zoom={13}
-                  style={{ height: "300px", width: "100%" }}
+                  style={{ height: "350px", width: "100%" }}
+                  className="z-0"
                 >
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/">OSM</a>'
                   />
+
                   <LocationPicker />
+
+                  <MapAutoCenter lat={location?.lat} lng={location?.lng} />
+
                   {location && <Marker position={location} icon={markerIcon} />}
                 </MapContainer>
               </div>

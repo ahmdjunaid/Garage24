@@ -1,5 +1,5 @@
 import React from "react";
-import whiteLogo from '../../assets/icons/logo-white.png'
+import whiteLogo from '@assets/icons/logo-white.png'
 
 interface ModalProps {
   isOpen: boolean;

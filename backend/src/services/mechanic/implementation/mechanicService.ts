@@ -92,7 +92,7 @@ export class MechanicService implements IMechanicService {
       throw { status: HttpStatus.BAD_REQUEST, message: EMAIL_ALREADY_EXIST };
     }
 
-    const noOfMechanics = await this._authRepository.countDocuments('mechanic')
+    const noOfMechanics = await this._mechanicRepository.countDocuments('mechanic')
     if(noOfMechanics >= allowedMechanics){
       throw {
         status:HttpStatus.BAD_REQUEST, 
@@ -141,8 +141,9 @@ export class MechanicService implements IMechanicService {
       isBlocked: action === "block" ? true : false,
     };
     const response = await this._authRepository.findByIdAndUpdate(userId, data);
+    const mechResponse = await this._mechanicRepository.findOneAndUpdate(userId, data);
 
-    if (!response) {
+    if (!response || !mechResponse) {
       throw {
         status: HttpStatus.BAD_REQUEST,
         message: USER_STATUS_UPDATE_FAILED,

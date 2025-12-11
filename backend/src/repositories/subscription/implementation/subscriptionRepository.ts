@@ -12,18 +12,27 @@ export class SubscriptionRepository
     super(subscription);
   }
   async upsertSubscription(data: Partial<ISubscription>) {
-    const subscriptionToSave = {
-      garageId: new Types.ObjectId(data.garageId),
-      planId: new Types.ObjectId(data.planId),
-      startDate: data.startDate,
-      expiryDate: data.expiryDate,
-      sessionId: data.sessionId,
+    if (!data.paymentIntent) {
+      throw new Error("paymentIntent is required");
+    }
+
+    const update = {
+      $set: {
+        startDate: data.startDate,
+        expiryDate: data.expiryDate,
+        sessionId: data.sessionId,
+        garageId: new Types.ObjectId(data.garageId!),
+        planId: new Types.ObjectId(data.planId!),
+      },
     };
 
     return await this.model.findOneAndUpdate(
       { paymentIntent: data.paymentIntent },
-      subscriptionToSave,
-      { upsert: true }
+      update,
+      {
+        upsert: true,
+        new: true,
+      }
     );
   }
 
@@ -37,11 +46,21 @@ export class SubscriptionRepository
   }
 
   async upsertSubscriptionByPaymentIntent(
-    paymentIntent: string,
+    paymentIntent: Partial<ISubscription>,
     data: Partial<ISubscription>
   ): Promise<ISubscription | null> {
-    return await this.model.findOneAndUpdate({ paymentIntent }, data, {
-      upsert: true,
-    });
+    return await this.model.findOneAndUpdate(
+      paymentIntent,
+      {
+        $set: data,
+        $setOnInsert: {
+          createdAt: new Date(),
+        },
+      },
+      {
+        upsert: true,
+        new: true,
+      }
+    );
   }
 }

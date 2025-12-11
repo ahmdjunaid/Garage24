@@ -8,6 +8,7 @@ export interface IMechanic {
   imageUrl: string;
   mobileNumber: string;
   isDeleted: boolean;
+  isBlocked: boolean;
 }
 
 export interface GetMechanicResponse{

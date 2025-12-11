@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import type { RootState } from "../../redux/store/store";
-import UnderReview from "../../components/garage/UnderReview";
-import OnboardingForm from "../../components/garage/OnboardingForm";
-import Spinner from "../../components/elements/Spinner";
-import { fetchGarageStatusApi } from "../../services/garageServices";
-import type { approvalStatus } from "../../types/GarageTypes";
-import { errorToast } from "../../utils/notificationAudio";
+import type { RootState } from "@/redux/store/store";
+import UnderReview from "@components/garage/UnderReview";
+import OnboardingForm from "@components/garage/OnboardingForm";
+import Spinner from "@components/elements/Spinner";
+import { fetchGarageStatusApi } from "@/services/garageServices";
+import type { approvalStatus } from "@/types/GarageTypes";
+import { errorToast } from "@/utils/notificationAudio";
 import { useNavigate } from "react-router-dom";
 
 interface GarageStatus {

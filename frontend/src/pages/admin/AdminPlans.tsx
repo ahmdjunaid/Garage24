@@ -1,22 +1,22 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import AdminSidebar from "../../components/layouts/AdminSidebar";
+import AdminSidebar from "@components/layouts/admin/AdminSidebar";
 import AdminTable, {
   type TableColumn,
-} from "../../components/layouts/AdminTable";
-import AdminHeader from "../../components/layouts/AdminHeader";
+} from "@components/layouts/admin/AdminTable";
+import AdminHeader from "@components/layouts/admin/AdminHeader";
 import _ from "lodash";
-import { ConfirmModal } from "../../components/modal/ConfirmModal";
-import type { ActionPayload } from "../../types/CommonTypes";
-import AddPlans from "../../components/modal/AddPlans";
-import type { IPlan } from "../../types/PlanTypes";
+import { ConfirmModal } from "@components/modal/ConfirmModal";
+import type { ActionPayload } from "@/types/CommonTypes";
+import AddPlans from "@components/modal/AddPlans";
+import type { IPlan } from "@/types/PlanTypes";
 import {
   deletePlansApi,
   fetchAllPlansApi,
   togglePlanStatusApi,
-} from "../../services/adminServices";
-import Pagination from "../../components/layouts/Pagination";
-import { errorToast, successToast } from "../../utils/notificationAudio";
-import EditPlans from "../../components/modal/EditPlans";
+} from "@/services/adminServices";
+import Pagination from "@components/layouts/admin/Pagination";
+import { errorToast, successToast } from "@/utils/notificationAudio";
+import EditPlans from "@components/modal/EditPlans";
 
 const AdminPlans = () => {
   const [plans, setPlans] = useState<IPlan[]>([]);

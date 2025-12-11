@@ -15,6 +15,7 @@ export interface User {
   role?: Role;
   isBlocked: boolean;
   isDeleted: boolean;
+  imageUrl?: string;
   isOnboardingRequired: boolean;
 }
 

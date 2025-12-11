@@ -6,3 +6,9 @@
     --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
   }
 }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+}

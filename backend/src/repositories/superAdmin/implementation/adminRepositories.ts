@@ -1,6 +1,6 @@
 import { IPopulatedGarage } from "../../../types/garage";
 import { GetPaginationQuery } from "../../../types/common";
-import User from "../../../models/user";
+import { User } from "../../../models/user";
 import { Garage } from "../../../models/garage";
 import { IAdminRepository } from "../interface/IAdminRepository";
 import { GetUserResponse, IUser } from "../../../types/user";

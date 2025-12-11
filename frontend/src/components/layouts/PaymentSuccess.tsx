@@ -1,7 +1,7 @@
 import { CheckCircle2 } from "lucide-react";
 import type React from "react";
 import { Link } from "react-router-dom";
-import type { IRetriveSessionData } from "../../types/PlanTypes";
+import type { IRetriveSessionData } from "@/types/PlanTypes";
 
 interface paymentProps {
     paymentData: IRetriveSessionData | null;

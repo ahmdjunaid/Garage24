@@ -3,7 +3,7 @@ import { TYPES } from "../../../DI/types";
 import IPaymentService from "../interface/IPaymentService";
 import { IPaymentRepository } from "../../../repositories/payment/interface/IPaymentRepositories";
 import { generateCustomId } from "../../../utils/generateUniqueIds";
-import { BillType } from "../../../types/payments";
+import { BillType, PaymentStatus } from "../../../types/payments";
 import { Types } from "mongoose";
 
 @injectable()
@@ -14,11 +14,12 @@ export class PaymentService implements IPaymentService {
   ) {}
   async create(data: {
     userId: Types.ObjectId;
-    sessionId: string;
     paymentIntentId: string;
+    provider: "stripe";
     BillType: BillType;
     referenceId: Types.ObjectId;
     amount: number;
+    status: PaymentStatus;
   }) {
     const transactionId = generateCustomId("transaction");
     await this._paymentRepository.create({...data,transactionId});

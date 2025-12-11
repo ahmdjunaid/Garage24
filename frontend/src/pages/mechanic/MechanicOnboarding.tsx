@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
-import logo from "../../assets/icons/Logo.png";
+import logo from "@assets/icons/Logo.png";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../../redux/store/store";
-import { errorToast, successToast } from "../../utils/notificationAudio";
-import { onboardingMechanicApi } from "../../services/mechanicServices";
+import type { RootState } from "@/redux/store/store";
+import { errorToast, successToast } from "@/utils/notificationAudio";
+import { onboardingMechanicApi } from "@/services/mechanicServices";
 import { useNavigate } from "react-router-dom";
-import { mobileRegex, passwordRegex } from "../../constants/commonRegex";
-import { login } from "../../redux/slice/userSlice";
-import type { User } from "../../types/UserTypes";
+import { mobileRegex, passwordRegex } from "@/constants/commonRegex";
+import { login } from "@/redux/slice/userSlice";
+import type { User } from "@/types/UserTypes";
 
 const MechanicOnboarding = () => {
   const [oneTimePassword, setOneTimePassword] = useState<string>("");

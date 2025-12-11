@@ -38,10 +38,12 @@ export class MechanicRepository
     const searchFilter = {
       garageId: id,
       ...(searchQuery && { name: { $regex: searchQuery, $options: "i" } }),
-      isDeleted: false
+      isDeleted: false,
+      isBlocked: false
     };
 
-    const mechanics = await this.model.find(searchFilter)
+    const mechanics = await this.model
+      .find(searchFilter)
       .populate("userId")
       .skip(skip)
       .limit(limit)
@@ -60,6 +62,14 @@ export class MechanicRepository
   }
 
   async findById(id: string): Promise<IMechanic | null> {
-      return await this.findById(id)
+    return await this.findById(id);
+  }
+
+  async countDocuments(garageId: string) {
+    return await this.model.countDocuments({
+      garageId,
+      isDeleted: false,
+      isBlocked: false
+    });
   }
 }

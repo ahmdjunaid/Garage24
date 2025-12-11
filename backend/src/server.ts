@@ -24,12 +24,10 @@ app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());
 
 
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "http://13.204.5.195:5173"],
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 
 app.use("/api/auth", authRouter);
 app.use("/api/garage", garageRouter);

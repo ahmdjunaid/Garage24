@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import AdminSidebar from "../../components/layouts/AdminSidebar";
-import AdminHeader from "../../components/layouts/AdminHeader";
-import { fetchAllUsersApi, toggleStatusApi } from "../../services/adminServices";
-import profilePlaceholder from "../../assets/icons/profile-placeholder.jpg";
+import AdminSidebar from "@components/layouts/admin/AdminSidebar";
+import AdminHeader from "@components/layouts/admin/AdminHeader";
+import { fetchAllUsersApi, toggleStatusApi } from "@/services/adminServices";
+import profilePlaceholder from "@assets/icons/profile-placeholder.jpg";
 import _ from "lodash";
-import type { IUsersMappedData } from "../../types/UserTypes";
-import { errorToast, successToast } from "../../utils/notificationAudio";
-import type { TableColumn } from "../../components/layouts/AdminTable";
-import AdminTable from "../../components/layouts/AdminTable";
-import type { ActionPayload } from "../../types/CommonTypes";
-import { ConfirmModal } from "../../components/modal/ConfirmModal";
-import Pagination from "../../components/layouts/Pagination";
+import type { IUsersMappedData } from "@/types/UserTypes";
+import { errorToast, successToast } from "@/utils/notificationAudio";
+import type { TableColumn } from "@components/layouts/admin/AdminTable";
+import AdminTable from "@components/layouts/admin/AdminTable";
+import type { ActionPayload } from "@/types/CommonTypes";
+import { ConfirmModal } from "@components/modal/ConfirmModal";
+import Pagination from "@components/layouts/admin/Pagination";
 
 const AdminUser = () => {
   const [users, setUsers] = useState<IUsersMappedData[]>([]);

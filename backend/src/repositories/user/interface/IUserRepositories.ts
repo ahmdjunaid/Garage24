@@ -19,6 +19,5 @@ export interface IAuthRepository {
   findById(id: string): Promise<UserDocument | null>;
   findOneAndUpdate( userId: string, data: Partial<IUser>): Promise<UserDocument | null>;
   findByIdAndDelete( userId:string ): Promise< UserDocument | null >;
-  findByIdAndUpdate( userId: string, data: Partial<IUser>): Promise< UserDocument | null >;
-  countDocuments( role:string ): Promise<number>;
+  findByIdAndUpdate( userId: string, data: Partial<IUser>): Promise<UserDocument | null>;
 }

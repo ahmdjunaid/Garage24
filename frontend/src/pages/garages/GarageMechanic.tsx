@@ -1,24 +1,24 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import AdminSidebar from "../../components/layouts/AdminSidebar";
+import AdminSidebar from "@components/layouts/admin/AdminSidebar";
 import AdminTable, {
   type TableColumn,
-} from "../../components/layouts/AdminTable";
-import { errorToast, successToast } from "../../utils/notificationAudio";
+} from "@components/layouts/admin/AdminTable";
+import { errorToast, successToast } from "@/utils/notificationAudio";
 import {
   deleteMechanic,
   fetchMechanicsApi,
   resendInvitation,
   toggleUserStatusApi,
-} from "../../services/garageServices";
-import AdminHeader from "../../components/layouts/AdminHeader";
+} from "@/services/garageServices";
+import AdminHeader from "@components/layouts/admin/AdminHeader";
 import _ from "lodash";
-import type { IMechanic } from "../../types/MechanicTypes";
-import RegisterMechanic from "../../components/modal/RegisterMechanic";
-import { ConfirmModal } from "../../components/modal/ConfirmModal";
-import type { ActionPayload } from "../../types/CommonTypes";
-import profilePlaceholder from "../../assets/icons/profile-placeholder.jpg";
-import Spinner from "../../components/elements/Spinner";
-import Pagination from "../../components/layouts/Pagination";
+import type { IMechanic } from "@/types/MechanicTypes";
+import RegisterMechanic from "@components/modal/RegisterMechanic";
+import { ConfirmModal } from "@components/modal/ConfirmModal";
+import type { ActionPayload } from "@/types/CommonTypes";
+import profilePlaceholder from "@assets/icons/profile-placeholder.jpg";
+import Spinner from "@components/elements/Spinner";
+import Pagination from "@components/layouts/admin/Pagination";
 
 const GarageMechanic = () => {
   const [mechanics, setMechanics] = useState<IMechanic[]>([]);

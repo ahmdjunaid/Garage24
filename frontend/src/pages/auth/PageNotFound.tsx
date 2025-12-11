@@ -1,7 +1,7 @@
 import React from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/icons/Logo.png";
+import logo from "@assets/icons/Logo.png";
 
 export default function PageNotFound() {
   const navigate = useNavigate();

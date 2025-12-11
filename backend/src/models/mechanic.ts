@@ -10,6 +10,7 @@ const mechanicSchema = new Schema<IMechanic>(
     imageUrl: { type: String },
     mobileNumber: { type: String },
     isDeleted: { type: Boolean, default: false },
+    isBlocked: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
