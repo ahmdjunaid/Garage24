@@ -44,6 +44,16 @@ import { IPaymentRepository } from "../repositories/payment/interface/IPaymentRe
 import { paymentRepository } from "../repositories/payment/implimentation/paymentRepositories";
 import IPaymentService from "../services/payment/interface/IPaymentService";
 import { PaymentService } from "../services/payment/implimentation/paymentService";
+import IServiceController from "../controllers/service/interface/IServiceController";
+import { ServiceController } from "../controllers/service/implementation/serviceController";
+import IServiceService from "../services/service/interface/IServiceService";
+import { ServiceService } from "../services/service/implementation/serviceService";
+import { IServiceRepository } from "../repositories/service/interface/IServiceRepository";
+import { ServiceRepository } from "../repositories/service/implementation/serviceRepositories";
+import { IVehicleRepository } from "../repositories/vehicle/interface/IVehicleRepository";
+import { VehicleRepository } from "../repositories/vehicle/implementation/vehicleRepositories";
+import { VehicleService } from "../services/vehicle/implimentation/vehicleService";
+import IVehicleService from "../services/vehicle/interface/IVehicleService";
 
 const container = new Container();
 
@@ -54,7 +64,9 @@ container.bind<IGarageRepository>(TYPES.GarageRepository).to(GarageRepository);
 container.bind<IMechanicRepository>(TYPES.MechanicRepository).to(MechanicRepository);
 container.bind<ISubscriptionRepository>(TYPES.SubscriptionRepository).to(SubscriptionRepository);
 container.bind<IPlanRepository>(TYPES.PlanRepository).to(PlanRepository);
-container.bind<IPaymentRepository>(TYPES.paymentRepository).to(paymentRepository);
+container.bind<IPaymentRepository>(TYPES.PaymentRepository).to(paymentRepository);
+container.bind<IServiceRepository>(TYPES.ServiceRepository).to(ServiceRepository);
+container.bind<IVehicleRepository>(TYPES.VehicleRepository).to(VehicleRepository)
 
 // Services
 container.bind<IAuthService>(TYPES.AuthService).to(AuthService);
@@ -64,7 +76,9 @@ container.bind<IMechanicService>(TYPES.MechanicService).to(MechanicService);
 container.bind<IStripeService>(TYPES.StripeService).to(StripeService);
 container.bind<ISubscriptionService>(TYPES.SubscriptionService).to(SubscriptionService);
 container.bind<IPlanService>(TYPES.PlanService).to(PlanService);
-container.bind<IPaymentService>(TYPES.PaymentService).to(PaymentService)
+container.bind<IPaymentService>(TYPES.PaymentService).to(PaymentService);
+container.bind<IServiceService>(TYPES.ServiceService).to(ServiceService);
+container.bind<IVehicleService>(TYPES.VehicleService).to(VehicleService)
 
 // Controllers
 container.bind<IAuthController>(TYPES.AuthController).to(Authcontroller);
@@ -72,6 +86,7 @@ container.bind<IAdminController>(TYPES.AdminController).to(AdminController);
 container.bind<IGarageController>(TYPES.GarageController).to(GarageController);
 container.bind<IMechanicController>(TYPES.MechanicController).to(MechanicController);
 container.bind<IStripeController>(TYPES.StripeController).to(StripeController);
-container.bind<IPlanController>(TYPES.PlanController).to(PlanController)
+container.bind<IPlanController>(TYPES.PlanController).to(PlanController);
+container.bind<IServiceController>(TYPES.ServiceController).to(ServiceController);
 
 export { container };

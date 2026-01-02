@@ -56,3 +56,13 @@ export const PAYMENT_DETAILS_ERROR="Error while retriving payment details, try a
 
 //Common
 export const ERROR_WHILE_FETCH_DATA = "Error while fetching data."
+
+//services
+export const SERVICE_ALREADY_EXIST="Service already exist"
+export const SERVICE_CREATED_SUCCESS="Service created successful."
+export const SERVICE_DOESNT_EXIST="Service does't exist."
+
+//vehicle
+export const VEHICLE_ALREADY_EXIST="Vehicle already exist in your Garage."
+export const ERROR_WHILE_CREATING_VEHICLE="Error while creating vehicle"
+export const VEHICLE_CREATED_SUCCESS="Vehicle created successful"

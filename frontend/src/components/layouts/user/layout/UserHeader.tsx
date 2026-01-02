@@ -5,10 +5,17 @@ import type { RootState } from "@/redux/store/store";
 import { logoutApi } from "@/services/authServices";
 import { logout } from "@/redux/slice/userSlice";
 import userBanner from "@assets/banner/userMainbBanner.jpg";
-import logo from "@assets/icons/Logo.png";
+import blackLogo from "@assets/icons/Logo.png";
+import whiteLogo from "@assets/icons/logo-white.png";
 import { Link } from "react-router-dom";
 
-export default function UserHeader() {
+interface HeaderProps {
+  showCta?: boolean;
+  ctaSize?: "full" | "half";
+  handleAppointmentClick?: ()=> void
+}
+
+const UserHeader = ({ showCta = false, ctaSize = "half", handleAppointmentClick}: HeaderProps) => {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
@@ -23,7 +30,11 @@ export default function UserHeader() {
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
+    <div
+      className={`relative w-full overflow-hidden ${
+        ctaSize === "full" ? "min-h-screen" : "min-h-[20vh]"
+      }`}
+    >
       {/* Background Image */}
       <div className="absolute inset-0">
         <img src={userBanner} alt="" className="w-full h-full object-cover" />
@@ -31,23 +42,22 @@ export default function UserHeader() {
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 min-h-screen flex flex-col">
+      <div
+        className={`relative z-10 ${ctaSize === "full" ? "min-h-screen" : "min-h-[20vh]"} flex flex-col`}
+      >
         {/* NAVBAR */}
         <nav className="grid grid-cols-3 items-center px-4 sm:px-8 lg:px-16 py-4 lg:py-6 gap-4">
-
-          
           {/* LEFT MENU (Desktop + Mobile) */}
           <div className="flex items-center text-white justify-start gap-4">
-
             {/* Desktop Menu */}
             <div className="hidden lg:flex items-center space-x-8">
-              <a href="#home" className="text-base hover:text-gray-300">
+              <Link to="/" className="text-base hover:text-gray-300">
                 Home
-              </a>
+              </Link>
 
-              <a href="#garage" className="text-base hover:text-gray-300">
+              <Link to="/my-garage" className="text-base hover:text-gray-300">
                 My Garage
-              </a>
+              </Link>
 
               {/* More Dropdown */}
               <div className="relative">
@@ -61,19 +71,34 @@ export default function UserHeader() {
 
                 {showMoreMenu && (
                   <div className="absolute top-full left-0 mt-2 w-44 bg-white text-gray-800 rounded shadow-lg py-2 z-50">
-                    <a href="#profile" className="block px-4 py-2 hover:bg-gray-100">
+                    <a
+                      href="#profile"
+                      className="block px-4 py-2 hover:bg-gray-100"
+                    >
                       Profile
                     </a>
-                    <a href="#profile" className="block px-4 py-2 hover:bg-gray-100">
+                    <a
+                      href="#profile"
+                      className="block px-4 py-2 hover:bg-gray-100"
+                    >
                       Appointments
                     </a>
-                    <a href="#services" className="block px-4 py-2 hover:bg-gray-100">
+                    <a
+                      href="#services"
+                      className="block px-4 py-2 hover:bg-gray-100"
+                    >
                       Services
                     </a>
-                    <a href="#about" className="block px-4 py-2 hover:bg-gray-100">
+                    <a
+                      href="#about"
+                      className="block px-4 py-2 hover:bg-gray-100"
+                    >
                       About
                     </a>
-                    <a href="#contact" className="block px-4 py-2 hover:bg-gray-100">
+                    <a
+                      href="#contact"
+                      className="block px-4 py-2 hover:bg-gray-100"
+                    >
                       Contact
                     </a>
                   </div>
@@ -94,7 +119,7 @@ export default function UserHeader() {
           <div className="flex items-center justify-start lg:justify-center">
             <img
               className="w-36 sm:w-44 lg:w-56 h-auto"
-              src={logo}
+              src={ ctaSize==="full" ? blackLogo : whiteLogo}
               alt="Garage24 Logo"
             />
           </div>
@@ -124,17 +149,17 @@ export default function UserHeader() {
         {/* MOBILE MENU DROPDOWN */}
         {showMobileMenu && (
           <div className="lg:hidden mx-5 w-50 bg-black/50 text-white px-6 py-4 space-y-4">
-            <a href="#home" className="block hover:text-gray-300">
+            <Link to="/" className="block hover:text-gray-300">
               Home
-            </a>
+            </Link>
 
             <a href="#profile" className="block hover:text-gray-300">
               Profile
             </a>
 
-            <a href="#garage" className="block hover:text-gray-300">
+            <Link to="/my-garage" className="block hover:text-gray-300">
               My Garage
-            </a>
+            </Link>
 
             <a href="#garage" className="block hover:text-gray-300">
               My Appointments
@@ -155,41 +180,46 @@ export default function UserHeader() {
         )}
 
         {/* HERO SECTION */}
-        <div className="flex-1 flex items-center px-4 sm:px-8 lg:px-16">
-          <div className="max-w-7xl w-full mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center text-center lg:text-left">
+        {showCta && (
+          <div className="flex-1 flex items-center px-4 sm:px-8 lg:px-16">
+            <div className="max-w-7xl w-full mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center text-center lg:text-left">
+                {/* Left Side - Hero Text */}
+                <div>
+                  <h1
+                    className="text-white text-3xl sm:text-4xl lg:text-6xl xl:text-7xl
+                  font-bold leading-tight mb-6 sm:mb-8"
+                  >
+                    Drive Confidently with{" "}
+                    <span className="text-red-500">GARAGE24</span>
+                  </h1>
 
-              {/* Left Side - Hero Text */}
-              <div>
-                <h1 className="text-white text-3xl sm:text-4xl lg:text-6xl xl:text-7xl
-                  font-bold leading-tight mb-6 sm:mb-8">
-                  Drive Confidently with{" "}
-                  <span className="text-red-500">GARAGE24</span>
-                </h1>
-
-                <button
-                  className="bg-red-500 hover:bg-red-600 text-white
+                  <button
+                    className="bg-red-500 hover:bg-red-600 text-white
                   px-6 sm:px-8 py-3 sm:py-3.5 rounded-md font-medium text-base sm:text-lg"
-                >
-                  Appointment Now
-                </button>
-              </div>
+                  onClick={()=>handleAppointmentClick?.()}
+                  >
+                    Appointment Now
+                  </button>
+                </div>
 
-              {/* Right Side - Description */}
-              <div className="lg:ml-auto lg:max-w-md">
-                <div className="p-4 sm:p-6 lg:p-8 rounded-lg">
-                  <p className="text-white text-base sm:text-lg leading-relaxed">
-                    Your car deserves the best care, and we deliver it with
-                    precision, speed, and reliability. Book your appointment
-                    today!
-                  </p>
+                {/* Right Side - Description */}
+                <div className="lg:ml-auto lg:max-w-md">
+                  <div className="p-4 sm:p-6 lg:p-8 rounded-lg">
+                    <p className="text-white text-base sm:text-lg leading-relaxed">
+                      Your car deserves the best care, and we deliver it with
+                      precision, speed, and reliability. Book your appointment
+                      today!
+                    </p>
+                  </div>
                 </div>
               </div>
-
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
-}
+};
+
+export default UserHeader;

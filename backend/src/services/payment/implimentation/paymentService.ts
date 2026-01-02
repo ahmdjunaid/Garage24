@@ -9,7 +9,7 @@ import { Types } from "mongoose";
 @injectable()
 export class PaymentService implements IPaymentService {
   constructor(
-    @inject(TYPES.paymentRepository)
+    @inject(TYPES.PaymentRepository)
     private _paymentRepository: IPaymentRepository
   ) {}
   async create(data: {

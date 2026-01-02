@@ -23,7 +23,7 @@ export default function UserFooter() {
           <div className="space-y-4 text-xs sm:text-sm">
             <div className="flex items-center gap-3 justify-center sm:justify-start">
               <MapPin size={16} className="text-red-500" />
-              <p>20/316 Cholayil, Koduvally</p>
+              <p>HO: 31/216-Cholayil, Koduvally</p>
             </div>
 
             <div className="flex items-center gap-3 justify-center sm:justify-start">

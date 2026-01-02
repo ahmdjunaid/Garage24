@@ -1,206 +1,72 @@
-import { AxiosError } from "axios";
 import api from "./api";
 import { ADMIN_BASE_ROUTE } from "../constants/apiRoutes";
 import type { PlanData } from "../components/modal/AddPlans";
 import type { IPlan } from "../types/PlanTypes";
 
-export const fetchAllUsersApi = async (
-  page = 1,
-  limit = 5,
-  searchQuery = ""
-) => {
-  try {
-    const response = await api.get(
+export const fetchAllUsersApi = (page = 1, limit = 5, searchQuery = "") => {
+  return api
+    .get(
       `/${ADMIN_BASE_ROUTE}/users?page=${page}&limit=${limit}&searchQuery=${searchQuery}`
-    );
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Error while fetching users:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+    )
+    .then((res) => res.data);
 };
 
-export const fetchAllGaragesApi = async (
-  page = 1,
-  limit = 5,
-  searchQuery = ""
-) => {
-  try {
-    const response = await api.get(
+export const fetchAllGaragesApi = (page = 1, limit = 5, searchQuery = "") => {
+  return api
+    .get(
       `/${ADMIN_BASE_ROUTE}/garages?page=${page}&limit=${limit}&searchQuery=${searchQuery}`
-    );
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Error while fetching garages:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+    )
+    .then((res) => res.data);
 };
 
-export const fetchGarageByIdApi = async (garageId:string) => {
-  try {
-    const response = await api.get(
-      `/${ADMIN_BASE_ROUTE}/garage?garageId=${garageId}`
-    );
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Error while fetching garage:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const fetchGarageByIdApi = (garageId: string) => {
+  return api
+    .get(`/${ADMIN_BASE_ROUTE}/garage?garageId=${garageId}`)
+    .then((res) => res.data);
 };
 
-export const toggleStatusApi = async (userId: string, action: string) => {
-  try {
-    const response = await api.patch(
-      `/${ADMIN_BASE_ROUTE}/toggle-status/${userId}`,
-      { action: action }
-    );
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("toggleUserStatus Error:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const toggleStatusApi = (userId: string, action: string) => {
+  return api
+    .patch(`/${ADMIN_BASE_ROUTE}/toggle-status/${userId}`, { action: action })
+    .then((res) => res.data);
 };
 
-export const garageApprovalApi = async (userId: string, action: string) => {
-  try {
-    const response = await api.patch(
-      `/${ADMIN_BASE_ROUTE}/garage-approval/${userId}`,
-      { action: action }
-    );
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("garageApproval Error:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const garageApprovalApi = (userId: string, action: string) => {
+  return api
+    .patch(`/${ADMIN_BASE_ROUTE}/garage-approval/${userId}`, { action: action })
+    .then((res) => res.data);
 };
 
-export const createPlanApi = async (data: PlanData) => {
-  try {
-    const response = await api.post(`/${ADMIN_BASE_ROUTE}/create-plan`, data);
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("createPlanError:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const createPlanApi = (data: PlanData) => {
+  return api
+    .post(`/${ADMIN_BASE_ROUTE}/create-plan`, data)
+    .then((res) => res.data);
 };
 
-export const fetchAllPlansApi = async (
-  page = 1,
-  limit = 5,
-  searchQuery = ""
-) => {
-  try {
-    const response = await api.get(
+export const fetchAllPlansApi = (page = 1, limit = 5, searchQuery = "") => {
+  return api
+    .get(
       `/${ADMIN_BASE_ROUTE}/plans?page=${page}&limit=${limit}&searchQuery=${searchQuery}`
-    );
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Error while fetching plans:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+    )
+    .then((res) => res.data);
 };
 
-export const togglePlanStatusApi = async (planId: string, action: string) => {
-  try {
-    const response = await api.patch(
-      `/${ADMIN_BASE_ROUTE}/toggle-plan-status/${planId}`,
-      { action: action }
-    );
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("togglePlanStatus Error:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const togglePlanStatusApi = (planId: string, action: string) => {
+  return api
+    .patch(`/${ADMIN_BASE_ROUTE}/toggle-plan-status/${planId}`, {
+      action: action,
+    })
+    .then((res) => res.data);
 };
 
-export const deletePlansApi = async (planId: string) => {
-  try {
-    const response = await api.delete(
-      `/${ADMIN_BASE_ROUTE}/delete-plan/${planId}`);
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("delete plan Error:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const deletePlansApi = (planId: string) => {
+  return api
+    .delete(`/${ADMIN_BASE_ROUTE}/delete-plan/${planId}`)
+    .then((res) => res.data);
 };
 
-export const updatePlanApi = async (planId: string, data: Partial<IPlan>) => {
-  try {
-    const response = await api.put(
-      `/${ADMIN_BASE_ROUTE}/plans/${planId}`, data);
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("update plan Error:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const updatePlanApi = (planId: string, data: Partial<IPlan>) => {
+  return api
+    .put(`/${ADMIN_BASE_ROUTE}/plans/${planId}`, data)
+    .then((res) => res.data);
 };

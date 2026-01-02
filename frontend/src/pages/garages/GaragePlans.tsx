@@ -16,7 +16,7 @@ import PaymentSuccess from "@components/layouts/PaymentSuccess";
 import Spinner from "@components/elements/Spinner";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store/store";
-import type { ISubscription } from "@/types/Subscription";
+import type { ISubscription } from "@/types/SubscriptionTypes";
 import PaymentFailed from "@components/modal/PaymentFailed";
 import { PlanCard } from "@/components/elements/PlanCard";
 

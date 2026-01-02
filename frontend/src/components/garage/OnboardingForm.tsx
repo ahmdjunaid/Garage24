@@ -16,7 +16,7 @@ import { mobileRegex } from "@/constants/commonRegex";
 import ImageUploader from "@components/garage/ImageUploader";
 import { ConfirmModalLight } from "@components/modal/ConfirmModalLight";
 import MapAutoCenter from "../elements/MapAutoCenter";
-import { Locate } from "lucide-react"
+import { Locate } from "lucide-react";
 
 const markerIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",

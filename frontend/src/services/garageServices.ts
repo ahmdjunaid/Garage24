@@ -1,229 +1,115 @@
-import { AxiosError } from "axios";
 import api from "./api";
 import { GARAGE_BASE_ROUTE, STRIPE_BASE_ROUTE } from "../constants/apiRoutes";
+import type { IService } from "@/types/ServicesTypes";
 
-export const onboardingApi = async (data: FormData) => {
-  try {
-    const response = await api.post(`/${GARAGE_BASE_ROUTE}/onboarding`, data, {
+export const onboardingApi = (data: FormData) => {
+  return api
+    .post(`/${GARAGE_BASE_ROUTE}/onboarding`, data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
-    });
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Onboarding Error:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+    })
+    .then((res) => res.data);
 };
 
-export const registerMechanicApi = async (data: {
+export const registerMechanicApi = (data: {
   name: string;
   email: string;
   role: string;
 }) => {
-  try {
-    const response = await api.post(`/${GARAGE_BASE_ROUTE}/register-mechanic`, data);
-    const user = response.data;
-
-    return user;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("SignUp Error:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+  return api
+    .post(`/${GARAGE_BASE_ROUTE}/register-mechanic`, data)
+    .then((res) => res.data);
 };
 
-export const fetchAddressApi = async (lat: number, lng: number) => {
-  try {
-    const response = await api.get(`/${GARAGE_BASE_ROUTE}/get-address?lat=${lat}&lng=${lng}`);
-    
-    return response.data;
-  } catch (error) {
- if (error instanceof AxiosError) {
-      console.error("SignUp Error:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const fetchAddressApi = (lat: number, lng: number) => {
+  return api
+    .get(`/${GARAGE_BASE_ROUTE}/get-address?lat=${lat}&lng=${lng}`)
+    .then((res) => res.data);
 };
 
-export const fetchMechanicsApi = async (page = 1, limit = 5, searchQuery =  '',) => {
-  try {
-    const response = await api.get(`/${GARAGE_BASE_ROUTE}/mechanics?page=${page}&limit=${limit}&searchQuery=${searchQuery}`);
-    
-    return response.data;
-  } catch (error) {
- if (error instanceof AxiosError) {
-      console.error("Error while fetching mechanics:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const fetchMechanicsApi = (page = 1, limit = 5, searchQuery = "") => {
+  return api
+    .get(
+      `/${GARAGE_BASE_ROUTE}/mechanics?page=${page}&limit=${limit}&searchQuery=${searchQuery}`
+    )
+    .then((res) => res.data);
 };
 
-export const toggleUserStatusApi = async ( userId: string, action: string) => {
-  try {
-    const response = await api.patch(`/${GARAGE_BASE_ROUTE}/mechanic/${userId}`, {action: action});
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("toggleUserStatus Error:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const toggleUserStatusApi = (userId: string, action: string) => {
+  return api
+    .patch(`/${GARAGE_BASE_ROUTE}/mechanic/${userId}`, { action: action })
+    .then((res) => res.data);
 };
 
-export const deleteMechanic = async ( userId: string) => {
-  try {
-    const response = await api.delete(`/${GARAGE_BASE_ROUTE}/mechanic/${userId}`);
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("deleteMechanic Error:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const deleteMechanic = (userId: string) => {
+  return api
+    .delete(`/${GARAGE_BASE_ROUTE}/mechanic/${userId}`)
+    .then((res) => res.data);
 };
 
-export const fetchGarageStatusApi = async () => {
-  try {
-    const response = await api.get(`/${GARAGE_BASE_ROUTE}/get-status`);
-    return response.data;
-
-  } catch (error) {
- if (error instanceof AxiosError) {
-      console.error("Error while fetching:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const fetchGarageStatusApi = () => {
+  return api.get(`/${GARAGE_BASE_ROUTE}/get-status`).then((res) => res.data);
 };
 
-export const fetchAllPlansApi = async (
-  page = 1,
-  limit = 5,
-  searchQuery = ""
-) => {
-  try {
-    const response = await api.get(
+export const fetchAllPlansApi = (page = 1, limit = 5, searchQuery = "") => {
+  return api
+    .get(
       `/${GARAGE_BASE_ROUTE}/plans?page=${page}&limit=${limit}&searchQuery=${searchQuery}`
-    );
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Error while fetching plans:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+    )
+    .then((res) => res.data);
 };
 
-export const resendInvitation = async (
-  id: string,
-) => {
-  try {
-    const response = await api.post(
-      `/${GARAGE_BASE_ROUTE}/resend-invitation/${id}`
-    );
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Error while resend", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const resendInvitation = (id: string) => {
+  return api
+    .post(`/${GARAGE_BASE_ROUTE}/resend-invitation/${id}`)
+    .then((res) => res.data);
 };
 
-export const subscribePlanApi = async (data:{planId:string, planName:string, planPrice:number}) => {
-  try {
-    const response = await api.post(
-      `/${STRIPE_BASE_ROUTE}/create-subscribe-session`, data);
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Error while create-session", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const subscribePlanApi = (data: {
+  planId: string;
+  planName: string;
+  planPrice: number;
+}) => {
+  return api
+    .post(`/${STRIPE_BASE_ROUTE}/create-subscribe-session`, data)
+    .then((res) => res.data);
 };
 
-export const retriveTransactionApi = async (sessionId:string) => {
-  try {
-    const response = await api.get(
-      `/${STRIPE_BASE_ROUTE}/session/${sessionId}`);
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Error while fetching-session", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const retriveTransactionApi = (sessionId: string) => {
+  return api
+    .get(`/${STRIPE_BASE_ROUTE}/session/${sessionId}`)
+    .then((res) => res.data);
 };
 
-export const getCurrentSubscriptionApi = async (garageId:string) => {
-  try {
-    const response = await api.get(
-      `/${GARAGE_BASE_ROUTE}/get-current-plan/${garageId}`);
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Error while fetching-currentPln", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const getCurrentSubscriptionApi = (garageId: string) => {
+  return api
+    .get(`/${GARAGE_BASE_ROUTE}/get-current-plan/${garageId}`)
+    .then((res) => res.data);
 };
+
+export const createServiceApi = (data: Partial<IService>) => {
+  return api
+    .post(`${GARAGE_BASE_ROUTE}/services`, data)
+    .then((res) => res.data);
+};
+
+export const fetchAllServicesApi = (page = 1, limit = 5, searchQuery = "") => {
+  return api
+    .get(
+      `/${GARAGE_BASE_ROUTE}/services?page=${page}&limit=${limit}&searchQuery=${searchQuery}`
+    )
+    .then((res) => res.data);
+};
+
+export const toggleServiceStatusApi = (serviceId:string, action:string) => {
+  return api
+    .patch(`/${GARAGE_BASE_ROUTE}/services/${serviceId}`,{action})
+    .then(res => res.data)
+}
+
+export const deleteService = (serviceId:string) => {
+  return api
+    .delete(`/${GARAGE_BASE_ROUTE}/services/${serviceId}`)
+    .then(res => res.data)
+}

@@ -8,6 +8,7 @@ import { container } from "../DI/container";
 import { TYPES } from "../DI/types";
 import { PlanController } from "../controllers/plan/implimentation/planController";
 import { hasActivePlan } from "../middleware/checkSubscription";
+import { ServiceController } from "../controllers/service/implementation/serviceController";
 
 
 const router = express.Router()
@@ -15,6 +16,7 @@ const router = express.Router()
 const garageController = container.get<GarageController>(TYPES.GarageController)
 const mechanicController = container.get<MechanicController>(TYPES.MechanicController)
 const planController = container.get<PlanController>(TYPES.PlanController)
+const serviceController = container.get<ServiceController>(TYPES.ServiceController)
 
 router.route('/onboarding').post(verifyJWT,authorizeRoles("garage"),uploadOnboardingImages,garageController.onboarding)
 router.route('/get-address').get(verifyJWT,authorizeRoles("garage"),garageController.getAddressFromCoordinates)
@@ -26,6 +28,10 @@ router.route('/mechanic/:userId')
             .delete(verifyJWT,authorizeRoles("garage"),mechanicController.deleteMechanic)
 router.route('/get-status').get(verifyJWT,authorizeRoles("garage"),garageController.getApprovalStatus)
 router.route('/plans').get(verifyJWT,authorizeRoles("garage"),planController.getAllPlans)
-router.route('/get-current-plan/:garageId').get(verifyJWT, garageController.getCurrentPlan)
+router.route('/get-current-plan/:garageId').get(verifyJWT,authorizeRoles("garage"),garageController.getCurrentPlan)
+router.route('/services').post(verifyJWT,hasActivePlan,authorizeRoles("garage"),serviceController.createService)
+router.route('/services').get(verifyJWT,authorizeRoles("garage"),serviceController.getAllServices)
+router.route('/services/:serviceId').patch(verifyJWT,authorizeRoles("garage"),serviceController.toggleStatus)
+router.route('/services/:serviceId').delete(verifyJWT,authorizeRoles("garage"),serviceController.deleteService)
 
 export default router;

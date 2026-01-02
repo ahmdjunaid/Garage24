@@ -1,5 +1,5 @@
 import React from "react";
-import { Filter, ChevronDown } from "lucide-react";
+// import { Filter, ChevronDown } from "lucide-react";
 
 export interface TableColumn<T> {
   key: keyof T | string;
@@ -19,8 +19,8 @@ const AdminTable = <T extends { id?: string; name?: string }>({
   data = [],
   columns = [],
   renderActions,
-  sortBy = "A-Z",
-  onSortChange,
+  // sortBy = "A-Z",
+  // onSortChange,
 }: AdminTableProps<T>) => {
   return (
     <div>
@@ -29,7 +29,7 @@ const AdminTable = <T extends { id?: string; name?: string }>({
       ) : (
         <div className="bg-gradient-to-br from-gray-900 to-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl backdrop-blur-sm">
           {/* Table Controls */}
-          <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between bg-gradient-to-r from-gray-900 to-gray-950">
+          {/* <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between bg-gradient-to-r from-gray-900 to-gray-950">
             <button className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-400 transition-all duration-200 hover:scale-105">
               <Filter className="w-4 h-4" />
               Filter
@@ -41,7 +41,7 @@ const AdminTable = <T extends { id?: string; name?: string }>({
               Sort By: {sortBy}
               <ChevronDown className="w-4 h-4" />
             </button>
-          </div>
+          </div> */}
 
           {/* Table Header */}
           <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-4 px-6 py-4 border-b border-gray-800 text-xs text-gray-500 font-semibold uppercase bg-gradient-to-r from-gray-900 to-gray-950">

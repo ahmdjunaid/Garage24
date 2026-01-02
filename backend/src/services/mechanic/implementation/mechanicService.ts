@@ -92,7 +92,7 @@ export class MechanicService implements IMechanicService {
       throw { status: HttpStatus.BAD_REQUEST, message: EMAIL_ALREADY_EXIST };
     }
 
-    const noOfMechanics = await this._mechanicRepository.countDocuments('mechanic')
+    const noOfMechanics = await this._mechanicRepository.countDocuments(garageId)
     if(noOfMechanics >= allowedMechanics){
       throw {
         status:HttpStatus.BAD_REQUEST, 
