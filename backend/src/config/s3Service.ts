@@ -30,10 +30,10 @@ export const uploadFile = async (
   return fileUrl;
 };
 
-export const deleteFromS3 = async (fileName: string): Promise<void> => {
+export const deleteFromS3 = async (key: string): Promise<void> => {
   const params = {
     Bucket: process.env.AWS_S3_BUCKET!,
-    Key: `uploads/${fileName}`,
+    Key: key,
   };
 
   await s3.send(new DeleteObjectCommand(params));

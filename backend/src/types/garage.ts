@@ -29,7 +29,9 @@ export interface IGarage {
   mobileNumber: string;
   isRSAEnabled: boolean;
   isDeleted?: boolean;
+  isBlocked?: boolean;
   approvalStatus?: approvalStatus;
+  rejectionReason?: string; 
 }
 
 export interface IPopulatedGarage {
@@ -44,8 +46,10 @@ export interface IPopulatedGarage {
   docUrl: string;
   mobileNumber: string;
   isRSAEnabled: boolean;
-  isDeleted?: boolean;
+  isDeleted: boolean;
+  isBlocked: boolean;
   approvalStatus?: approvalStatus;
+  rejectionReason?: string; 
 }
 
 export interface GetMappedGarageResponse{

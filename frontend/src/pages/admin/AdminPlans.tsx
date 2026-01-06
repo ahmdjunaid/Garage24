@@ -37,7 +37,6 @@ const AdminPlans = () => {
           searchQuery
         );
         setPlans(response.plans);
-        console.log(response.plans, "res.plans");
         setTotalPages(response.totalPages);
       } catch (error) {
         console.error("Error from page:", error);

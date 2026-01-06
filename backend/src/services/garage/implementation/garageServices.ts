@@ -2,21 +2,25 @@ import { IGarageRepository } from "../../../repositories/garage/interface/IGarag
 import IGarageService from "../interface/IGarageService";
 import { IAuthRepository } from "../../../repositories/user/interface/IUserRepositories";
 import mongoose from "mongoose";
-import { uploadFile } from "../../../config/s3Service";
+import { deleteFromS3, uploadFile } from "../../../config/s3Service";
 import axios from "axios";
-import { IAddress } from "../../../types/garage";
+import { IAddress, IGarage } from "../../../types/garage";
 import { deleteLocalFile } from "../../../helper/helper";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
 import { ISubscriptionRepository } from "../../../repositories/subscription/interface/ISubscriptionRepository";
 import { ISubscription } from "../../../types/subscription";
+import { extractS3KeyFromUrl } from "../../../utils/extractS3KeyFromUrl";
+import HttpStatus from "../../../constants/httpStatusCodes";
 
 @injectable()
 export class GarageService implements IGarageService {
   constructor(
-    @inject(TYPES.GarageRepository) private _garageRepository: IGarageRepository,
+    @inject(TYPES.GarageRepository)
+    private _garageRepository: IGarageRepository,
     @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository,
-    @inject(TYPES.SubscriptionRepository) private _subscriptionRepository: ISubscriptionRepository
+    @inject(TYPES.SubscriptionRepository)
+    private _subscriptionRepository: ISubscriptionRepository
   ) {}
   async onboarding(
     name: string,
@@ -31,21 +35,33 @@ export class GarageService implements IGarageService {
     mobile: string,
     isRSAEnabled: boolean
   ) {
+    const convertedUserId = new mongoose.Types.ObjectId(userId);
+    const existing = await this._garageRepository.findOne({
+      userId: convertedUserId,
+    });
+
+    if (existing && existing.approvalStatus !== "rejected") {
+      throw {
+        status: HttpStatus.BAD_REQUEST,
+        message: "Onboarding update not allowed",
+      };
+    }
+
     const imageUrl = await uploadFile(image, "garages");
     const docUrl = await uploadFile(document, "garages");
-
     if (image?.path) deleteLocalFile(image.path);
     if (document?.path) deleteLocalFile(document.path);
 
-    const convertedUserId = new mongoose.Types.ObjectId(userId);
-    const latitude = Number(location.lat);
-    const longitude = Number(location.lng);
-
-    const garageData = await this._garageRepository.onboarding({
+    const data = {
       name,
       userId: convertedUserId,
-      latitude,
-      longitude,
+      location: {
+        type: "Point" as const,
+        coordinates: [Number(location.lng), Number(location.lat)] as [
+          number,
+          number,
+        ],
+      },
       address,
       startTime,
       endTime,
@@ -54,19 +70,46 @@ export class GarageService implements IGarageService {
       docUrl,
       mobileNumber: mobile,
       isRSAEnabled,
-    });
+      approvalStatus: "pending",
+      rejectionReason: undefined,
+    };
+
+    const garageData = existing
+      ? await this._garageRepository.findOneAndUpdate(
+          { userId: convertedUserId },
+          data
+        )
+      : await this._garageRepository.onboarding(data);
+
+    if (existing) {
+      await Promise.all([
+        deleteFromS3(extractS3KeyFromUrl(existing.imageUrl)),
+        deleteFromS3(extractS3KeyFromUrl(existing.docUrl)),
+      ]);
+    }
 
     await this._authRepository.findOneAndUpdate(userId, {
       isOnboardingRequired: false,
+      imageUrl: imageUrl
     });
+
     return garageData;
   }
 
   async getAddressFromCoordinates(lat: string, lng: string) {
     const response = await axios.get(
-      `https://nominatim.openstreetmap.org/reverse`,
+      "https://nominatim.openstreetmap.org/reverse",
       {
-        params: { lat, lon: lng, format: "json" },
+        params: {
+          lat,
+          lon: lng,
+          format: "json",
+        },
+        headers: {
+          "User-Agent": "Garage24-Backend/1.0 (contact: support@garage24.com)",
+          "Accept-Language": "en",
+        },
+        timeout: 5000,
       }
     );
 
@@ -108,5 +151,9 @@ export class GarageService implements IGarageService {
     }
 
     return { isActive: true, plan: currentPlan };
+  }
+
+  async getGarageById(garageId: string): Promise<IGarage | null> {
+    return await this._garageRepository.findOne({ userId: garageId });
   }
 }

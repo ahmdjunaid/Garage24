@@ -5,7 +5,7 @@ import AdminTable, {
 } from "@components/layouts/admin/AdminTable";
 import { errorToast, successToast } from "@/utils/notificationAudio";
 import {
-  deleteService,
+  deleteServiceApi,
   fetchAllServicesApi,
   toggleServiceStatusApi,
 } from "@/services/garageServices";
@@ -72,7 +72,7 @@ const GarageServices = () => {
 
     try {
       if (act === "delete") {
-        await deleteService(id);
+        await deleteServiceApi(id);
         setServices((prev) => prev.filter((m) => m._id !== id));
         successToast("Deleted successfully");
       } else if (act === "block" || act === "unblock") {

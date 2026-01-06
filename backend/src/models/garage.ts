@@ -35,12 +35,14 @@ const garageSchema = new Schema<IGarage>(
     docUrl: { type: String, required: true },
     mobileNumber: { type: String, required: true },
     isRSAEnabled: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
+    isBlocked: { type: Boolean, default: false },
     approvalStatus: {
       type: String,
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
-    isDeleted: { type: Boolean, default: false },
+    rejectionReason: {type: String}
   },
   { timestamps: true }
 );

@@ -7,7 +7,11 @@ import type { ILocation, User } from "@/types/UserTypes";
 import type { RootState } from "@/redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { validateTime } from "@/utils/validateTime";
-import { fetchAddressApi, onboardingApi } from "@/services/garageServices";
+import {
+  fetchAddressApi,
+  getGarageDetailsApi,
+  onboardingApi,
+} from "@/services/garageServices";
 import { errorToast, successToast } from "@/utils/notificationAudio";
 import { daysOfWeek, getTimeOptions } from "@/constants/constantDatas";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
@@ -17,6 +21,8 @@ import ImageUploader from "@components/garage/ImageUploader";
 import { ConfirmModalLight } from "@components/modal/ConfirmModalLight";
 import MapAutoCenter from "../elements/MapAutoCenter";
 import { Locate } from "lucide-react";
+import FileUploader from "./FileUploader";
+import type { IMappedGarageData } from "@/types/GarageTypes";
 
 const markerIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
@@ -37,6 +43,7 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
   const [docFile, setDocFile] = useState<File | null>(null);
   const [docError, setDocError] = useState<string>("");
   const [selectedHolidays, setSelectedHolidays] = useState<string[]>([]);
+  const [selectHolidaysError, setSelectedHolidaysError] = useState<string>("");
   const [mobile, setMobile] = useState<string>("");
   const [mobileError, setMobileError] = useState<string>("");
   const [isRSAEnabled, setIsRSAEnabled] = useState<boolean | null>(null);
@@ -48,10 +55,32 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
   const [state, setState] = useState<string>("");
   const [pincode, setPincode] = useState<string>("");
   const [locationError, setLocationError] = useState<string>("");
+  const [isRejected, setIsRejected] = useState<boolean>(false);
 
   const { user, token } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   const timeOptions = getTimeOptions();
+
+  useEffect(() => {
+    const fetchGarageData = async () => {
+      if (!user) return;
+      const response: IMappedGarageData = await getGarageDetailsApi(user?._id);
+      if (response) {
+        setLocation({
+          lat: response.location?.coordinates[0] ?? 0,
+          lng: response.location?.coordinates[1] ?? 0,
+        });
+        setStartTime(response.startTime!);
+        setEndTime(response.endTime!);
+        setSelectedHolidays(response.selectedHolidays!);
+        setMobile(response.mobileNumber!);
+        setIsRSAEnabled(response.isRSAEnabled!);
+        setIsRejected(true);
+      }
+    };
+
+    fetchGarageData();
+  }, [user]);
 
   useEffect(() => {
     const getAddress = async () => {
@@ -88,6 +117,7 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
     setRSAError("");
     setDocError("");
     setImageError("");
+    setSelectedHolidaysError("");
 
     if (!validateTime(startTime, endTime)) {
       setTimeError("Select a valid timing.");
@@ -116,6 +146,13 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
 
     if (!imageFile) {
       setImageError("Upload image to verify your garage.");
+      hasError = true;
+    }
+
+    if (selectedHolidays.length > 6) {
+      setSelectedHolidaysError(
+        "At least one working day is required. You can’t mark all days as holidays."
+      );
       hasError = true;
     }
 
@@ -193,6 +230,16 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
           </h1>
         </div>
 
+        {isRejected && (
+          <div className="bg-red-100 rounded p-2 text-center">
+          <p className="text-red-600 text-sm mt-1">
+            <strong>Application rejected. </strong>
+            Please check your email for the rejection reason and resubmit after
+            uploading valid documents.
+          </p>
+          </div>
+        )}
+
         {/* Form */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Left Section */}
@@ -256,6 +303,7 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
               <input
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value)}
+                maxLength={15}
                 placeholder="Enter mobile number"
                 className="w-full bg-gray-50 rounded-lg p-3 text-gray-800 border-2 border-transparent focus:border-red-600 focus:outline-none"
               />
@@ -287,6 +335,11 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
                   </label>
                 ))}
               </div>
+              {selectHolidaysError && (
+                <p className="text-red-600 font-light text-sm mt-1">
+                  {selectHolidaysError}
+                </p>
+              )}
             </div>
 
             {/* RSA */}
@@ -383,9 +436,9 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
 
             {/* Document */}
             <div>
-              <ImageUploader
+              <FileUploader
                 label="Upload Document"
-                onImageSelect={(data) => setDocFile(data)}
+                onFileSelect={(data) => setDocFile(data)}
               />
               {docError && (
                 <p className="text-red-600 font-light text-sm mt-1">
@@ -395,12 +448,11 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
             </div>
           </div>
         </div>
-
         {/* Submit */}
         <div>
           <AuthButton
             action={handleCompleteRegistration}
-            text="COMPLETE REGISTRATION"
+            text={isRejected ? "RE-SUBMIT" : "COMPLETE REGISTRATION"}
           />
         </div>
       </div>

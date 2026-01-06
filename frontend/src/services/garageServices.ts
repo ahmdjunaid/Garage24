@@ -108,8 +108,14 @@ export const toggleServiceStatusApi = (serviceId:string, action:string) => {
     .then(res => res.data)
 }
 
-export const deleteService = (serviceId:string) => {
+export const deleteServiceApi = (serviceId:string) => {
   return api
     .delete(`/${GARAGE_BASE_ROUTE}/services/${serviceId}`)
+    .then(res => res.data)
+}
+
+export const getGarageDetailsApi = (garageId:string) => {
+  return api
+    .get(`/${GARAGE_BASE_ROUTE}/get-garage?garageId=${garageId}`)
     .then(res => res.data)
 }

@@ -119,13 +119,16 @@ export class GarageController implements IGarageController {
   getCurrentPlan = async (req: Request, res: Response) => {
     try {
       const garageId = req.params.garageId;
-      if(!garageId){
-        throw {status: HttpStatus.BAD_REQUEST, message: ERROR_WHILE_FETCH_DATA}
+      if (!garageId) {
+        throw {
+          status: HttpStatus.BAD_REQUEST,
+          message: ERROR_WHILE_FETCH_DATA,
+        };
       }
 
-      const response = await this._garageService.getCurrentPlan(garageId)
-      
-      res.status(HttpStatus.OK).json(response)
+      const response = await this._garageService.getCurrentPlan(garageId);
+
+      res.status(HttpStatus.OK).json(response);
     } catch (error) {
       console.error(error);
       const err = error as Error;
@@ -133,5 +136,25 @@ export class GarageController implements IGarageController {
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: err?.message || SERVER_ERROR });
     }
-  }
+  };
+
+  getGarageById = async (req: Request, res: Response) => {
+    try {
+      const garageId = req.query.garageId as string;
+      
+      if (!garageId) {
+        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+      }
+
+      const garageData = await this._garageService.getGarageById(garageId);
+
+      res.status(HttpStatus.OK).json(garageData);
+    } catch (error) {
+      console.error(error);
+      const err = error as Error;
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: err?.message || SERVER_ERROR });
+    }
+  };
 }

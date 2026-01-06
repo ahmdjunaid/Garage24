@@ -14,8 +14,9 @@ export default interface IGarageService {
     document: Express.Multer.File,
     mobile: string,
     isRSAEnabled: boolean
-  ): Promise<{ garageData: IGarage }>;
+  ): Promise<IGarage | null>;
   getAddressFromCoordinates (lat:string, lng:string):Promise<IAddress>;
   getApprovalStatus(userId: string):Promise<GarageStatusResponse>;
-  getCurrentPlan(garageId:string): Promise<{isActive: boolean, plan: ISubscription | null}>
+  getCurrentPlan(garageId:string): Promise<{isActive: boolean, plan: ISubscription | null}>;
+  getGarageById(garageId:string): Promise<IGarage | null>
 }

@@ -11,7 +11,7 @@ export default interface IMechanicService {
     mobileNumber: string,
     password: string,
     newPassword: string
-  ): Promise<{ message: string; mechanic: HydratedDocument<IMechanic> }>;
+  ): Promise<{mechanic: HydratedDocument<IMechanic> }>;
   registerMechanic(
     name: string,
     email: string,

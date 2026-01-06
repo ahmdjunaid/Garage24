@@ -33,5 +33,6 @@ router.route('/services').post(verifyJWT,hasActivePlan,authorizeRoles("garage"),
 router.route('/services').get(verifyJWT,authorizeRoles("garage"),serviceController.getAllServices)
 router.route('/services/:serviceId').patch(verifyJWT,authorizeRoles("garage"),serviceController.toggleStatus)
 router.route('/services/:serviceId').delete(verifyJWT,authorizeRoles("garage"),serviceController.deleteService)
+router.route('/get-garage').get(verifyJWT,authorizeRoles("garage"),garageController.getGarageById)
 
 export default router;

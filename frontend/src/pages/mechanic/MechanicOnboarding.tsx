@@ -5,7 +5,11 @@ import type { RootState } from "@/redux/store/store";
 import { errorToast, successToast } from "@/utils/notificationAudio";
 import { onboardingMechanicApi } from "@/services/mechanicServices";
 import { useNavigate } from "react-router-dom";
-import { mobileRegex, passwordRegex } from "@/constants/commonRegex";
+import {
+  mobileRegex,
+  onlyString,
+  passwordRegex,
+} from "@/constants/commonRegex";
 import { login } from "@/redux/slice/userSlice";
 import type { User } from "@/types/UserTypes";
 
@@ -30,11 +34,11 @@ const MechanicOnboarding = () => {
 
   const { user, token } = useSelector((state: RootState) => state.auth);
 
-  useEffect(()=>{
-    if(!user?.isOnboardingRequired){
-      navigate('/mechanic')
+  useEffect(() => {
+    if (!user?.isOnboardingRequired) {
+      navigate("/mechanic");
     }
-  },[user,navigate])
+  }, [user, navigate]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -63,7 +67,12 @@ const MechanicOnboarding = () => {
   };
 
   const addSkill = () => {
+    setSkillsError("");
     if (newSkill.trim() && !skills.includes(newSkill.trim())) {
+      if (typeof newSkill !== "string" || !onlyString.test(newSkill.trim())) {
+        setSkillsError("Skill must be valid.");
+        return;
+      }
       setSkills([...skills, newSkill.trim()]);
       setNewSkill("");
     }
@@ -87,11 +96,15 @@ const MechanicOnboarding = () => {
     setPreviewError("");
     setMobileError("");
 
-    if (
-      !passwordRegex.test(newPassword) ||
-      !passwordRegex.test(oneTimePassword)
-    ) {
+    if (!passwordRegex.test(oneTimePassword)) {
       setOneTimePassError(
+        "Password must be 8+ chars with uppercase, lowercase, number, and special character."
+      );
+      hasError = true;
+    }
+
+    if (!passwordRegex.test(newPassword)) {
+      setNewPasswordError(
         "Password must be 8+ chars with uppercase, lowercase, number, and special character."
       );
       hasError = true;
@@ -127,10 +140,14 @@ const MechanicOnboarding = () => {
       }
 
       try {
-        await onboardingMechanicApi(formData);
+        const response = await onboardingMechanicApi(formData);
         dispatch(
           login({
-            user: { ...user, isOnboardingRequired: false } as User,
+            user: {
+              ...user,
+              imageUrl: response.mechanic.imageUrl,
+              isOnboardingRequired: false,
+            } as User,
             token,
           })
         );
@@ -250,6 +267,7 @@ const MechanicOnboarding = () => {
                   type="text"
                   value={newSkill}
                   onChange={(e) => setNewSkill(e.target.value)}
+                  maxLength={30}
                   onKeyPress={handleKeyPress}
                   placeholder="Add a new skill"
                   className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600"
@@ -284,6 +302,7 @@ const MechanicOnboarding = () => {
                 className="bg-gray-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base 
              focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-0 w-130"
                 onChange={(e) => setMobile(e.target.value)}
+                maxLength={15}
               />
               {mobileError ? (
                 <p className="text-red-600 font-light text-sm ">

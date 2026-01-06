@@ -75,9 +75,10 @@ export class MechanicService implements IMechanicService {
     await this._authRepository.findOneAndUpdate(userId, {
       isOnboardingRequired: false,
       password: hashedPassword,
+      imageUrl: imageUrl
     });
 
-    return { message: "Updated successfully", mechanic: mechanicData };
+    return {mechanic: mechanicData };
   }
 
   async registerMechanic(

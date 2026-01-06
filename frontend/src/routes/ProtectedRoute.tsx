@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
 import type { Role } from "../types/UserTypes";
 import { useSelector } from "react-redux";
-import { store, type RootState } from "../redux/store/store";
+import { type RootState } from "../redux/store/store";
 import { Navigate, Outlet, useNavigate } from "react-router-dom";
 import { fetchGarageStatusApi } from "../services/garageServices";
 import Spinner from "../components/elements/Spinner";
 import type { approvalStatus } from "../types/GarageTypes";
-import { logoutApi } from "../services/authServices";
-import { logout } from "../redux/slice/userSlice";
-import { errorToast } from "../utils/notificationAudio";
 
 interface ProtectedRouteProps {
   requiredRoles: Role[];
@@ -100,13 +97,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
 
     if (user.isOnboardingRequired === false && approvalStatus === "rejected") {
-      errorToast('Your application has been rejected!')
-      store.dispatch(logout());
-      navigate('/login')
-      setTimeout(async () => {
-        await logoutApi();
-      });
-      return
+      return <Navigate to="/garage/onboarding" replace />;
     }
   }
 

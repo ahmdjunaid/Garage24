@@ -109,12 +109,12 @@ const AdminGarages = () => {
       render: (g) => (
         <span
           className={`px-3 py-1 rounded-full text-xs font-medium ${
-            g.isBlocked || !g?.plan?.name
+            g.isBlocked
               ? "bg-red-900 text-red-300"
               : "bg-green-900 text-green-300"
           }`}
         >
-          {g.isBlocked || !g?.plan?.name ? "Inactive" : "Active"}
+          {g.isBlocked ? "Inactive" : "Active"}
         </span>
       ),
     },
