@@ -23,6 +23,7 @@ export class SubscriptionRepository
         sessionId: data.sessionId,
         garageId: new Types.ObjectId(data.garageId!),
         planId: new Types.ObjectId(data.planId!),
+        planSnapShot: data.planSnapShot
       },
     };
 
@@ -38,7 +39,7 @@ export class SubscriptionRepository
 
   async getSubscriptionByGarageId(
     garageId: string
-  ): Promise<ISubscription | null> {
+  ) {
     return await this.getByFilter({
       garageId,
       expiryDate: { $gt: new Date() },

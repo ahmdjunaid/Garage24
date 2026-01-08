@@ -1,5 +1,6 @@
 import React from "react";
-import logo from '@assets/icons/Logo.png'
+import { createPortal } from "react-dom";
+import logo from "@assets/icons/Logo.png";
 
 interface ModalProps {
   isOpen: boolean;
@@ -10,26 +11,39 @@ interface ModalProps {
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div
-        className="absolute inset-0 bg-black/50 z-40"
-        onClick={(e) => e.stopPropagation()}
-      ></div>
+  const modalRoot = document.getElementById("modal-root");
+  if (!modalRoot) return null;
 
-      <div className="relative bg-white p-6 rounded-lg shadow-lg z-50 w-96">
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50"
+        onClick={onClose}
+      />
+
+      {/* Modal box */}
+      <div
+        className="relative z-50 w-96 rounded-lg bg-white p-6 shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
         <button
-          onClick={() => (onClose?.())}
+          onClick={onClose}
           className="absolute right-4 top-4 text-gray-500 hover:text-red-600 transition-colors duration-200"
           aria-label="Close"
         >
           ✕
         </button>
-        {/* child component will be rendered here */}
-        <img src={logo} alt="GARAGE24" className="w-25" />
+
+        {/* Logo */}
+        <img src={logo} alt="GARAGE24" className="mb-4 w-24" />
+
+        {/* Modal content */}
         {children}
       </div>
-    </div>
+    </div>,
+    modalRoot
   );
 };
 

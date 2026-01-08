@@ -8,7 +8,6 @@ import { GetMappedGarageResponse, IGarage, IPopulatedGarage } from "../../../typ
 import HttpStatus from "../../../constants/httpStatusCodes";
 import {
   GARAGE_APPROVAL_FAILED,
-  GARAGE_NOT_FOUND,
   USER_STATUS_UPDATE_FAILED,
 } from "../../../constants/messages";
 import { IGarageRepository } from "../../../repositories/garage/interface/IGarageRepository";
@@ -90,13 +89,5 @@ export class AdminService implements IAdminService {
     }
 
     return { message: `${action}ed successfull` };
-  }
-
-  async getGarageById(id: string): Promise<IGarage | null> {
-    const garage = await this._garageRepository.findOne({userId: id});
-
-    if (!garage) throw { status: HttpStatus.NOT_FOUND, message: GARAGE_NOT_FOUND };
-
-    return garage;
   }
 }

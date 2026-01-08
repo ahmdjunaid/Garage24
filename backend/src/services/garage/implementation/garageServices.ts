@@ -1,6 +1,6 @@
 import { IGarageRepository } from "../../../repositories/garage/interface/IGarageRepository";
 import IGarageService from "../interface/IGarageService";
-import { IAuthRepository } from "../../../repositories/user/interface/IUserRepositories";
+import { IAuthRepository } from "../../../repositories/auth/interface/IAuthRepositories";
 import mongoose from "mongoose";
 import { deleteFromS3, uploadFile } from "../../../config/s3Service";
 import axios from "axios";
@@ -9,9 +9,9 @@ import { deleteLocalFile } from "../../../helper/helper";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
 import { ISubscriptionRepository } from "../../../repositories/subscription/interface/ISubscriptionRepository";
-import { ISubscription } from "../../../types/subscription";
 import { extractS3KeyFromUrl } from "../../../utils/extractS3KeyFromUrl";
 import HttpStatus from "../../../constants/httpStatusCodes";
+import { IMechanicRepository } from "../../../repositories/mechanic/interface/IMechanicRepository";
 
 @injectable()
 export class GarageService implements IGarageService {
@@ -20,7 +20,9 @@ export class GarageService implements IGarageService {
     private _garageRepository: IGarageRepository,
     @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository,
     @inject(TYPES.SubscriptionRepository)
-    private _subscriptionRepository: ISubscriptionRepository
+    private _subscriptionRepository: ISubscriptionRepository,
+    @inject(TYPES.MechanicRepository)
+    private _mechanicRepository: IMechanicRepository
   ) {}
   async onboarding(
     name: string,
@@ -90,7 +92,7 @@ export class GarageService implements IGarageService {
 
     await this._authRepository.findOneAndUpdate(userId, {
       isOnboardingRequired: false,
-      imageUrl: imageUrl
+      imageUrl: imageUrl,
     });
 
     return garageData;
@@ -141,9 +143,7 @@ export class GarageService implements IGarageService {
     };
   }
 
-  async getCurrentPlan(
-    garageId: string
-  ): Promise<{ isActive: boolean; plan: ISubscription | null }> {
+  async getCurrentPlan(garageId: string) {
     const currentPlan =
       await this._subscriptionRepository.getSubscriptionByGarageId(garageId);
     if (!currentPlan) {
@@ -155,5 +155,15 @@ export class GarageService implements IGarageService {
 
   async getGarageById(garageId: string): Promise<IGarage | null> {
     return await this._garageRepository.findOne({ userId: garageId });
+  }
+
+  async getGarageDetails(garageId: string) {
+    const [garage, subscription, mechanics] = await Promise.all([
+      this._garageRepository.findOne({userId: garageId}),
+      this._subscriptionRepository.getSubscriptionByGarageId(garageId),
+      this._mechanicRepository.getMechnaicsByGarageId(garageId),
+    ]);
+
+    return { garage, subscription, mechanics };
   }
 }

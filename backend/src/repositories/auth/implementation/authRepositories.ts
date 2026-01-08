@@ -1,7 +1,7 @@
 import { User } from "../../../models/user";
 import { IUser, Role } from "../../../types/user";
 import { BaseRepository } from "../../IBaseRepository";
-import { IAuthRepository } from "../interface/IUserRepositories";
+import { IAuthRepository } from "../interface/IAuthRepositories";
 
 export class AuthRepository
   extends BaseRepository<IUser>

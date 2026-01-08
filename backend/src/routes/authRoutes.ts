@@ -1,5 +1,5 @@
 import express from "express";
-import { Authcontroller } from "../controllers/user/implementation/authController";
+import { Authcontroller } from "../controllers/auth/implementation/authController";
 import { verifyResetJWT } from "../middleware/jwt";
 import { container } from "../DI/container";
 import { TYPES } from "../DI/types";

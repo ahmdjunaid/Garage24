@@ -6,4 +6,5 @@ export default interface IGarageController {
     getApprovalStatus(req:Request, res:Response): Promise<void>;
     getCurrentPlan(req:Request, res:Response): Promise<void>;
     getGarageById(req:Request, res:Response): Promise<void>;
+    getGarageDetailsById(req:Request, res:Response): Promise<void>;
 }

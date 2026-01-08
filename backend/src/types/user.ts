@@ -1,3 +1,5 @@
+import { UserDocument } from "../models/user";
+
 export type Role = "user" | "admin" | "garage" | "mechanic";
 
 export interface ResetTokenPayload {
@@ -28,7 +30,7 @@ export interface IUser {
 
 
 export interface GetUserResponse{
-  users:IUser[]
+  users:UserDocument[]
   totalUsers: number;
   totalPages: number;
 }

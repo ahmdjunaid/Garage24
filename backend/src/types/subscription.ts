@@ -1,9 +1,18 @@
 import { Types } from "mongoose";
 import { PaymentStatus } from "./payments";
 
+export interface planSnapShot {
+  name: string;
+  price: number;
+  validity: number;
+  noOfMechanics: number;
+  noOfServices: number;
+}
+
 export interface ISubscription {
   garageId: Types.ObjectId;
   planId: Types.ObjectId;
+  planSnapShot: planSnapShot;
   startDate: Date;
   expiryDate: Date;
   status: "pending" | "active" | "expired" | "cancelled";

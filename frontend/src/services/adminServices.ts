@@ -70,3 +70,15 @@ export const updatePlanApi = (planId: string, data: Partial<IPlan>) => {
     .put(`/${ADMIN_BASE_ROUTE}/plans/${planId}`, data)
     .then((res) => res.data);
 };
+
+export const getSubscriptionByGarageIdApi = (garageId: string) => {
+  return api
+    .get(`/${ADMIN_BASE_ROUTE}/get-current-plan/${garageId}`)
+    .then((res) => res.data);
+};
+
+export const fetchGarageDetailsByIdApi = (garageId: string) => {
+  return api
+    .get(`/${ADMIN_BASE_ROUTE}/garage-details?garageId=${garageId}`)
+    .then((res) => res.data);
+};

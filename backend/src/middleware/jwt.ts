@@ -4,7 +4,7 @@ import logger from "../config/logger";
 import { Request, Response, NextFunction } from "express";
 import { DecodedUser } from "../types/user";
 import HttpStatus from "../constants/httpStatusCodes";
-import { AuthRepository } from "../repositories/user/implementation/userRepositories";
+import { AuthRepository } from "../repositories/auth/implementation/authRepositories";
 import { ACCOUNT_IS_BLOCKED } from "../constants/messages";
 
 const userRepo = new AuthRepository()

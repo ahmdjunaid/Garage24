@@ -141,7 +141,7 @@ export class GarageController implements IGarageController {
   getGarageById = async (req: Request, res: Response) => {
     try {
       const garageId = req.query.garageId as string;
-      
+
       if (!garageId) {
         throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
       }
@@ -157,4 +157,24 @@ export class GarageController implements IGarageController {
         .json({ message: err?.message || SERVER_ERROR });
     }
   };
+
+  getGarageDetailsById = async (req: Request, res: Response) => {
+    try {
+      const garageId = req.query.garageId as string;
+
+      if (!garageId) {
+        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+      }
+
+      const garageData = await this._garageService.getGarageDetails(garageId);
+
+      res.status(HttpStatus.OK).json(garageData);
+    } catch (error) {
+      console.error(error);
+      const err = error as Error;
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: err?.message || SERVER_ERROR });
+    }
+  }
 }

@@ -40,9 +40,18 @@ export class SubscriptionService implements ISubscriptionService {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + plan.validity);
 
+    const planSnapShot = {
+      name: plan.name,
+      price: plan.price,
+      validity: plan.validity,
+      noOfMechanics: plan.noOfMechanics,
+      noOfServices: plan.noOfServices,
+    };
+
     await this._subscriptionRepository.upsertSubscription({
       garageId: garageIdConverted,
       planId: planIdConverted,
+      planSnapShot,
       startDate: new Date(),
       expiryDate,
       sessionId,

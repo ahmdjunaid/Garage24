@@ -11,3 +11,14 @@ export interface IMechanic {
   imageUrl?: string;
   mobileNumber?: string;
 }
+
+export interface IBaseMechanic {
+  name: string;
+  garageId: string;
+  userId: string;
+  skills: string[];
+  imageUrl: string;
+  mobileNumber: string;
+  isDeleted: boolean;
+  isBlocked: boolean;
+}

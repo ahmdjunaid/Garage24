@@ -49,7 +49,6 @@ const RegisterMechanic:React.FC<ModalProps> = ({ isOpen, onClose, onCreated}) =>
         }, 2000);
       } catch (error) {
         if(error instanceof Error){
-          console.error(error);
           errorToast(error.message || "Error while creating mechanic");
         }
         setLoading(false)

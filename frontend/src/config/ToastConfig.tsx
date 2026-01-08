@@ -6,6 +6,11 @@ export const toastStyles = {
     background: "#333",
     color: "#fff",
     fontWeight: "400",
+    maxWidth: "360px",
+    lineHeight: "1.5",
+    wordBreak: "break-word",
+    whiteSpace: "normal",
+    textAlign: "left",
   },
   success: {
     style: { background: "#4caf50", color: "#fff" },

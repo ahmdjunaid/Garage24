@@ -6,10 +6,10 @@ import { errorToast } from "../utils/notificationAudio";
 import { AUTH_BASE_ROUTE } from "../constants/apiRoutes";
 
 const isLocalhost = window.location.hostname === "localhost";
-const API_URL = isLocalhost === true ? import.meta.env.VITE_API_BASE_URL : import.meta.env.VITE_P_API_BASE_URL;
-
-console.log(window.location.hostname)
-console.log(API_URL)
+const API_URL =
+  isLocalhost === true
+    ? import.meta.env.VITE_API_BASE_URL
+    : import.meta.env.VITE_P_API_BASE_URL;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -69,7 +69,15 @@ api.interceptors.response.use(
         return Promise.reject(Refresherror);
       }
     }
-    return Promise.reject(error);
+
+    if (axios.isAxiosError(error)) {
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Something went wrong";
+
+      return Promise.reject(new Error(message));
+    }
   }
 );
 

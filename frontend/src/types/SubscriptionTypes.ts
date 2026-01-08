@@ -10,11 +10,20 @@ export interface ISubscription {
   _id: string;
   garageId: string;
   planId: string;
+  planSnapShot: planSnapShot;
   transactionId: string;
   startDate: string;
-  expiryDate: string;
+  expiryDate: Date;
   createdAt: string;
   updatedAt: string;
   paymentHistory: IPaymentHistory;
   __v?: number;
+}
+
+export interface planSnapShot {
+  name: string;
+  price: number;
+  validity: number;
+  noOfMechanics: number;
+  noOfServices: number;
 }

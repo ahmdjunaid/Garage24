@@ -1,7 +1,7 @@
 import { BaseRepository } from "../../IBaseRepository";
 import { IMechanicRepository } from "../interface/IMechanicRepository";
 import { IMechanic } from "../../../types/mechanic";
-import { Mechanic } from "../../../models/mechanic";
+import { Mechanic, MechanicDocument } from "../../../models/mechanic";
 import { GetPaginationQuery } from "../../../types/common";
 import { FilterQuery, Types } from "mongoose";
 
@@ -39,7 +39,7 @@ export class MechanicRepository
       garageId: id,
       ...(searchQuery && { name: { $regex: searchQuery, $options: "i" } }),
       isDeleted: false,
-      isBlocked: false
+      isBlocked: false,
     };
 
     const mechanics = await this.model
@@ -69,7 +69,11 @@ export class MechanicRepository
     return await this.model.countDocuments({
       garageId,
       isDeleted: false,
-      isBlocked: false
+      isBlocked: false,
     });
+  }
+
+  async getMechnaicsByGarageId(garageId: string): Promise<MechanicDocument[] | null> {
+    return await this.getAll({ garageId });
   }
 }

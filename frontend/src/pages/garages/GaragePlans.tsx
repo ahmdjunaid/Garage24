@@ -95,6 +95,7 @@ const GaragePlans = () => {
       if (response.url) window.location.href = response.url;
       else throw new Error("No checkout URL received");
     } catch (error) {
+      console.error(error)
       errorToast((error as Error).message || "Error while creating payment session.");
     }
   };

@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { HydratedDocument, Schema } from "mongoose";
 import { IMechanic } from "../types/mechanic"
 
 const mechanicSchema = new Schema<IMechanic>(
@@ -17,3 +17,4 @@ const mechanicSchema = new Schema<IMechanic>(
 
 
 export const Mechanic = mongoose.model<IMechanic>("Mechanic", mechanicSchema);
+export type MechanicDocument = HydratedDocument<IMechanic>

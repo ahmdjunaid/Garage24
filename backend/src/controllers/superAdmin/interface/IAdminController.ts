@@ -5,5 +5,4 @@ export default interface IAdminController {
     getAllUsers(req:Request, res:Response): Promise<void>;
     toggleStatus(req:Request, res:Response): Promise<void>;
     garageApproval(req:Request, res:Response): Promise<void>;
-    getGarageById(req:Request, res:Response): Promise<void>;
 }

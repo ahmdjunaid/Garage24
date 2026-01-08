@@ -37,3 +37,31 @@ export interface IMappedGarageData {
   isRSAEnabled?: boolean;
   approvalStatus?:approvalStatus;
 }
+
+export interface GarageData {
+  _id: string; 
+  userId: string
+  name: string;
+  mobileNumber: string;
+  startTime: string;
+  endTime: string;
+  address: {
+    city: string;
+    district: string;
+    state: string;
+    pincode: string;
+  };
+  location: {
+    coordinates: [number, number];
+    type: string;
+  };
+  approvalStatus: string;
+  isRSAEnabled: boolean;
+  imageUrl: string;
+  docUrl: string;
+  selectedHolidays: string[];
+  isBlocked: boolean;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

@@ -38,7 +38,7 @@ export class MechanicController implements IMechanicController {
 
       res.status(HttpStatus.OK).json({ mechanic: response.mechanic });
     } catch (error) {
-      console.error(error, "Error from onboariding");
+      console.error(error);
       const err = error as Error;
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -66,7 +66,7 @@ export class MechanicController implements IMechanicController {
 
       res.status(HttpStatus.OK).json({ response });
     } catch (error) {
-      console.error(error, "Error from register");
+      console.error(error);
       const err = error as Error;
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)

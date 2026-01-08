@@ -1,4 +1,4 @@
-import { FilterQuery, Types, UpdateQuery } from "mongoose";
+import { FilterQuery, HydratedDocument, Types, UpdateQuery } from "mongoose";
 import {
   GetMappedGarageResponse,
   IAddress,
@@ -22,18 +22,18 @@ export interface IGarageRepository {
     docUrl: string;
     mobileNumber: string;
     isRSAEnabled: boolean;
-  }): Promise<IGarage>;
+  }): Promise<HydratedDocument<IGarage>>;
 
   getAllGarages({
     page,
     limit,
     searchQuery,
   }: GetPaginationQuery): Promise<GetMappedGarageResponse>;
-  findOneAndDelete(filter: FilterQuery<IGarage>): Promise<IGarage | null>;
-  findOne(filter: FilterQuery<IGarage>): Promise<IGarage | null>;
+  findOneAndDelete(filter: FilterQuery<IGarage>): Promise<HydratedDocument<IGarage> | null>;
+  findOne(filter: FilterQuery<IGarage>): Promise<HydratedDocument<IGarage> | null>;
   findOneAndUpdate(
     filter: FilterQuery<IGarage>,
     update: UpdateQuery<IGarage>
-  ): Promise<IGarage | null>;
-  findById(id: string): Promise<IGarage | null>;
+  ): Promise<HydratedDocument<IGarage> | null>;
+  findById(id: string): Promise<HydratedDocument<IGarage> | null>;
 }

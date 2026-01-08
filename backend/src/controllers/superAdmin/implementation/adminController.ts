@@ -106,24 +106,4 @@ export class AdminController implements IAdminController {
         .json({ message: err?.message || SERVER_ERROR });
     }
   };
-
-  getGarageById = async (req: Request, res: Response) => {
-    try {
-      const userId = req.query.garageId as string;
-
-      if (!userId) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
-      }
-
-      const response = await this._adminService.getGarageById(userId);
-
-      res.status(HttpStatus.ACCEPTED).json({ garage: response });
-    } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
-    }
-  };
 }

@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { resendOtpEmail, sendOtpEmail } from "../../../utils/sendOtp";
 import IAuthService from "../interface/IAuthService";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import { IAuthRepository } from "../../../repositories/user/interface/IUserRepositories";
+import { IAuthRepository } from "../../../repositories/auth/interface/IAuthRepositories";
 import { Role } from "../../../types/user";
 import {
   ACCOUNT_IS_BLOCKED,

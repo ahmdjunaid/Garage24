@@ -16,7 +16,7 @@ import AdminTable, {
 } from "@components/layouts/admin/AdminTable";
 import { ConfirmModal } from "@components/modal/ConfirmModal";
 import type { ActionPayload } from "@/types/CommonTypes";
-import GarageDetailsSection from "@components/modal/GarageDetailsSection";
+import GarageDetailsSection from "@/pages/admin/GarageDetailsSection";
 import Pagination from "@components/layouts/admin/Pagination";
 
 const AdminGarages = () => {

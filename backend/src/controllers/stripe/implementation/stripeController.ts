@@ -29,15 +29,16 @@ export class StripeController implements IStripeController {
           message: ALL_FIELDS_REQUIRED,
         };
       }
-
       const session = await this._stripeService.createSubscribeSession({
         planId,
         planName,
         planPrice,
         garageId,
       });
+      
       res.status(HttpStatus.OK).json(session);
     } catch (error) {
+      console.error(error)
       const err = error as Error;
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)

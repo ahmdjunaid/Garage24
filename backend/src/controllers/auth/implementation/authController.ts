@@ -9,7 +9,7 @@ import {
   NO_REFRESH_TOKEN_FOUND,
   SERVER_ERROR,
 } from "../../../constants/messages";
-import IAuthService from "../../../services/user/interface/IAuthService";
+import IAuthService from "../../../services/auth/interface/IAuthService";
 import dotenv from "dotenv";
 import { loginSchema, registerSchema } from "../../../utils/zodValidate";
 import { inject, injectable } from "inversify";

@@ -6,7 +6,7 @@ import {
   IGarage,
 } from "../../../types/garage";
 import { Garage } from "../../../models/garage";
-import { FilterQuery, Types, UpdateQuery } from "mongoose";
+import { FilterQuery, HydratedDocument, Types, UpdateQuery } from "mongoose";
 import { GetPaginationQuery } from "../../../types/common";
 
 export class GarageRepository
@@ -60,18 +60,18 @@ export class GarageRepository
 
   async findOneAndDelete(
     filter: FilterQuery<IGarage>
-  ): Promise<IGarage | null> {
+  ): Promise<HydratedDocument<IGarage> | null> {
     return await this.model.findOneAndDelete(filter);
   }
 
-  async findOne(filter: FilterQuery<IGarage>): Promise<IGarage | null> {
+  async findOne(filter: FilterQuery<IGarage>): Promise<HydratedDocument<IGarage> | null> {
     return await this.getByFilter(filter);
   }
 
   async findOneAndUpdate(
     filter: FilterQuery<IGarage>,
     update: UpdateQuery<IGarage>
-  ): Promise<IGarage | null> {
+  ): Promise<HydratedDocument<IGarage> | null> {
     return this.model.findOneAndUpdate(
       filter,
       { $set: update },
@@ -81,7 +81,7 @@ export class GarageRepository
     );
   }
 
-  async findById(id: string): Promise<IGarage | null> {
+  async findById(id: string) {
     return await this.getById(id);
   }
 }

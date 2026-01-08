@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, HydratedDocument } from "mongoose";
 import { IGarage, ILocation } from "../types/garage";
 
 const LocationSchema = new Schema<ILocation>(
@@ -50,3 +50,4 @@ const garageSchema = new Schema<IGarage>(
 garageSchema.index({ location: "2dsphere" });
 
 export const Garage = mongoose.model<IGarage>("Garage", garageSchema);
+export type GarageDocument = HydratedDocument<IGarage>

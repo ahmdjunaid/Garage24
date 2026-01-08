@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import whiteLogo from "@assets/icons/logo-white.png";
 
 interface ModalProps {
@@ -28,14 +29,23 @@ const DarkModal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+  const modalRoot = document.getElementById("modal-root");
+  if (!modalRoot) return null;
 
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50"
+        onClick={onClose}
+      />
+
+      {/* Modal box */}
       <div
         className="relative z-50 w-[480px] max-h-[90vh] overflow-y-auto rounded-lg bg-black p-6 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close button */}
         <button
           onClick={() => {
             onClose?.();
@@ -46,11 +56,18 @@ const DarkModal: React.FC<ModalProps> = ({
           ✕
         </button>
 
-        <img src={whiteLogo} alt="GARAGE24" className="w-24 mb-4" />
+        {/* Logo */}
+        <img
+          src={whiteLogo}
+          alt="GARAGE24"
+          className="mb-4 w-24"
+        />
 
+        {/* Modal content */}
         {children}
       </div>
-    </div>
+    </div>,
+    modalRoot
   );
 };
 

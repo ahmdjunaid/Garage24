@@ -1,4 +1,4 @@
-import { IAuthRepository } from "../../../repositories/user/interface/IUserRepositories";
+import { IAuthRepository } from "../../../repositories/auth/interface/IAuthRepositories";
 import IMechanicService from "../interface/IMechanicService";
 import { IMechanicRepository } from "../../../repositories/mechanic/interface/IMechanicRepository";
 import HttpStatus from "../../../constants/httpStatusCodes";

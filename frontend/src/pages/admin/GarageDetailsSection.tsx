@@ -1,46 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { fetchGarageByIdApi, garageApprovalApi } from "../../services/adminServices";
-import Spinner from "../elements/Spinner";
+import {
+  fetchGarageDetailsByIdApi,
+  garageApprovalApi,
+} from "../../services/adminServices";
+import Spinner from "../../components/elements/Spinner";
 import { errorToast, successToast } from "../../utils/notificationAudio";
-import { ConfirmModal } from "./ConfirmModal";
-import type { ApprovalPayload } from "../../types/GarageTypes";
+import { ConfirmModal } from "../../components/modal/ConfirmModal";
+import type { ApprovalPayload, GarageData } from "../../types/GarageTypes";
+import type { ISubscription } from "@/types/SubscriptionTypes";
+import type { IBaseMechanic } from "@/types/MechanicTypes";
+import { MechanicDetailsModal } from "@/components/modal/MechanicDetailsModal";
 
 interface GarageDetailsSectionProps {
   garageId: string | null;
   onBack: () => void;
-}
-
-interface GarageData {
-  _id: string;
-  name: string;
-  mobileNumber: string;
-  startTime: string;
-  endTime: string;
-  address: {
-    city: string;
-    district: string;
-    state: string;
-    pincode: string;
-  };
-  location: {
-    coordinates: [number, number];
-    type: string;
-  };
-  approvalStatus: string;
-  isApproved: boolean;
-  isRSAEnabled: boolean;
-  imageUrl: string;
-  docUrl: string;
-  selectedHolidays: string[];
-  plan: {
-    name: string;
-    price: number;
-    validity: number;
-    noOfMechanics: number;
-    noOfServices: number;
-  }[];
-  createdAt: string;
-  updatedAt: string;
 }
 
 const GarageDetailsSection: React.FC<GarageDetailsSectionProps> = ({
@@ -51,14 +24,20 @@ const GarageDetailsSection: React.FC<GarageDetailsSectionProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [approval, setApproval] = useState<ApprovalPayload | null>(null);
+  const [subscription, setSubscription] = useState<ISubscription | null>(null);
+  const [mechanics, setMechanics] = useState<IBaseMechanic[] | null>(null);
+  const [showMechanics, setShowMechanics] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchGarage = async () => {
       if (!garageId) return;
       try {
         setLoading(true);
-        const res = await fetchGarageByIdApi(garageId);
+        const res = await fetchGarageDetailsByIdApi(garageId);
         setGarage(res.garage);
+        setSubscription(res.subscription);
+        setMechanics(res.mechanics);
+        console.log(res.mechanics, "mechhh");
       } catch (error) {
         console.error("Error fetching garage details:", error);
         errorToast("Details not found!");
@@ -95,8 +74,6 @@ const GarageDetailsSection: React.FC<GarageDetailsSectionProps> = ({
 
   if (loading) return <Spinner loading={loading} />;
   if (!garage) return null;
-
-  const plan = garage.plan?.[0];
 
   return (
     <div className="min-h-[80vh] bg-gradient-to-br from-gray-900 to-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl backdrop-blur-sm p-6">
@@ -164,30 +141,54 @@ const GarageDetailsSection: React.FC<GarageDetailsSectionProps> = ({
 
           {/* Plan Details */}
           <div className="bg-gray-800 p-5 rounded-xl h-fit">
-            <h3 className="font-semibold mb-3 text-lg">Plan Details</h3>
-            {plan ? (
+            <h3 className="font-semibold mb-3 text-lg">Subscription Details</h3>
+            {subscription ? (
               <>
-                <p>
-                  <strong>Plan Name:</strong> {plan.name}
-                </p>
-                <p>
-                  <strong>Price:</strong> ₹{plan.price}
-                </p>
-                <p>
-                  <strong>Validity:</strong> {plan.validity} Days
-                </p>
-                <p>
-                  <strong>Mechanics Allowed:</strong> {plan.noOfMechanics}
-                </p>
-                <p>
-                  <strong>Services Allowed:</strong> {plan.noOfServices}
-                </p>
+                <div className="space-y-2 text-sm">
+                  <p className="flex justify-between text-white/80">
+                    <span className="font-medium text-white">Plan Name</span>
+                    <span>{subscription.planSnapShot.name}</span>
+                  </p>
+
+                  <p className="flex justify-between text-white/80">
+                    <span className="font-medium text-white">Price</span>
+                    <span>₹ {subscription.planSnapShot.price}</span>
+                  </p>
+
+                  <p className="flex justify-between text-white/80">
+                    <span className="font-medium text-white">Valid Till</span>
+                    <span>
+                      {new Date(subscription.expiryDate).toDateString()}
+                    </span>
+                  </p>
+
+                  <p className="flex justify-between text-white/80">
+                    <span className="font-medium text-white">
+                      Mechanics Allowed
+                    </span>
+                    <span>{subscription.planSnapShot.noOfMechanics}</span>
+                  </p>
+
+                  <p className="flex justify-between text-white/80">
+                    <span className="font-medium text-white">
+                      Services Allowed
+                    </span>
+                    <span>{subscription.planSnapShot.noOfServices}</span>
+                  </p>
+                </div>
               </>
             ) : (
               <p className="text-gray-400 italic">No active plan found.</p>
             )}
           </div>
         </div>
+
+        <button
+          className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-medium transition w-full mt-5"
+          onClick={() => setShowMechanics(true)}
+        >
+          Get Mechanic Details ({mechanics?.length})
+        </button>
 
         {/* Images */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
@@ -260,10 +261,16 @@ const GarageDetailsSection: React.FC<GarageDetailsSectionProps> = ({
       <ConfirmModal
         isOpen={!!approval}
         message={`Are you sure want ${approval?.action} ${approval?.name}`}
-        isReasonRequired={approval?.action==='rejected'}
+        isReasonRequired={approval?.action === "rejected"}
         onClose={() => setApproval(null)}
         onConfirm={() => handleApproval()}
         onCancel={() => setApproval(null)}
+      />
+
+      <MechanicDetailsModal
+        mechanics={mechanics}
+        isOpen={showMechanics}
+        onClose={() => setShowMechanics(false)}
       />
 
       {/* Fullscreen Preview */}
