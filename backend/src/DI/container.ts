@@ -60,6 +60,12 @@ import { IBrandRepository } from "../repositories/brand/interface/IBrandReposito
 import { BrandRepository } from "../repositories/brand/implementation/brandRepository";
 import { IBrandService } from "../services/brand/interface/IBrandService";
 import { BrandService } from "../services/brand/implementation/brandService";
+import { IBrandController } from "../controllers/brand/interface/IBrandController";
+import { BrandController } from "../controllers/brand/implementation/brandController";
+import { IVehicleModelRepository } from "../repositories/vehicleModel/interface/IVehicleModelRepository";
+import { VehicleModelRepository } from "../repositories/vehicleModel/implementation/vehicleModelRepository";
+import { IVehicleModelService } from "../services/vehicleModel/interface/IVehicleModelService";
+import { VehicleModelService } from "../services/vehicleModel/implementation/vehicleModelService";
 
 const container = new Container();
 
@@ -113,5 +119,9 @@ container.bind<IVehicleController>(TYPES.VehicleController).to(VehicleController
 //Brand
 container.bind<IBrandRepository>(TYPES.BrandRepository).to(BrandRepository);
 container.bind<IBrandService>(TYPES.BrandService).to(BrandService);
+container.bind<IBrandController>(TYPES.BrandController).to(BrandController);
+
+container.bind<IVehicleModelRepository>(TYPES.VehicleModelRepository).to(VehicleModelRepository);
+container.bind<IVehicleModelService>(TYPES.VehicleModelService).to(VehicleModelService)
 
 export { container };

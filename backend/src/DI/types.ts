@@ -50,4 +50,9 @@ export const TYPES = {
   BrandRepository: Symbol.for("BrandRepository"),
   BrandService: Symbol.for("BrandService"),
   BrandController: Symbol.for("BrandController"),
+
+  //VehicleModel
+  VehicleModelRepository: Symbol.for("VehicleModelRepository"),
+  VehicleModelService: Symbol.for("VehicleModelService"),
+  VehicleModelController: Symbol.for("VehicleModelController"),
 };
