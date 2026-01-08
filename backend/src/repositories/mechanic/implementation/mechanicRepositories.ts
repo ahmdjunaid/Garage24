@@ -4,7 +4,9 @@ import { IMechanic } from "../../../types/mechanic";
 import { Mechanic, MechanicDocument } from "../../../models/mechanic";
 import { GetPaginationQuery } from "../../../types/common";
 import { FilterQuery, Types } from "mongoose";
+import { injectable } from "inversify";
 
+@injectable()
 export class MechanicRepository
   extends BaseRepository<IMechanic>
   implements IMechanicRepository

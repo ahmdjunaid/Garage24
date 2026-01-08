@@ -25,8 +25,11 @@ export class VehicleController implements IVehicleController {
         insuranceValidity,
         puccValidity,
       } = req.body;
+      const image = req.file as Express.Multer.File;
+      const userId = req.user?.id
 
       if (
+        !userId ||
         !licensePlate ||
         !make ||
         !model ||
@@ -36,12 +39,25 @@ export class VehicleController implements IVehicleController {
         !variant ||
         !color ||
         !insuranceValidity ||
-        !puccValidity
+        !puccValidity ||
+        !image
       ) {
         throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
       }
 
-      const message = await this._vehicleService.createVehicle(req.body);
+      const message = await this._vehicleService.createVehicle(
+        userId,
+        licensePlate,
+        make,
+        model,
+        registrationYear,
+        fuelType,
+        color,
+        insuranceValidity,
+        puccValidity,
+        image,
+        variant
+      );
 
       res.status(HttpStatus.OK).json({ message });
     } catch (error) {

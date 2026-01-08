@@ -10,6 +10,7 @@ import garageRouter from "../src/routes/garageRoutes";
 import mechanicRouter from "../src/routes/mechanicRoutes";
 import adminRouter from "../src/routes/adminRoutes";
 import stripeRouter from "../src/routes/stripeRoutes";
+import userRouter from "../src/routes/userRouter"
 import cookieParser from "cookie-parser";
 import { connectRedis } from "./config/redisClient";
 import "reflect-metadata";
@@ -34,6 +35,7 @@ app.use("/api/garage", garageRouter);
 app.use("/api/mechanic", mechanicRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/stripe", stripeRouter);
+app.use("/api/user", userRouter)
 
 connectDB();
 

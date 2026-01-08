@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import DarkModal from "../layouts/DarkModal";
 import { Upload, Calendar } from "lucide-react";
+import { registerVehicleApi } from "@/services/userRouter";
+import { errorToast, successToast } from "@/utils/notificationAudio";
 
 interface AddVehicleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
 }
 
 interface Errors {
@@ -15,7 +16,6 @@ interface Errors {
 const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
   isOpen,
   onClose,
-  onSubmit,
 }) => {
   const [preview, setPreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -102,22 +102,14 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
         payload.append("vehicleImage", imageFile);
       }
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/vehicles`,
-        {
-          method: "POST",
-          body: payload,
-          credentials: "include",
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to add vehicle");
-
-      const data = await res.json();
-      onSubmit(data);
+      const res = await registerVehicleApi(payload)
+      successToast(res.message || "Vehicle added to Garage.")
       onClose();
     } catch (err) {
       console.error(err);
+      if(err instanceof Error){
+        errorToast(err.message)
+      }
     } finally {
       setLoading(false);
     }

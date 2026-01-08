@@ -14,3 +14,16 @@ export interface IVehicle {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface VehicleAddDetails {
+    licensePlate: string;
+    make: string;
+    model: string;
+    registrationYear: string;
+    fuelType: string;
+    variant: string;
+    color: string;
+    insuranceValidity: string;
+    puccValidity: string;
+    vehicleImage: 
+}

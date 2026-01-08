@@ -2,7 +2,9 @@ import { BaseRepository } from "../../IBaseRepository";
 import { IVehicleRepository } from "../interface/IVehicleRepository";
 import { IVehicle } from "../../../types/vehicle";
 import { Vehicle } from "../../../models/vehicle";
+import { injectable } from "inversify";
 
+@injectable()
 export class VehicleRepository
   extends BaseRepository<IVehicle>
   implements IVehicleRepository

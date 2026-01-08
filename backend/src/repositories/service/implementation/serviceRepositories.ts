@@ -4,7 +4,9 @@ import { IService } from "../../../types/services";
 import { Service } from "../../../models/service";
 import { HydratedDocument } from "mongoose";
 import { GetPaginationQuery } from "../../../types/common";
+import { injectable } from "inversify";
 
+@injectable()
 export class ServiceRepository
   extends BaseRepository<IService>
   implements IServiceRepository

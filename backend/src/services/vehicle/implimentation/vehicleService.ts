@@ -6,23 +6,48 @@ import {
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
 import IVehicleService from "../interface/IVehicleService";
-import { IVehicle } from "../../../types/vehicle";
 import { IVehicleRepository } from "../../../repositories/vehicle/interface/IVehicleRepository";
+import { Types } from "mongoose";
+import { uploadFile } from "../../../config/s3Service";
+import { deleteLocalFile } from "../../../helper/helper";
 
 @injectable()
 export class VehicleService implements IVehicleService {
   constructor(
-    @inject(TYPES.VehicleRepository) private _vehicleRepository: IVehicleRepository
+    @inject(TYPES.VehicleRepository)
+    private _vehicleRepository: IVehicleRepository
   ) {}
 
-  async createVehicle(data: Partial<IVehicle>): Promise<{ message: string }> {
-    // const existing = await this._planRepository.getPlanByName(data.licensePlate!);
+  async createVehicle(
+    userId: string,
+    licensePlate: string,
+    make: string,
+    model: string,
+    registrationYear: number,
+    fuelType: string,
+    color: string,
+    insuranceValidity: Date,
+    puccValidity: Date,
+    image: Express.Multer.File,
+    variant?: string
+  ): Promise<{ message: string }> {
+    const userIdConverted = new Types.ObjectId(userId);
+    const imageUrl = await uploadFile(image, "vehicle");
+    if (image?.path) deleteLocalFile(image.path);
 
-    // if (existing) {
-    //   throw { status: HttpStatus.CONFLICT, message: PLAN_ALREADY_EXIST };
-    // }
-
-    const response = await this._vehicleRepository.create(data);
+    const response = await this._vehicleRepository.create({
+      userId: userIdConverted,
+      licensePlate,
+      make,
+      model,
+      registrationYear,
+      fuelType,
+      variant,
+      color,
+      insuranceValidity,
+      puccValidity,
+      imageUrl
+    });
 
     if (!response) {
       throw {

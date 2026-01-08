@@ -13,7 +13,7 @@ const s3 = new S3Client({
 
 export const uploadFile = async (
   file: Express.Multer.File,
-  folder: "profile" | "garages"
+  folder: "profile" | "garages" | "vehicle"
 ): Promise<string> => {
   const fileContent = fs.readFileSync(file.path);
 

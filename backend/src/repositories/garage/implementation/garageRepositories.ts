@@ -8,7 +8,9 @@ import {
 import { Garage } from "../../../models/garage";
 import { FilterQuery, HydratedDocument, Types, UpdateQuery } from "mongoose";
 import { GetPaginationQuery } from "../../../types/common";
+import { injectable } from "inversify";
 
+@injectable()
 export class GarageRepository
   extends BaseRepository<IGarage>
   implements IGarageRepository

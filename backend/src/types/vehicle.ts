@@ -8,7 +8,7 @@ export interface IVehicle {
   registrationYear: number;
   fuelType: string;
   variant?: string;
-  color: string;
+  color?: string;
   imageUrl?: string;
   insuranceValidity: Date;
   puccValidity: Date;

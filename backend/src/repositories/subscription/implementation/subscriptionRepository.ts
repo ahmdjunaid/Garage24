@@ -3,7 +3,9 @@ import { ISubscriptionRepository } from "../interface/ISubscriptionRepository";
 import { Types } from "mongoose";
 import { ISubscription } from "../../../types/subscription";
 import subscription from "../../../models/subscription";
+import { injectable } from "inversify";
 
+@injectable()
 export class SubscriptionRepository
   extends BaseRepository<ISubscription>
   implements ISubscriptionRepository

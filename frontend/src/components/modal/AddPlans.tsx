@@ -60,6 +60,11 @@ const AddPlans: React.FC<ModalProps> = ({ isOpen, onClose, onCreated }) => {
       hasError = true;
     }
 
+    if (priceValue < 50) {
+      setPriceError("Please select a plan priced at ₹50 or above.");
+      hasError = true;
+    }
+
     const validityValue = Number(validity);
     if (!validity || isNaN(validityValue) || validityValue <= 0) {
       setValidityError("Select a valid duration.");

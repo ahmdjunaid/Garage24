@@ -60,7 +60,7 @@ export const VehicleListing: React.FC = () => {
         ))}
       </div>
 
-      <AddVehicleModal isOpen={showAddModal} onClose={()=>setShowModal(false)} onSubmit={(da)=>console.log(da)}/>
+      <AddVehicleModal isOpen={showAddModal} onClose={()=>setShowModal(false)} />
     </div>
   );
 };

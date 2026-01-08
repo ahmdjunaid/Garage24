@@ -48,6 +48,8 @@ export const upload = multer({
 
 export const uploadProfile = upload.single("profile");
 
+export const uploadVehicleImage = upload.single("vehicleImage")
+
 export const uploadOnboardingImages = upload.fields([
   { name: "image", maxCount: 1 },
   { name: "document", maxCount: 1 },

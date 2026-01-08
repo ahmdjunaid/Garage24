@@ -54,39 +54,64 @@ import { IVehicleRepository } from "../repositories/vehicle/interface/IVehicleRe
 import { VehicleRepository } from "../repositories/vehicle/implementation/vehicleRepositories";
 import { VehicleService } from "../services/vehicle/implimentation/vehicleService";
 import IVehicleService from "../services/vehicle/interface/IVehicleService";
+import IVehicleController from "../controllers/vehicle/interface/IVehicleController";
+import { VehicleController } from "../controllers/vehicle/implimentation/vehicleController";
+import { IBrandRepository } from "../repositories/brand/interface/IBrandRepository";
+import { BrandRepository } from "../repositories/brand/implementation/brandRepository";
+import { IBrandService } from "../services/brand/interface/IBrandService";
+import { BrandService } from "../services/brand/implementation/brandService";
 
 const container = new Container();
 
-// Repositories
+//Authentication
 container.bind<IAuthRepository>(TYPES.AuthRepository).to(AuthRepository);
-container.bind<IAdminRepository>(TYPES.AdminRepository).toDynamicValue(() => new AdminRepository(User, Garage));
-container.bind<IGarageRepository>(TYPES.GarageRepository).to(GarageRepository);
-container.bind<IMechanicRepository>(TYPES.MechanicRepository).to(MechanicRepository);
-container.bind<ISubscriptionRepository>(TYPES.SubscriptionRepository).to(SubscriptionRepository);
-container.bind<IPlanRepository>(TYPES.PlanRepository).to(PlanRepository);
-container.bind<IPaymentRepository>(TYPES.PaymentRepository).to(paymentRepository);
-container.bind<IServiceRepository>(TYPES.ServiceRepository).to(ServiceRepository);
-container.bind<IVehicleRepository>(TYPES.VehicleRepository).to(VehicleRepository)
-
-// Services
 container.bind<IAuthService>(TYPES.AuthService).to(AuthService);
-container.bind<IAdminService>(TYPES.AdminService).to(AdminService);
-container.bind<IGarageService>(TYPES.GarageService).to(GarageService);
-container.bind<IMechanicService>(TYPES.MechanicService).to(MechanicService);
-container.bind<IStripeService>(TYPES.StripeService).to(StripeService);
-container.bind<ISubscriptionService>(TYPES.SubscriptionService).to(SubscriptionService);
-container.bind<IPlanService>(TYPES.PlanService).to(PlanService);
-container.bind<IPaymentService>(TYPES.PaymentService).to(PaymentService);
-container.bind<IServiceService>(TYPES.ServiceService).to(ServiceService);
-container.bind<IVehicleService>(TYPES.VehicleService).to(VehicleService)
-
-// Controllers
 container.bind<IAuthController>(TYPES.AuthController).to(Authcontroller);
+
+//Admin
+container.bind<IAdminRepository>(TYPES.AdminRepository).toDynamicValue(() => new AdminRepository(User, Garage));
+container.bind<IAdminService>(TYPES.AdminService).to(AdminService);
 container.bind<IAdminController>(TYPES.AdminController).to(AdminController);
+
+//Garage
+container.bind<IGarageRepository>(TYPES.GarageRepository).to(GarageRepository);
+container.bind<IGarageService>(TYPES.GarageService).to(GarageService);
 container.bind<IGarageController>(TYPES.GarageController).to(GarageController);
+
+//Mechanic
+container.bind<IMechanicRepository>(TYPES.MechanicRepository).to(MechanicRepository);
+container.bind<IMechanicService>(TYPES.MechanicService).to(MechanicService);
 container.bind<IMechanicController>(TYPES.MechanicController).to(MechanicController);
+
+//Subscription
+container.bind<ISubscriptionRepository>(TYPES.SubscriptionRepository).to(SubscriptionRepository);
+container.bind<ISubscriptionService>(TYPES.SubscriptionService).to(SubscriptionService);
+
+//Stripe
+container.bind<IStripeService>(TYPES.StripeService).to(StripeService);
 container.bind<IStripeController>(TYPES.StripeController).to(StripeController);
+
+//Payment
+container.bind<IPaymentRepository>(TYPES.PaymentRepository).to(paymentRepository);
+container.bind<IPaymentService>(TYPES.PaymentService).to(PaymentService);
+
+//Plan
+container.bind<IPlanRepository>(TYPES.PlanRepository).to(PlanRepository);
+container.bind<IPlanService>(TYPES.PlanService).to(PlanService);
 container.bind<IPlanController>(TYPES.PlanController).to(PlanController);
+
+//Service
+container.bind<IServiceRepository>(TYPES.ServiceRepository).to(ServiceRepository);
+container.bind<IServiceService>(TYPES.ServiceService).to(ServiceService);
 container.bind<IServiceController>(TYPES.ServiceController).to(ServiceController);
+
+//Vehicle
+container.bind<IVehicleRepository>(TYPES.VehicleRepository).to(VehicleRepository);
+container.bind<IVehicleService>(TYPES.VehicleService).to(VehicleService);
+container.bind<IVehicleController>(TYPES.VehicleController).to(VehicleController);
+
+//Brand
+container.bind<IBrandRepository>(TYPES.BrandRepository).to(BrandRepository);
+container.bind<IBrandService>(TYPES.BrandService).to(BrandService);
 
 export { container };

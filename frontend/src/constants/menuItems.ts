@@ -1,9 +1,9 @@
-import { Wrench, Home, Settings, Calendar, FileText, CalendarCheck, CheckCheck, UserRound, HandCoins } from "lucide-react";
+import { Wrench, Home, Settings, Calendar, FileText, CalendarCheck, CheckCheck, UserRound, HandCoins, type LucideIcon  } from "lucide-react";
 
 type MenuItem = {
   name: string;
   path: string;
-  icon: any;
+  icon: LucideIcon;
   exact?: boolean;
 };
 
