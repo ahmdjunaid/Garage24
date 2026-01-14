@@ -1,30 +1,22 @@
 import { VehicleCard } from "@/components/cards/VehicleCard";
-import AddVehicleModal from "@/components/modal/AddVehicleModal";
-import { useState } from "react";
-
-
-const vehicles = [
-  {
-    id: "1",
-    name: "Honda City i-VTEC",
-    licensePlate: "KL-11-BN-7774",
-  },
-  {
-    id: "2",
-    name: "Toyota Etios Liva",
-    licensePlate: "KL-57-Y-5656",
-  },
-  {
-    id: "3",
-    name: "Toyota Altis GL",
-    licensePlate: "KL-57-AB-1797",
-  },
-];
+import AddVehicleModal from "@/components/modal/user/AddVehicleModal";
+import VehicleDetailsModal from "@/components/modal/user/VehicleDetailsModal";
+import { getVehiclesByUserIdApi } from "@/services/userRouter";
+import type { IVehicleDTO } from "@/types/VehicleTypes";
+import { useEffect, useState } from "react";
 
 export const VehicleListing: React.FC = () => {
-  const [showAddModal, setShowModal] = useState<boolean>(false)
-  const handleView = (id: string) => {
-    console.log("View vehicle", id);
+  const [showAddModal, setShowModal] = useState<boolean>(false);
+  const [vehicleToView, setVehicleToView] = useState<IVehicleDTO | null>(null);
+  const [vehicles, setVehicles] = useState<IVehicleDTO[] | []>([]);
+
+  useEffect(() => {
+    fetchVehicles();
+  }, []);
+
+  const fetchVehicles = async () => {
+    const res = await getVehiclesByUserIdApi();
+    setVehicles(res);
   };
 
   const handleBook = (id: string) => {
@@ -39,10 +31,10 @@ export const VehicleListing: React.FC = () => {
     <div className="relative min-h-screen bg-[#1f1f1f] p-6">
       {/* Header */}
       <div className="flex justify-end mb-6">
-        <button 
+        <button
           className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg text-sm"
-          onClick={()=>setShowModal(true)}
-          >
+          onClick={() => setShowModal(true)}
+        >
           Add Vehicle
         </button>
       </div>
@@ -51,16 +43,25 @@ export const VehicleListing: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
         {vehicles.map((vehicle) => (
           <VehicleCard
-            key={vehicle.id}
+            key={vehicle._id}
             vehicle={vehicle}
-            onView={handleView}
+            onView={(vehicle) => setVehicleToView(vehicle)}
             onBook={handleBook}
             onRemove={handleRemove}
           />
         ))}
       </div>
 
-      <AddVehicleModal isOpen={showAddModal} onClose={()=>setShowModal(false)} />
+      <AddVehicleModal
+        isOpen={showAddModal}
+        onClose={() => setShowModal(false)}
+        onCreated={() => fetchVehicles()}
+      />
+      <VehicleDetailsModal
+        vehicle={vehicleToView}
+        isOpen={!!vehicleToView}
+        onClose={() => setVehicleToView(null)}
+      />
     </div>
   );
 };

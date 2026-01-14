@@ -4,7 +4,7 @@ import UserFooter from "@components/layouts/user/layout/UserFooter";
 import UserHeader from "@components/layouts/user/layout/UserHeader";
 import UserProcess from "@components/layouts/user/section/UserProcess";
 import Garage24Testimonials from "@components/layouts/user/section/UserTestimonials";
-import SelectVehicleModal from "@/components/modal/SelectVehicleModal";
+import SelectVehicleModal from "@/components/modal/user/SelectVehicleModal";
 import { useState } from "react";
 
 export default function HomePage() {

@@ -55,4 +55,17 @@ export const TYPES = {
   VehicleModelRepository: Symbol.for("VehicleModelRepository"),
   VehicleModelService: Symbol.for("VehicleModelService"),
   VehicleModelController: Symbol.for("VehicleModelController"),
+
+  //ServiceCategory
+  ServiceCategoryRepository: Symbol.for("ServiceCategoryRepository"),
+  ServiceCategoryService: Symbol.for("ServiceCategoryService"),
+  ServiceCategoryController: Symbol.for("ServiceCategoryController"),
+
+  //Slot
+  SlotRepository: Symbol.for("SlotRepository"),
+  SlotService:  Symbol.for("SlotService"),
+  SlotController: Symbol.for("SlotController"),
+
+  //Appointment
+  AppointmentController: Symbol.for("AppointmentController"),
 };

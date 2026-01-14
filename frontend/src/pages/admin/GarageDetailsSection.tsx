@@ -106,6 +106,9 @@ const GarageDetailsSection: React.FC<GarageDetailsSectionProps> = ({
               {garage.endTime}
             </p>
             <p>
+              <strong>No. of service bays:</strong> {garage.numOfServiceBays}
+            </p>
+            <p>
               <strong>Status:</strong>{" "}
               <span
                 className={`font-semibold ${
@@ -127,6 +130,12 @@ const GarageDetailsSection: React.FC<GarageDetailsSectionProps> = ({
             {garage.selectedHolidays?.length > 0 && (
               <p>
                 <strong>Holidays:</strong> {garage.selectedHolidays.join(", ")}
+              </p>
+            )}
+
+            {garage.supportedFuelTypes?.length > 0 && (
+              <p>
+                <strong>Supported Fuel Types:</strong> {garage.supportedFuelTypes.join(", ")}
               </p>
             )}
             <p>

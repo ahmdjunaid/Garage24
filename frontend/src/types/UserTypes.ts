@@ -16,6 +16,7 @@ export interface User {
   isBlocked: boolean;
   isDeleted: boolean;
   imageUrl?: string;
+  mobileNumber?: string;
   isOnboardingRequired: boolean;
 }
 

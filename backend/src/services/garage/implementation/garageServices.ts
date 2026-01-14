@@ -35,7 +35,9 @@ export class GarageService implements IGarageService {
     image: Express.Multer.File,
     document: Express.Multer.File,
     mobile: string,
-    isRSAEnabled: boolean
+    isRSAEnabled: boolean,
+    numOfServiceBays: number,
+    supportedFuelTypes: string[]
   ) {
     const convertedUserId = new mongoose.Types.ObjectId(userId);
     const existing = await this._garageRepository.findOne({
@@ -72,6 +74,8 @@ export class GarageService implements IGarageService {
       docUrl,
       mobileNumber: mobile,
       isRSAEnabled,
+      numOfServiceBays,
+      supportedFuelTypes,
       approvalStatus: "pending",
       rejectionReason: undefined,
     };

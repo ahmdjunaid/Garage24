@@ -119,3 +119,9 @@ export const getGarageDetailsApi = (garageId:string) => {
     .get(`/${GARAGE_BASE_ROUTE}/get-garage?garageId=${garageId}`)
     .then(res => res.data)
 }
+
+export const getAllServiceCatoriesApi = () => {
+  return api
+    .get(`${GARAGE_BASE_ROUTE}/service-categories`)
+    .then(res => res.data)
+}

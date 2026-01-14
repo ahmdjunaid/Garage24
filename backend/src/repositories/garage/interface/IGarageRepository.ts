@@ -22,6 +22,8 @@ export interface IGarageRepository {
     docUrl: string;
     mobileNumber: string;
     isRSAEnabled: boolean;
+    numOfServiceBays: number;
+    supportedFuelTypes: string[];
   }): Promise<HydratedDocument<IGarage>>;
 
   getAllGarages({
@@ -29,8 +31,12 @@ export interface IGarageRepository {
     limit,
     searchQuery,
   }: GetPaginationQuery): Promise<GetMappedGarageResponse>;
-  findOneAndDelete(filter: FilterQuery<IGarage>): Promise<HydratedDocument<IGarage> | null>;
-  findOne(filter: FilterQuery<IGarage>): Promise<HydratedDocument<IGarage> | null>;
+  findOneAndDelete(
+    filter: FilterQuery<IGarage>
+  ): Promise<HydratedDocument<IGarage> | null>;
+  findOne(
+    filter: FilterQuery<IGarage>
+  ): Promise<HydratedDocument<IGarage> | null>;
   findOneAndUpdate(
     filter: FilterQuery<IGarage>,
     update: UpdateQuery<IGarage>

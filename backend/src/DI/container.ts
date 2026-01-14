@@ -66,6 +66,20 @@ import { IVehicleModelRepository } from "../repositories/vehicleModel/interface/
 import { VehicleModelRepository } from "../repositories/vehicleModel/implementation/vehicleModelRepository";
 import { IVehicleModelService } from "../services/vehicleModel/interface/IVehicleModelService";
 import { VehicleModelService } from "../services/vehicleModel/implementation/vehicleModelService";
+import { IVehicleModelController } from "../controllers/vehicleModel/interface/IVehicleModelController";
+import { VehicleModelController } from "../controllers/vehicleModel/implementation/vehicleModelController";
+import { IServiceCategoryRepository } from "../repositories/serviceCategory/interface/IServiceCategoryRepository";
+import { ServiceCategoryRepository } from "../repositories/serviceCategory/implementation/serviceCategoryRepository";
+import { IServiceCategoryService } from "../services/serviceCategory/interface/IServiceCategoryService";
+import { ServiceCategoryService } from "../services/serviceCategory/implementation/serviceCategoryService";
+import { IServiceCategoryController } from "../controllers/serviceCategory/interface/IServiceCategoryController";
+import { ServiceCategoryController } from "../controllers/serviceCategory/implementation/serviceCategoryController";
+import { ISlotRepository } from "../repositories/slot/interface/ISlotRepository";
+import { SlotRepository } from "../repositories/slot/implementation/slotRepository";
+import { ISlotService } from "../services/slot/interface/ISlotService";
+import { SlotService } from "../services/slot/implementation/slotService";
+import { IAppointmentController } from "../controllers/appointment/interface/IAppointmentController";
+import { AppointmentController } from "../controllers/appointment/implementation/appointmentController";
 
 const container = new Container();
 
@@ -121,7 +135,22 @@ container.bind<IBrandRepository>(TYPES.BrandRepository).to(BrandRepository);
 container.bind<IBrandService>(TYPES.BrandService).to(BrandService);
 container.bind<IBrandController>(TYPES.BrandController).to(BrandController);
 
+//VehicleModel
 container.bind<IVehicleModelRepository>(TYPES.VehicleModelRepository).to(VehicleModelRepository);
-container.bind<IVehicleModelService>(TYPES.VehicleModelService).to(VehicleModelService)
+container.bind<IVehicleModelService>(TYPES.VehicleModelService).to(VehicleModelService);
+container.bind<IVehicleModelController>(TYPES.VehicleModelController).to(VehicleModelController);
+
+//ServiceCategory
+container.bind<IServiceCategoryRepository>(TYPES.ServiceCategoryRepository).to(ServiceCategoryRepository);;
+container.bind<IServiceCategoryService>(TYPES.ServiceCategoryService).to(ServiceCategoryService);
+container.bind<IServiceCategoryController>(TYPES.ServiceCategoryController).to(ServiceCategoryController);
+
+//Slot
+container.bind<ISlotRepository>(TYPES.SlotRepository).to(SlotRepository);
+container.bind<ISlotService>(TYPES.SlotService).to(SlotService);
+// container.bind<>
+
+//Appointment
+container.bind<IAppointmentController>(TYPES.AppointmentController).to(AppointmentController)
 
 export { container };

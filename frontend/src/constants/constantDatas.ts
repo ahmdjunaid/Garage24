@@ -9,6 +9,8 @@ export const daysOfWeek = [
   "Sunday",
 ];
 
+export const fuelTypes = ["Petrol", "Diesel", "Electric", "Hybrid", "CNG"]
+
 export const getTimeOptions = () => {
   const timeOptions = [];
   for (let h = 0; h < 24; h++) {

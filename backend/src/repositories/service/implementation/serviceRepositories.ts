@@ -1,6 +1,6 @@
 import { BaseRepository } from "../../IBaseRepository";
 import { IServiceRepository } from "../interface/IServiceRepository";
-import { IService } from "../../../types/services";
+import { IService, IServicePopulated } from "../../../types/services";
 import { Service } from "../../../models/service";
 import { HydratedDocument } from "mongoose";
 import { GetPaginationQuery } from "../../../types/common";
@@ -37,12 +37,17 @@ export class ServiceRepository
       .find(searchFilter)
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .populate({path:"categoryId", select:"name -_id"})
+      .lean()
 
     const totalServices = await this.model.countDocuments(searchFilter);
     const totalPages = Math.ceil(totalServices / limit);
 
-    return { services, totalServices, totalPages };
+    return { 
+      services: services as unknown as IServicePopulated[], 
+      totalServices, 
+      totalPages };
   }
 
   async findOneAndUpdate(

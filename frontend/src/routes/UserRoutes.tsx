@@ -8,6 +8,7 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import UnauthorizedPage from "../pages/auth/Unauthorized";
 import PageNotFound from "../pages/auth/PageNotFound";
 import MyGarage from "@/pages/user/MyGarage";
+import Appointment from "@/pages/user/Appointment";
 
 const UserRoutes: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const UserRoutes: React.FC = () => {
         <Route path="/" element={<HomePage />} />
       <Route element={<ProtectedRoute requiredRoles={["user"]} />}>
         <Route path="/my-garage" element={<MyGarage/>}/>
+        <Route path="/appointment" element={<Appointment/>}/>
         <Route path="*" element={<PageNotFound/>}/>
       </Route>
     </Routes>

@@ -1,27 +1,28 @@
-import React, { useState } from "react";
-import DarkModal from "../layouts/DarkModal";
+import React, { useEffect, useState } from "react";
+import DarkModal from "../../layouts/DarkModal";
 import { Upload, Calendar } from "lucide-react";
-import { registerVehicleApi } from "@/services/userRouter";
+import {
+  getAllBrandsApi,
+  getVehicleModelsByBrandApi,
+  registerVehicleApi,
+} from "@/services/userRouter";
 import { errorToast, successToast } from "@/utils/notificationAudio";
+import type { IBrand } from "@/types/BrandTypes";
+import type { IVehicleModel } from "@/types/VehicleModelTypes";
+import { isValidIndianPlate } from "@/utils/validateLicencePlate";
+import { fuelTypes } from "@/constants/constantDatas";
 
 interface AddVehicleModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onCreated: () => void;
 }
 
 interface Errors {
   [key: string]: string;
 }
 
-const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
-  isOpen,
-  onClose,
-}) => {
-  const [preview, setPreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const [formData, setFormData] = useState({
+const intialFormData = { 
     licensePlate: "",
     make: "",
     model: "",
@@ -31,9 +32,38 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
     color: "",
     insuranceValidity: "",
     puccValidity: "",
-  });
+}
 
+const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
+  isOpen,
+  onClose,
+  onCreated
+}) => {
+  const [preview, setPreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
+  const [brands, setBrands] = useState<IBrand[] | []>([]);
+  const [vehicleModels, setVehicleModels] = useState<IVehicleModel[] | []>([]);
+  const [formData, setFormData] = useState(intialFormData);
+
+  useEffect(() => {
+    const fetchBrands = async () => {
+      const res = await getAllBrandsApi();
+      setBrands(res);
+    };
+
+    fetchBrands();
+  }, []);
+
+  useEffect(() => {
+    const fetchVehicleModels = async () => {
+      if(!formData.make) return;
+      const res = await getVehicleModelsByBrandApi(formData.make);
+      setVehicleModels(res);
+    };
+    fetchVehicleModels();
+  }, [formData.make]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -52,12 +82,10 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
   const validate = () => {
     const newErrors: Errors = {};
 
-    const plateRegex = /^[A-Z]{2}-\d{2}-[A-Z]{2}-\d{4}$/;
-
     if (!formData.licensePlate)
       newErrors.licensePlate = "License plate is required";
-    else if (!plateRegex.test(formData.licensePlate.toUpperCase()))
-      newErrors.licensePlate = "Invalid license plate format";
+    else if (!isValidIndianPlate(formData.licensePlate))
+      newErrors.licensePlate = "Invalid license plate";
 
     if (!formData.make) newErrors.make = "Car make is required";
     if (!formData.model) newErrors.model = "Car model is required";
@@ -76,15 +104,13 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
     if (!formData.insuranceValidity)
       newErrors.insuranceValidity = "Insurance date required";
 
-    if (!formData.puccValidity)
-      newErrors.puccValidity = "PUCC date required";
+    if (!formData.puccValidity) newErrors.puccValidity = "PUCC date required";
 
     if (!imageFile) newErrors.image = "Vehicle image is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
 
   const handleSubmit = async () => {
     if (!validate()) return;
@@ -102,19 +128,22 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
         payload.append("vehicleImage", imageFile);
       }
 
-      const res = await registerVehicleApi(payload)
-      successToast(res.message || "Vehicle added to Garage.")
+      const res = await registerVehicleApi(payload);
+      successToast(res.message || "Vehicle added to Garage.");
+      onCreated();
       onClose();
+      setFormData(intialFormData)
+      setImageFile(null)
+      setPreview(null)
     } catch (err) {
       console.error(err);
-      if(err instanceof Error){
-        errorToast(err.message)
+      if (err instanceof Error) {
+        errorToast(err.message);
       }
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <DarkModal isOpen={isOpen} onClose={onClose}>
@@ -165,22 +194,44 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
           placeholder="License Plate (KL-01-AA-0000)"
           span
         />
-
-        <Input
-          name="make"
-          value={formData.make}
-          onChange={handleChange}
-          error={errors.make}
-          placeholder="Car Make"
-        />
-
-        <Input
-          name="model"
-          value={formData.model}
-          onChange={handleChange}
-          error={errors.model}
-          placeholder="Car Model"
-        />
+        <div>
+          <select
+            name="make"
+            id=""
+            onChange={handleChange}
+            value={formData.make}
+            className="w-full bg-white rounded-lg px-4 py-3 text-sm text-gray-800 focus:ring-2 focus:ring-red-500 outline-none"
+          >
+            <option value="" selected disabled>
+              Select a brand
+            </option>
+            {brands.map((brand) => {
+              return <option value={brand._id}>{brand.name}</option>;
+            })}
+          </select>
+          {errors.make && (
+            <p className="text-red-500 text-xs mt-1">{errors.make}</p>
+          )}
+        </div>
+        <div>
+          <select
+            name="model"
+            id=""
+            onChange={handleChange}
+            value={formData.model}
+            className="w-full bg-white rounded-lg px-4 py-3 text-sm text-gray-800 focus:ring-2 focus:ring-red-500 outline-none"
+          >
+            <option value="" selected disabled>
+              Select a model
+            </option>
+            {vehicleModels.map((model) => {
+              return <option value={model._id}>{model.name}</option>;
+            })}
+          </select>
+          {errors.model && (
+            <p className="text-red-500 text-xs mt-1">{errors.model}</p>
+          )}
+        </div>
 
         <Input
           name="registrationYear"
@@ -190,13 +241,25 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
           placeholder="Registration Year"
         />
 
-        <Input
-          name="fuelType"
-          value={formData.fuelType}
-          onChange={handleChange}
-          error={errors.fuelType}
-          placeholder="Fuel Type"
-        />
+        <div>
+          <select
+            name="fuelType"
+            id=""
+            onChange={handleChange}
+            value={formData.fuelType}
+            className="w-full bg-white rounded-lg px-4 py-3 text-sm text-gray-800 focus:ring-2 focus:ring-red-500 outline-none"
+          >
+            <option value="" selected disabled>
+              Select a fuel-type
+            </option>
+            {fuelTypes.map((fuel) => {
+              return <option value={fuel}>{fuel}</option>;
+            })}
+          </select>
+          {errors.fuelType && (
+            <p className="text-red-500 text-xs mt-1">{errors.fuelType}</p>
+          )}
+        </div>
 
         <Input
           name="variant"
@@ -244,14 +307,7 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
   );
 };
 
-const Input = ({
-  name,
-  value,
-  onChange,
-  placeholder,
-  error,
-  span,
-}: any) => (
+const Input = ({ name, value, onChange, placeholder, error, span }: any) => (
   <div className={span ? "col-span-2" : ""}>
     <input
       name={name}
@@ -264,21 +320,16 @@ const Input = ({
   </div>
 );
 
-const DateInput = ({
-  name,
-  value,
-  onChange,
-  error,
-}: any) => (
+const DateInput = ({ name, value, onChange, error, placeholder }: any) => (
   <div className="relative">
+    <label className="text-sm text-white">{placeholder} :</label>
     <input
       type="date"
       name={name}
       value={value}
       onChange={onChange}
-      className="w-full bg-white rounded-lg px-4 py-3 pr-10 text-sm text-gray-800 focus:ring-2 focus:ring-red-500 outline-none"
+      className="w-full bg-white rounded-lg px-4 py-3 text-sm text-gray-800 focus:ring-2 focus:ring-red-500 outline-none"
     />
-    <Calendar size={16} className="absolute right-3 top-3 text-red-500" />
     {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
   </div>
 );

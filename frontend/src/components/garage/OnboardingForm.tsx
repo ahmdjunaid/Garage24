@@ -13,7 +13,7 @@ import {
   onboardingApi,
 } from "@/services/garageServices";
 import { errorToast, successToast } from "@/utils/notificationAudio";
-import { daysOfWeek, getTimeOptions } from "@/constants/constantDatas";
+import { daysOfWeek, fuelTypes, getTimeOptions } from "@/constants/constantDatas";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import { login } from "@/redux/slice/userSlice";
 import { mobileRegex } from "@/constants/commonRegex";
@@ -56,6 +56,10 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
   const [pincode, setPincode] = useState<string>("");
   const [locationError, setLocationError] = useState<string>("");
   const [isRejected, setIsRejected] = useState<boolean>(false);
+  const [numOfServiceBays, setNumOfServiceBays] = useState<number | string>("");
+  const [serviceBayError, setServiceBayError] = useState<string>("");
+  const [supportedFuelTypes, setSupportedFuelTypes] = useState<string[]>([]);
+  const [supportedFuelTypesError, setSupportedFuelTypesError] = useState<string>("");
 
   const { user, token } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
@@ -100,9 +104,16 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
     );
   };
 
+  const handleFuelTypeChange = (t: string) => {
+    setSupportedFuelTypes((prev) =>
+      prev.includes(t) ? prev.filter((d) => d !== t) : [...prev, t]
+    );
+  };
+
   const LocationPicker = () => {
     useMapEvents({
       click(e) {
+        setLocationError("");
         setLocation(e.latlng);
       },
     });
@@ -156,6 +167,22 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
       hasError = true;
     }
 
+      if (supportedFuelTypes.length<1) {
+      setSupportedFuelTypesError(
+        "Please select the fuel types supported by your garage."
+      );
+      hasError = true;
+    }
+
+    if (
+      !numOfServiceBays ||
+      Number.isNaN(numOfServiceBays) ||
+      Number(numOfServiceBays) < 0
+    ) {
+      setServiceBayError("Enter valid number of service bays.");
+      hasError = true;
+    }
+
     if (hasError) return;
     setShowConfirm(true);
   };
@@ -175,6 +202,8 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
       formData.append("address", JSON.stringify(address));
       formData.append("location", JSON.stringify(location));
       formData.append("selectedHolidays", JSON.stringify(selectedHolidays));
+      formData.append("numOfServiceBays", String(numOfServiceBays));
+      formData.append("supportedFuelTypes", JSON.stringify(supportedFuelTypes));
 
       if (imageFile) formData.append("image", imageFile);
       if (docFile) formData.append("document", docFile);
@@ -202,6 +231,7 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
 
   const handleRSAchange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
+    setRSAError("");
     if (value === "Yes") setIsRSAEnabled(true);
     else if (value === "No") setIsRSAEnabled(false);
     else setIsRSAEnabled(null);
@@ -212,6 +242,7 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
       (pos) => {
         const { latitude, longitude } = pos.coords;
         setLocation({ lat: latitude, lng: longitude });
+        setLocationError("");
       },
       (err) => {
         console.error("Error getting location", err);
@@ -232,11 +263,11 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
 
         {isRejected && (
           <div className="bg-red-100 rounded p-2 text-center">
-          <p className="text-red-600 text-sm mt-1">
-            <strong>Application rejected. </strong>
-            Please check your email for the rejection reason and resubmit after
-            uploading valid documents.
-          </p>
+            <p className="text-red-600 text-sm mt-1">
+              <strong>Application rejected. </strong>
+              Please check your email for the rejection reason and resubmit
+              after uploading valid documents.
+            </p>
           </div>
         )}
 
@@ -265,7 +296,10 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
               <div className="flex gap-3">
                 <select
                   value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
+                  onChange={(e) => {
+                    setStartTime(e.target.value);
+                    setTimeError("");
+                  }}
                   className="flex-1 bg-gray-50 rounded-lg p-3 text-gray-800 border-2 border-transparent focus:border-red-600 focus:outline-none"
                 >
                   <option value="">Select Opening</option>
@@ -277,7 +311,10 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
                 </select>
                 <select
                   value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
+                  onChange={(e) => {
+                    setEndTime(e.target.value);
+                    setTimeError("");
+                  }}
                   className="flex-1 bg-gray-50 rounded-lg p-3 text-gray-800 border-2 border-transparent focus:border-red-600 focus:outline-none"
                 >
                   <option value="">Select Closing</option>
@@ -302,7 +339,10 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
               </label>
               <input
                 value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
+                onChange={(e) => {
+                  setMobile(e.target.value);
+                  setMobileError("");
+                }}
                 maxLength={15}
                 placeholder="Enter mobile number"
                 className="w-full bg-gray-50 rounded-lg p-3 text-gray-800 border-2 border-transparent focus:border-red-600 focus:outline-none"
@@ -328,7 +368,10 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
                     <input
                       type="checkbox"
                       checked={selectedHolidays.includes(day)}
-                      onChange={() => handleCheckboxChange(day)}
+                      onChange={() => {
+                        handleCheckboxChange(day);
+                        setSelectedHolidaysError("");
+                      }}
                       className="w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500"
                     />
                     <span>{day}</span>
@@ -338,6 +381,80 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
               {selectHolidaysError && (
                 <p className="text-red-600 font-light text-sm mt-1">
                   {selectHolidaysError}
+                </p>
+              )}
+            </div>
+
+            {/* supportedFuelTypes */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Supported Fuel Types
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {fuelTypes.map(
+                  (type) => (
+                    <label
+                      key={type}
+                      className="flex items-center space-x-2 text-gray-800"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={supportedFuelTypes.includes(type)}
+                        onChange={() => {
+                          handleFuelTypeChange(type);
+                          setSupportedFuelTypesError("");
+                        }}
+                        className="w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                      />
+                      <span>{type}</span>
+                    </label>
+                  )
+                )}
+              </div>
+              {supportedFuelTypesError && (
+                <p className="text-red-600 font-light text-sm mt-1">
+                  {supportedFuelTypesError}
+                </p>
+              )}
+            </div>
+
+            {/* ServiceBays */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Number of Service Bays{" "}
+                <span className="relative group cursor-help">
+                  <i
+                    className="fa fa-question-circle text-gray-400 hover:text-gray-600"
+                    aria-hidden="true"
+                  />
+
+                  {/* Tooltip */}
+                  <span
+                    className="
+                    absolute bottom-full left-1/2 -translate-x-1/2 mb-2
+                    hidden group-hover:block
+                    bg-gray-900 text-white text-xs px-3 py-1 rounded-md
+                    whitespace-nowrap shadow-lg z-50
+                    "
+                    role="tooltip"
+                  >
+                    Number of vehicles that can be serviced at the same time
+                  </span>
+                </span>
+              </label>
+              <input
+                value={numOfServiceBays}
+                onChange={(e) => {
+                  setNumOfServiceBays(Number(e.target.value));
+                  setServiceBayError("");
+                }}
+                maxLength={3}
+                placeholder="Enter no of service bays"
+                className="w-full bg-gray-50 rounded-lg p-3 text-gray-800 border-2 border-transparent focus:border-red-600 focus:outline-none"
+              />
+              {serviceBayError && (
+                <p className="text-red-600 font-light text-sm mt-1">
+                  {serviceBayError}
                 </p>
               )}
             </div>
@@ -425,7 +542,10 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
             <div>
               <ImageUploader
                 label="Garage Image"
-                onImageSelect={(data) => setImageFile(data)}
+                onImageSelect={(data) => {
+                  setImageFile(data);
+                  setImageError("");
+                }}
               />
               {imageError && (
                 <p className="text-red-600 font-light text-sm mt-1">
@@ -438,7 +558,10 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
             <div>
               <FileUploader
                 label="Upload Document"
-                onFileSelect={(data) => setDocFile(data)}
+                onFileSelect={(data) => {
+                  setDocFile(data);
+                  setDocError("");
+                }}
               />
               {docError && (
                 <p className="text-red-600 font-light text-sm mt-1">

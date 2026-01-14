@@ -15,7 +15,9 @@ export default interface IGarageService {
     image: Express.Multer.File,
     document: Express.Multer.File,
     mobile: string,
-    isRSAEnabled: boolean
+    isRSAEnabled: boolean,
+    numOfServiceBays: number,
+    supportedFuelTypes: string[]
   ): Promise<IGarage | null>;
   getAddressFromCoordinates(lat: string, lng: string): Promise<IAddress>;
   getApprovalStatus(userId: string): Promise<GarageStatusResponse>;

@@ -15,10 +15,10 @@ export class ServiceController implements IServiceController {
 
   createService = async (req: Request, res: Response) => {
     try {
-      const { category, name, price, durationMinutes } = req.body;
+      const { categoryId, name, price, durationMinutes } = req.body;
       const garageId = req.user?.id;
 
-      if (!category || !name || !price || !durationMinutes || !garageId) {
+      if (!categoryId || !name || !price || !durationMinutes || !garageId) {
         throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
       }
 

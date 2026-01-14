@@ -4,7 +4,7 @@ import { TYPES } from "../../../DI/types";
 import { IVehicleModelService } from "../../../services/vehicleModel/interface/IVehicleModelService";
 import { Request, Response } from "express";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import { SERVER_ERROR } from "../../../constants/messages";
+import { ERROR_WHILE_FETCH_DATA, SERVER_ERROR } from "../../../constants/messages";
 
 @injectable()
 export class VehicleModelController implements IVehicleModelController {
@@ -13,10 +13,16 @@ export class VehicleModelController implements IVehicleModelController {
     private _vehicleModelService: IVehicleModelService
   ) {}
 
-  getAllVehicleModels = async (req: Request, res: Response) => {
+  getAllVehicleModelsByBrand = async (req: Request, res: Response) => {
     try {
+      const brandId = req.params.brandId
+
+      if(!brandId){
+        throw {status:HttpStatus.BAD_REQUEST, message: ERROR_WHILE_FETCH_DATA}
+      }
+
       const vehicleModels =
-        await this._vehicleModelService.getAllVehicleModels();
+        await this._vehicleModelService.getAllVehicleModelsByBrand(brandId);
 
       res.status(HttpStatus.OK).json(vehicleModels);
     } catch (error) {

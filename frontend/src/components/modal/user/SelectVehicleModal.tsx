@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import DarkModal from "../layouts/DarkModal";
+import DarkModal from "../../layouts/DarkModal";
 import { Car, ChevronRight, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -12,7 +12,6 @@ const SelectVehicleModal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
 }) => {
-//   const [selectedOption, setSelectedOption] = useState(null);
   const [isHovering, setIsHovering] = useState<"myGarage" | "newVehicle" | null>(null);
   const navigate = useNavigate()
 

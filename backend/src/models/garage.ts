@@ -42,7 +42,9 @@ const garageSchema = new Schema<IGarage>(
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
-    rejectionReason: {type: String}
+    rejectionReason: {type: String},
+    numOfServiceBays: { type: Number, required: true },
+    supportedFuelTypes: { type: [String], required: true, enum: ["Petrol", "Diesel", "Electric", "Hybrid", "CNG"] }
   },
   { timestamps: true }
 );

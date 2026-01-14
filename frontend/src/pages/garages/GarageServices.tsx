@@ -15,11 +15,11 @@ import { ConfirmModal } from "@components/modal/ConfirmModal";
 import type { ActionPayload } from "@/types/CommonTypes";
 import Spinner from "@components/elements/Spinner";
 import Pagination from "@components/layouts/admin/Pagination";
-import type { IService } from "@/types/ServicesTypes";
+import type { IServiceResponse } from "@/types/ServicesTypes";
 import RegisterServices from "@/components/modal/RegisterServices";
 
 const GarageServices = () => {
-  const [services, setServices] = useState<IService[]>([]);
+  const [services, setServices] = useState<IServiceResponse[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -94,11 +94,11 @@ const GarageServices = () => {
     }
   };
 
-  const columns: TableColumn<IService>[] = [
+  const columns: TableColumn<IServiceResponse>[] = [
     { key: "_id", label: "ID" },
     { key: "name", label: "Name" },
     { key: "price", label: "Price in INR" },
-    { key: "category", label: "Category" },
+    { key: "categoryName", label: "Category" },
     { key: "durationMinutes", label: "Duration (Min)" },
     {
       key: "isBlocked",

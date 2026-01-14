@@ -1,14 +1,9 @@
+import type { IVehicleDTO } from "@/types/VehicleTypes";
 import { X } from "lucide-react";
 
-interface Vehicle {
-  id: string;
-  name: string;
-  licensePlate: string;
-}
-
 interface VehicleCardProps {
-  vehicle: Vehicle;
-  onView: (id: string) => void;
+  vehicle: IVehicleDTO;
+  onView: (vehicle: IVehicleDTO) => void;
   onBook: (id: string) => void;
   onRemove?: (id: string) => void;
 }
@@ -24,7 +19,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
       {/* Remove icon */}
       {onRemove && (
         <button
-          onClick={() => onRemove(vehicle.id)}
+          onClick={() => onRemove(vehicle._id)}
           className="absolute top-3 right-3 text-red-500 hover:scale-110 transition"
         >
           <X size={16} />
@@ -33,16 +28,18 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
 
       {/* Icon */}
       <div className="flex justify-center mb-4">
-        <img
-          src="/car-icon-red.svg" // replace with your svg
-          alt="car"
-          className="w-24 h-24"
-        />
+        <div className="w-36 h-24 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img
+            src={vehicle.imageUrl}
+            alt="car"
+            className="h-full"
+          />
+        </div>
       </div>
 
       {/* Details */}
       <h3 className="text-white text-lg font-semibold text-center">
-        {vehicle.name}
+        {`${vehicle.makeName} ${vehicle.model} ${vehicle.variant}`}
       </h3>
       <p className="text-gray-400 text-sm text-center mt-1">
         License Plate: {vehicle.licensePlate}
@@ -51,14 +48,14 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
       {/* Actions */}
       <div className="flex gap-3 mt-6">
         <button
-          onClick={() => onView(vehicle.id)}
-          className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-sm transition"
+          onClick={() => onView(vehicle)}
+          className="flex-1 p-2 bg-black hover:bg-gray-800 text-white rounded-lg text-sm transition"
         >
           View Details
         </button>
         <button
-          onClick={() => onBook(vehicle.id)}
-          className="flex-1 bg-black border border-gray-600 hover:bg-gray-900 text-white py-2 rounded-lg text-sm transition"
+          onClick={() => onBook(vehicle._id)}
+          className="flex-1 p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition"
         >
           Book an Appointment
         </button>

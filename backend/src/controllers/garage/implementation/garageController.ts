@@ -19,11 +19,12 @@ export class GarageController implements IGarageController {
 
   onboarding = async (req: Request, res: Response) => {
     try {
-      const { name, userId, startTime, endTime, mobile, isRSAEnabled } =
+      const { name, userId, startTime, endTime, mobile, isRSAEnabled, numOfServiceBays } =
         req.body;
       const location = JSON.parse(req.body.location);
       const address = JSON.parse(req.body.address);
       const selectedHolidays = JSON.parse(req.body.selectedHolidays);
+      const supportedFuelTypes = JSON.parse(req.body.supportedFuelTypes)
 
       let image: Express.Multer.File | undefined;
       let document: Express.Multer.File | undefined;
@@ -43,7 +44,9 @@ export class GarageController implements IGarageController {
         !document ||
         !mobile ||
         !isRSAEnabled ||
-        !address
+        !address ||
+        !numOfServiceBays ||
+        !supportedFuelTypes
       ) {
         throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
       }
@@ -59,7 +62,9 @@ export class GarageController implements IGarageController {
         image,
         document,
         mobile,
-        isRSAEnabled
+        isRSAEnabled,
+        numOfServiceBays,
+        supportedFuelTypes
       );
       res.status(HttpStatus.OK).json({ garage: response });
     } catch (error) {

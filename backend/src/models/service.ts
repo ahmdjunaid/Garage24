@@ -4,7 +4,7 @@ import { IService } from "../types/services";
 const garageServiceSchema = new Schema<IService>(
   {
     garageId: { type: Schema.Types.ObjectId, ref: "Garage", required: true },
-    category: { type: String, required: true },
+    categoryId: { type: Schema.Types.ObjectId, ref: "ServiceCatgory", required: true },
     name: { type: String, required: true },
     price: { type: Number, required: true },
     durationMinutes: { type: Number, required: true },

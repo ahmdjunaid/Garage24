@@ -33,6 +33,8 @@ export class GarageRepository
     docUrl: string;
     mobileNumber: string;
     isRSAEnabled: boolean;
+    numOfServiceBays: number;
+    supportedFuelTypes: string[];
   }) {
     return await this.model.create(garageData);
   }

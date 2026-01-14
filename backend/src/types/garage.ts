@@ -31,7 +31,9 @@ export interface IGarage {
   isDeleted?: boolean;
   isBlocked?: boolean;
   approvalStatus?: approvalStatus;
-  rejectionReason?: string; 
+  rejectionReason?: string;
+  numOfServiceBays: number;
+  supportedFuelTypes: string[];
 }
 
 export interface IPopulatedGarage {
@@ -50,6 +52,8 @@ export interface IPopulatedGarage {
   isBlocked: boolean;
   approvalStatus?: approvalStatus;
   rejectionReason?: string; 
+  numOfServiceBays: number;
+  supportedFuelTypes: string[];
 }
 
 export interface GetMappedGarageResponse{

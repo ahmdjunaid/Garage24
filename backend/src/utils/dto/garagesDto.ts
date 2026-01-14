@@ -17,7 +17,9 @@ export interface IMappedGarageData {
   mobileNumber?: string;
   isRSAEnabled?: boolean;
   approvalStatus?: string;
-  rejectionReason?: string; 
+  rejectionReason?: string;
+  numOfServiceBays: number;
+  supportedFuelTypes: string[]
 }
 
 export const garageDataMapping = (garage: IPopulatedGarage): IMappedGarageData => {
@@ -39,6 +41,8 @@ export const garageDataMapping = (garage: IPopulatedGarage): IMappedGarageData =
     mobileNumber: garage?.mobileNumber,
     isRSAEnabled: garage?.isRSAEnabled,
     approvalStatus: garage?.approvalStatus,
-    rejectionReason: garage?.rejectionReason
+    rejectionReason: garage?.rejectionReason,
+    numOfServiceBays: garage.numOfServiceBays,
+    supportedFuelTypes: garage.supportedFuelTypes
   };
 };

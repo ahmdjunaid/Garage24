@@ -10,7 +10,7 @@ export class VehicleModelService implements IVehicleModelService {
         @inject(TYPES.VehicleModelRepository) private _vehicleModelRepository: IVehicleModelRepository,
     ){}
 
-    async getAllVehicleModels(): Promise<VechicleModelDocument[] | null> {
-        return await this._vehicleModelRepository.getAllVehicleModels()
+    async getAllVehicleModelsByBrand(brandId:string): Promise<VechicleModelDocument[] | null> {
+        return await this._vehicleModelRepository.getAllVehicleModelsByBrand(brandId)
     }
 }

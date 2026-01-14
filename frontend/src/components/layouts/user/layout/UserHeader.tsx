@@ -77,12 +77,12 @@ const UserHeader = ({ showCta = false, ctaSize = "half", handleAppointmentClick}
                     >
                       Profile
                     </a>
-                    <a
-                      href="#profile"
+                    <Link
+                      to="/appointment"
                       className="block px-4 py-2 hover:bg-gray-100"
                     >
                       Appointments
-                    </a>
+                    </Link>
                     <a
                       href="#services"
                       className="block px-4 py-2 hover:bg-gray-100"
@@ -161,9 +161,9 @@ const UserHeader = ({ showCta = false, ctaSize = "half", handleAppointmentClick}
               My Garage
             </Link>
 
-            <a href="#garage" className="block hover:text-gray-300">
+            <Link to="/appointment" className="block hover:text-gray-300">
               My Appointments
-            </a>
+            </Link>
 
             <a href="#services" className="block hover:text-gray-300">
               Services

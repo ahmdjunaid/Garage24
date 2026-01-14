@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DarkModal from "../layouts/DarkModal";
 import { errorToast, successToast } from "../../utils/notificationAudio";
 import Spinner from "../elements/Spinner";
 import { serviceNameRegex } from "../../constants/commonRegex";
 import {
   createServiceApi,
+  getAllServiceCatoriesApi,
 } from "@/services/garageServices";
-import { SERVICE_CATEGORIES } from "@/constants/serviceCategories";
+import type { IServiceCategory } from "@/types/ServiceCategoryTypes";
 
 interface ModalProps {
   isOpen: boolean;
@@ -19,7 +20,7 @@ const RegisterServices: React.FC<ModalProps> = ({
   onClose,
   onCreated,
 }) => {
-  const [category, setCategory] = useState<string>("");
+  const [categoryId, setCategory] = useState<string>("");
   const [categoryError, setCategoryError] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [nameError, setNameError] = useState<string>("");
@@ -28,11 +29,17 @@ const RegisterServices: React.FC<ModalProps> = ({
   const [duration, setDuration] = useState<string>();
   const [durationError, setDurationError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [serviceCategories, setServiceCategories] = useState<IServiceCategory[] | null>(null);
 
-  const categories: {
-    id: string;
-    name: string;
-  }[] = SERVICE_CATEGORIES;
+  useEffect(() => {
+    const fetchServiceCategories = async () => {
+      const res = await getAllServiceCatoriesApi();
+      console.log(res);
+      setServiceCategories(res);
+    };
+
+    fetchServiceCategories();
+  }, [isOpen]);
 
   const handleSubmit = async () => {
     setCategoryError("");
@@ -48,7 +55,7 @@ const RegisterServices: React.FC<ModalProps> = ({
       hasError = true;
     }
 
-    if (!category?.trim()) {
+    if (!categoryId?.trim()) {
       setCategoryError("Select a category.");
       hasError = true;
     }
@@ -67,7 +74,7 @@ const RegisterServices: React.FC<ModalProps> = ({
       try {
         setLoading(true);
         await createServiceApi({
-          category,
+          categoryId,
           name,
           price: numericPrice,
           durationMinutes: numericDuration,
@@ -79,8 +86,8 @@ const RegisterServices: React.FC<ModalProps> = ({
         setTimeout(() => {
           setCategory("");
           setName("");
-          setPrice("")
-          setDuration("")
+          setPrice("");
+          setDuration("");
           setLoading(false);
         }, 2000);
       } catch (error) {
@@ -126,8 +133,8 @@ const RegisterServices: React.FC<ModalProps> = ({
             <option value="" selected disabled>
               Select a catgory
             </option>
-            {categories.map((cat) => {
-              return <option value={cat.name}>{cat.name}</option>;
+            {serviceCategories && serviceCategories.map((cat) => {
+              return <option value={cat._id}>{cat.name}</option>;
             })}
           </select>
           {categoryError ? (

@@ -1,7 +1,12 @@
 import IServiceService from "../interface/IServiceService";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
-import { GetServiceResponse, IService } from "../../../types/services";
+import {
+  GetServiceResponse,
+  IService,
+  IServiceDTO,
+  IServicePopulated,
+} from "../../../types/services";
 import { IServiceRepository } from "../../../repositories/service/interface/IServiceRepository";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import {
@@ -31,7 +36,28 @@ export class ServiceService implements IServiceService {
   }
 
   async getAllServices(query: GetPaginationQuery): Promise<GetServiceResponse> {
-    return await this._serviceRepository.getAllServices(query);
+    const rawServices = await this._serviceRepository.getAllServices(query);
+
+    const services: IServiceDTO[] = rawServices.services.map(
+      (s: IServicePopulated) => {
+        return {
+          _id: s._id,
+          name: s.name,
+          categoryName: s.categoryId.name,
+          price: s.price,
+          durationMinutes: s.durationMinutes,
+          garageId: s.garageId,
+          isDeleted: s.isDeleted,
+          isBlocked: s.isBlocked,
+        };
+      }
+    );
+
+    return {
+      services: services,
+      totalPages: rawServices.totalPages,
+      totalServices: rawServices.totalServices
+    };
   }
 
   async toggleStatus(
@@ -56,8 +82,10 @@ export class ServiceService implements IServiceService {
       throw { status: HttpStatus.NOT_FOUND, message: SERVICE_DOESNT_EXIST };
     }
 
-    await this._serviceRepository.findOneAndUpdate(serviceId, {isDeleted:true})
+    await this._serviceRepository.findOneAndUpdate(serviceId, {
+      isDeleted: true,
+    });
 
-    return {message: "Service deleted successful"}
+    return { message: "Service deleted successful" };
   }
 }
