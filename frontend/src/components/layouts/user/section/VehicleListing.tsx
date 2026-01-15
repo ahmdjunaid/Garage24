@@ -4,11 +4,14 @@ import VehicleDetailsModal from "@/components/modal/user/VehicleDetailsModal";
 import { getVehiclesByUserIdApi } from "@/services/userRouter";
 import type { IVehicleDTO } from "@/types/VehicleTypes";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const VehicleListing: React.FC = () => {
   const [showAddModal, setShowModal] = useState<boolean>(false);
   const [vehicleToView, setVehicleToView] = useState<IVehicleDTO | null>(null);
   const [vehicles, setVehicles] = useState<IVehicleDTO[] | []>([]);
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     fetchVehicles();
@@ -46,7 +49,7 @@ export const VehicleListing: React.FC = () => {
             key={vehicle._id}
             vehicle={vehicle}
             onView={(vehicle) => setVehicleToView(vehicle)}
-            onBook={handleBook}
+            onBook={(id) => navigate(`/appointment?vehicleId=${id}`)}
             onRemove={handleRemove}
           />
         ))}

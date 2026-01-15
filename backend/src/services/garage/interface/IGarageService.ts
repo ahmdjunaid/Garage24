@@ -1,7 +1,12 @@
 import { GarageDocument } from "../../../models/garage";
 import { MechanicDocument } from "../../../models/mechanic";
 import { SubscriptionDocument } from "../../../models/subscription";
-import { GarageStatusResponse, IAddress, IGarage } from "../../../types/garage";
+import {
+  GarageNearbyDto,
+  GarageStatusResponse,
+  IAddress,
+  IGarage
+} from "../../../types/garage";
 
 export default interface IGarageService {
   onboarding(
@@ -19,17 +24,15 @@ export default interface IGarageService {
     numOfServiceBays: number,
     supportedFuelTypes: string[]
   ): Promise<IGarage | null>;
-  getAddressFromCoordinates(lat: string, lng: string): Promise<IAddress>;
   getApprovalStatus(userId: string): Promise<GarageStatusResponse>;
   getCurrentPlan(
     garageId: string
   ): Promise<{ isActive: boolean; plan: SubscriptionDocument | null }>;
   getGarageById(garageId: string): Promise<IGarage | null>;
-  getGarageDetails(
-    garageId: string
-  ): Promise<{
+  getGarageDetails(garageId: string): Promise<{
     garage: GarageDocument | null;
     subscription: SubscriptionDocument | null;
     mechanics: MechanicDocument[] | null;
   }>;
+  findNearbyGarages(lat: number, lng: number): Promise<GarageNearbyDto[]>;
 }

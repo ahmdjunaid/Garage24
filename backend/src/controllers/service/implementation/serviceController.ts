@@ -103,4 +103,24 @@ export class ServiceController implements IServiceController {
         .json({ message: err?.message || SERVER_ERROR });
     }
   };
+
+  getServicesByGarageId = async (req: Request, res: Response) => {
+    try {
+      const garageId = req.query.garageId as string;
+      const categoryId = req.query.categoryId as string;
+      if(!garageId || !categoryId){
+        throw {status:HttpStatus.BAD_REQUEST, message: "Garage Id is required"}
+      }
+      const response = await this._serviceService.getServicesByGarageId(garageId, categoryId)
+
+      res.status(HttpStatus.OK).json(response)
+      
+    } catch (error) {
+            console.error(error);
+      const err = error as Error;
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: err?.message || SERVER_ERROR });
+    }
+  }
 }

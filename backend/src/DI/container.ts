@@ -80,6 +80,10 @@ import { ISlotService } from "../services/slot/interface/ISlotService";
 import { SlotService } from "../services/slot/implementation/slotService";
 import { IAppointmentController } from "../controllers/appointment/interface/IAppointmentController";
 import { AppointmentController } from "../controllers/appointment/implementation/appointmentController";
+import { ILocationService } from "../services/location/interface/ILocationService";
+import { LocationService } from "../services/location/implementation/locationService";
+import { ILocationController } from "../controllers/location/interface/ILocationController";
+import { LocationController } from "../controllers/location/implementation/locationController";
 
 const container = new Container();
 
@@ -151,6 +155,10 @@ container.bind<ISlotService>(TYPES.SlotService).to(SlotService);
 // container.bind<>
 
 //Appointment
-container.bind<IAppointmentController>(TYPES.AppointmentController).to(AppointmentController)
+container.bind<IAppointmentController>(TYPES.AppointmentController).to(AppointmentController);
+
+// Location
+container.bind<ILocationService>(TYPES.LocationService).to(LocationService);
+container.bind<ILocationController>(TYPES.LocationController).to(LocationController);
 
 export { container };

@@ -1,11 +1,13 @@
+export type fuelTypeType = "Petrol" | "Diesel" | "Electric" | "Hybrid" | "CNG" | ""
+
 export interface IVehicle {
   _id?: string;
   userId: string;
   licensePlate: string;
   make: string;
   model: string;
-  registrationYear: number;
-  fuelType: "Petrol" | "Diesel" | "Electric" | "Hybrid";
+  registrationYear: string;
+  fuelType: fuelTypeType;
   variant?: string;
   color: string;
   imageUrl?: string;
@@ -29,4 +31,16 @@ export interface IVehicleDTO {
   insuranceValidity: Date;
   puccValidity: Date;
   lastServicedKM?:string;
+}
+
+
+export interface IPopulatedVehicle extends Omit<IVehicle, "make" | "model"> {
+  make: {
+    _id: string;
+    name: string;
+  },
+  model: {
+    _id: string;
+    name: string;
+  }
 }

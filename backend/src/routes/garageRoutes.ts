@@ -10,6 +10,7 @@ import { PlanController } from "../controllers/plan/implimentation/planControlle
 import { hasActivePlan } from "../middleware/checkSubscription";
 import { ServiceController } from "../controllers/service/implementation/serviceController";
 import { ServiceCategoryController } from "../controllers/serviceCategory/implementation/serviceCategoryController";
+import { LocationController } from "../controllers/location/implementation/locationController";
 
 
 const router = express.Router()
@@ -19,9 +20,10 @@ const mechanicController = container.get<MechanicController>(TYPES.MechanicContr
 const planController = container.get<PlanController>(TYPES.PlanController)
 const serviceController = container.get<ServiceController>(TYPES.ServiceController)
 const serviceCategoryController = container.get<ServiceCategoryController>(TYPES.ServiceCategoryController)
+const locationController = container.get<LocationController>(TYPES.LocationController)
 
 router.route('/onboarding').post(verifyJWT,authorizeRoles("garage"),uploadOnboardingImages,garageController.onboarding)
-router.route('/get-address').get(verifyJWT,authorizeRoles("garage"),garageController.getAddressFromCoordinates)
+router.route('/get-address').get(verifyJWT,authorizeRoles("garage"),locationController.getAddressFromCoordinates)
 router.route('/register-mechanic').post(verifyJWT,hasActivePlan,authorizeRoles("garage"),mechanicController.registerMechanic)
 router.route('/resend-invitation/:mechanicId').post(verifyJWT,authorizeRoles("garage"),mechanicController.resendMechanicInvite)
 router.route('/mechanics').get(verifyJWT,authorizeRoles("garage"),mechanicController.getAllMechanics)

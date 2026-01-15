@@ -27,4 +27,5 @@ export interface IServiceRepository {
   ): Promise<HydratedDocument<IService> | null>;
 
   getServiceById(serviceId: string): Promise<HydratedDocument<IService> | null>;
+  getServicesByGarageId(garageId:string, categoryId:string): Promise<HydratedDocument<IService>[]>;
 }

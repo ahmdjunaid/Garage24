@@ -5,13 +5,16 @@ import { TYPES } from "../../../DI/types";
 import { IServiceCategoryService } from "../../../services/serviceCategory/interface/IServiceCategoryService";
 import { IBrandService } from "../../../services/brand/interface/IBrandService";
 import HttpStatus from "../../../constants/httpStatusCodes";
+import IGarageService from "../../../services/garage/interface/IGarageService";
+import { json } from "zod";
 
 @injectable()
 export class AppointmentController implements IAppointmentController {
   constructor(
     @inject(TYPES.ServiceCategoryService)
     private _serviceCategoryService: IServiceCategoryService,
-    @inject(TYPES.BrandService) private _brandService: IBrandService
+    @inject(TYPES.BrandService) private _brandService: IBrandService,
+    @inject(TYPES.GarageService) private _garageService: IGarageService
   ) {}
 
   getAppointmentMetaData = async (req: Request, res: Response) => {
@@ -21,7 +24,7 @@ export class AppointmentController implements IAppointmentController {
         this._brandService.getAllBrands(),
       ]);
 
-      res.status(HttpStatus.OK).json({categories, brands})
+      res.status(HttpStatus.OK).json({ categories, brands });
     } catch (error) {
       const err = error as Error;
       res

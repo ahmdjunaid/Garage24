@@ -1,5 +1,4 @@
-import { VehicleDocument } from "../../../models/vehicle";
-import { IVehicleDTO } from "../../../types/vehicle";
+import { IPopulatedVehicle, IVehicleDTO } from "../../../types/vehicle";
 
 export default interface IVehicleService {
   createVehicle(
@@ -17,5 +16,5 @@ export default interface IVehicleService {
   ): Promise<{ message: string }>;
 
   getAllVehicleByUserId(userId:string):Promise<IVehicleDTO[]>;
-  getVehicleById(vid:string):Promise<VehicleDocument | null>
+  getVehicleById(vid:string):Promise<IPopulatedVehicle | null>
 }

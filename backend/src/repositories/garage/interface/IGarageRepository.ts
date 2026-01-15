@@ -1,5 +1,6 @@
 import { FilterQuery, HydratedDocument, Types, UpdateQuery } from "mongoose";
 import {
+  GarageNearbyDto,
   GetMappedGarageResponse,
   IAddress,
   IGarage,
@@ -42,4 +43,5 @@ export interface IGarageRepository {
     update: UpdateQuery<IGarage>
   ): Promise<HydratedDocument<IGarage> | null>;
   findById(id: string): Promise<HydratedDocument<IGarage> | null>;
+  findNearbyGarages(lat: number, lng: number): Promise<GarageNearbyDto[]>;
 }

@@ -1,6 +1,7 @@
 import { BaseRepository } from "../../IBaseRepository";
 import { IGarageRepository } from "../interface/IGarageRepository";
 import {
+  GarageNearbyDto,
   GetMappedGarageResponse,
   IAddress,
   IGarage,
@@ -9,6 +10,8 @@ import { Garage } from "../../../models/garage";
 import { FilterQuery, HydratedDocument, Types, UpdateQuery } from "mongoose";
 import { GetPaginationQuery } from "../../../types/common";
 import { injectable } from "inversify";
+
+const GARAGE_SEARCH_RADIUS = 25000; //25KM
 
 @injectable()
 export class GarageRepository
@@ -68,7 +71,9 @@ export class GarageRepository
     return await this.model.findOneAndDelete(filter);
   }
 
-  async findOne(filter: FilterQuery<IGarage>): Promise<HydratedDocument<IGarage> | null> {
+  async findOne(
+    filter: FilterQuery<IGarage>
+  ): Promise<HydratedDocument<IGarage> | null> {
     return await this.getByFilter(filter);
   }
 
@@ -87,5 +92,34 @@ export class GarageRepository
 
   async findById(id: string) {
     return await this.getById(id);
+  }
+
+  async findNearbyGarages(lat: number, lng: number): Promise<GarageNearbyDto[]> {
+    return await this.model.aggregate<GarageNearbyDto>([
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [lng, lat],
+          },
+          distanceField: "distance",
+          maxDistance: GARAGE_SEARCH_RADIUS,
+          spherical: true,
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          userId: 1,
+          address: 1,
+          distance: 1,
+          supportedFuelTypes: 1,
+          selectedHolidays: 1,
+          numOfServiceBays: 1,
+          isRSAEnabled: 1,
+          imageUrl: 1,
+        },
+      },
+    ]);
   }
 }

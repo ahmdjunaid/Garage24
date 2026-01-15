@@ -66,3 +66,18 @@ export interface GarageStatusResponse {
   hasGarage: boolean;
   approvalStatus: string | undefined;
 }
+
+export interface GarageNearbyDto {
+  _id: string;
+  name: string;
+  userId: string;
+  address: IAddress;
+  imageUrl: string;
+  distance: number;
+
+  numOfServiceBays: number;
+  isRSAEnabled: boolean;
+
+  supportedFuelTypes: string[];
+  selectedHolidays: string[];
+}

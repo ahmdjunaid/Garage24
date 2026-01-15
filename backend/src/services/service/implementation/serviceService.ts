@@ -15,6 +15,7 @@ import {
   SERVICE_DOESNT_EXIST,
 } from "../../../constants/messages";
 import { GetPaginationQuery } from "../../../types/common";
+import { HydratedDocument } from "mongoose";
 
 @injectable()
 export class ServiceService implements IServiceService {
@@ -87,5 +88,9 @@ export class ServiceService implements IServiceService {
     });
 
     return { message: "Service deleted successful" };
+  }
+
+  async getServicesByGarageId(garageId: string, categoryId:string): Promise<HydratedDocument<IService>[]> {
+    return await this._serviceRepository.getServicesByGarageId(garageId, categoryId)
   }
 }

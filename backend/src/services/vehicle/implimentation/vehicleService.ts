@@ -11,8 +11,7 @@ import { Types } from "mongoose";
 import { uploadFile } from "../../../config/s3Service";
 import { deleteLocalFile } from "../../../helper/helper";
 import { normalizePlate } from "../../../utils/normalizeLicencePlate";
-import { IVehicleDTO, IVehiclePopulated } from "../../../types/vehicle";
-import { VehicleDocument } from "../../../models/vehicle";
+import { IPopulatedVehicle, IVehicleDTO,  } from "../../../types/vehicle";
 
 @injectable()
 export class VehicleService implements IVehicleService {
@@ -70,7 +69,7 @@ export class VehicleService implements IVehicleService {
   async getAllVehicleByUserId(userId: string): Promise<IVehicleDTO[]> {
     const rawVehicles = await this._vehicleRepository.getAllVehicleByUserId(userId)
 
-    const vehicles:IVehicleDTO[] = rawVehicles.map((v:IVehiclePopulated)=>{
+    const vehicles:IVehicleDTO[] = rawVehicles.map((v:IPopulatedVehicle)=>{
       return {
         _id: v._id,
         licensePlate: v.licensePlate,
@@ -89,7 +88,7 @@ export class VehicleService implements IVehicleService {
     return vehicles;
   }
 
-  async getVehicleById(vid: string): Promise<VehicleDocument | null> {
+  async getVehicleById(vid: string): Promise<IPopulatedVehicle | null> {
     return await this._vehicleRepository.getVehicleById(vid)
   }
 }

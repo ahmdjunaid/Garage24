@@ -70,3 +70,25 @@ export interface GarageData {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface IAddress {
+  city: { type: string };
+  district: { type: string }
+  state: { type: string };
+  pincode: { type: string };
+}
+
+export interface GarageNearbyDto {
+  _id: string;
+  name: string;
+  userId: string;
+  address: IAddress;
+  imageUrl: string;
+  distance: number;
+
+  numOfServiceBays: number;
+  isRSAEnabled: boolean;
+
+  supportedFuelTypes: string[];
+  selectedHolidays: string[];
+}

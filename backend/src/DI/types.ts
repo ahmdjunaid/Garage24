@@ -1,3 +1,4 @@
+
 export const TYPES = {
   //Authentication
   AuthRepository: Symbol.for("AuthRepository"),
@@ -68,4 +69,8 @@ export const TYPES = {
 
   //Appointment
   AppointmentController: Symbol.for("AppointmentController"),
+
+  //Location
+  LocationService: Symbol.for("LocationService"),
+  LocationController: Symbol.for("LocationController"),
 };

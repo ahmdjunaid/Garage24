@@ -5,4 +5,5 @@ export default interface IServiceController {
     getAllServices(req:Request, res:Response): Promise<void>;
     toggleStatus(req:Request, res:Response): Promise<void>;
     deleteService(req:Request, res:Response): Promise<void>;
+    getServicesByGarageId(req:Request, res:Response): Promise<void>;
 }

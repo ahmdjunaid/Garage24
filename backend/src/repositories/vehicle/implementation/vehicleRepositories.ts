@@ -1,7 +1,7 @@
 import { BaseRepository } from "../../IBaseRepository";
 import { IVehicleRepository } from "../interface/IVehicleRepository";
-import { IVehicle, IVehiclePopulated } from "../../../types/vehicle";
-import { Vehicle, VehicleDocument } from "../../../models/vehicle";
+import { IPopulatedVehicle, IVehicle } from "../../../types/vehicle";
+import { Vehicle } from "../../../models/vehicle";
 import { injectable } from "inversify";
 
 @injectable()
@@ -19,19 +19,22 @@ export class VehicleRepository
 
   async getAllVehicleByUserId(
     userId: string
-  ): Promise<IVehiclePopulated[]> {
+  ): Promise<IPopulatedVehicle[]> {
     const vehicles = await this.model
       .find({ userId, isDeleted: false })
       .populate([
-        { path: "make", select: "name -_id" },
-        { path: "model", select: "name -_id" },
+        { path: "make", select: "name" },
+        { path: "model", select: "name" },
       ])
       .lean()
 
-    return vehicles as unknown as IVehiclePopulated[]
+    return vehicles as unknown as IPopulatedVehicle[]
   }
 
-  async getVehicleById(vid: string): Promise<VehicleDocument | null> {
-    return await this.getById(vid)
+  async getVehicleById(vid: string): Promise<IPopulatedVehicle | null> {
+    const vehicle = await this.model.findById(vid)
+      .populate([{path:"make", select:"name"},{path:"model", select:"name"}])
+
+    return vehicle as unknown as IPopulatedVehicle;
   }
 }

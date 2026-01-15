@@ -1,49 +1,27 @@
-import React, { useState, useEffect } from "react";
-import {
-  MapPin,
-  Clock,
-  Phone,
-  Mail,
-  Car,
-  Search,
-  Navigation,
-  CheckCircle,
-  MapPinned,
-  User,
-} from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Clock, Phone, Mail, Car, CheckCircle, User } from "lucide-react";
 import { getNext7Days } from "@/utils/getNext7Days";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store/store";
 import type { IUsersMappedData } from "@/types/UserTypes";
 import {
+  fetchNearByGaragesApi,
+  fetchServicesByGarageIdApi,
   getAppointmentMetaData,
   getVehicleDetailsById,
   getVehicleModelsByBrandApi,
 } from "@/services/userRouter";
 import { errorToast } from "@/utils/notificationAudio";
-import type { IVehicleDTO } from "@/types/VehicleTypes";
+import type { fuelTypeType, IPopulatedVehicle } from "@/types/VehicleTypes";
 import type { IServiceCategory } from "@/types/ServiceCategoryTypes";
 import { fuelTypes } from "@/constants/constantDatas";
 import type { IBrand } from "@/types/BrandTypes";
 import type { IVehicleModel } from "@/types/VehicleModelTypes";
-
-interface Service {
-  id: string;
-  name: string;
-  price: number;
-  duration: string;
-}
-
-interface Garage {
-  id: string;
-  name: string;
-  address: string;
-  distance: number;
-  rating: number;
-  lat: number;
-  lng: number;
-  services: Service[];
-}
+import MapSection from "./MapSection";
+import type { GarageNearbyDto } from "@/types/GarageTypes";
+import type { IService } from "@/types/ServicesTypes";
+import { metersToKm } from "@/utils/meterToKMs";
+import Spinner from "@/components/elements/Spinner";
 
 interface TimeSlot {
   id: string;
@@ -52,32 +30,36 @@ interface TimeSlot {
 }
 
 const CarServiceAppointmentForm: React.FC = () => {
-  const [vehicleId, setVehicleId] = useState<string | null>(null);
   const [userData, setUserData] = useState<Partial<IUsersMappedData>>({
     name: "",
     email: "",
     mobileNumber: "",
   });
-
-  const [vehicleData, setVehicleData] = useState<Partial<IVehicleDTO>>({
+  const [vehicleData, setVehicleData] = useState<Partial<IPopulatedVehicle>>({
     _id: "",
-    makeName: "",
-    model: "",
+    make: {
+      _id: "",
+      name: "",
+    },
+    model: {
+      _id: "",
+      name: "",
+    },
     registrationYear: "",
     licensePlate: "",
     fuelType: "",
     variant: "",
     color: "",
   });
-
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null
   );
-  const [locationName, setLocationName] = useState<string>("");
-  const [garages, setGarages] = useState<Garage[]>([]);
-  const [selectedGarage, setSelectedGarage] = useState<Garage | null>(null);
+  const [garages, setGarages] = useState<GarageNearbyDto[]>([]);
+  const [selectedGarage, setSelectedGarage] = useState<GarageNearbyDto | null>(
+    null
+  );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [serviceCategories, setServiceCategories] = useState<
@@ -85,6 +67,7 @@ const CarServiceAppointmentForm: React.FC = () => {
   >([]);
   const [brands, setBrands] = useState<IBrand[] | []>([]);
   const [models, setModels] = useState<IVehicleModel[] | []>([]);
+  const [services, setServices] = useState<IService[] | []>([]);
   const [loading, setLoading] = useState(false);
   const { user } = useSelector((state: RootState) => state.auth);
 
@@ -95,20 +78,6 @@ const CarServiceAppointmentForm: React.FC = () => {
       mobileNumber: user?.mobileNumber,
     });
   }, [user]);
-
-  async function fetchVehicleData(vehicleId: string) {
-    if (!vehicleId) return;
-    setLoading(true);
-    try {
-      const res = await getVehicleDetailsById(vehicleId);
-      setVehicleData(res);
-    } catch (error) {
-      console.error("Error fetching vehicle data:", error);
-      if (error instanceof Error) errorToast(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   useEffect(() => {
     const fetchMetadata = async () => {
@@ -121,196 +90,66 @@ const CarServiceAppointmentForm: React.FC = () => {
 
   useEffect(() => {
     const fetchVehicleModels = async () => {
-      if (!vehicleData.makeName) return;
-      const res = await getVehicleModelsByBrandApi(vehicleData.makeName);
+      if (!vehicleData.make?._id) return;
+      const res = await getVehicleModelsByBrandApi(vehicleData.make._id);
       setModels(res);
     };
     fetchVehicleModels();
-  }, [vehicleData.makeName]);
+  }, [vehicleData.make?._id]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const vId = urlParams.get("vehicleId");
 
     if (vId) {
-      setVehicleId(vId);
       fetchVehicleData(vId);
     }
   }, []);
 
   useEffect(() => {
-    if (location) {
-      fetchNearbyGarages(location.lat, location.lng);
-    }
-  }, [location]);
+    if (!location?.lat || !location?.lng) return;
 
-  const getCurrentLocation = () => {
-    setLoading(true);
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setLocation({ lat: latitude, lng: longitude });
-          setLocationName(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
-          setLoading(false);
-        },
-        (error) => {
-          console.error(error);
-          setLoading(false);
-        }
-      );
-    } else {
-      alert("Geolocation is not supported by this browser");
-      setLoading(false);
-    }
-  };
+    fetchNearbyGarages(location.lat, location.lng);
+  }, [location?.lat, location?.lng]);
 
-  const fetchNearbyGarages = async (lat: number, lng: number) => {
+  async function fetchVehicleData(vehicleId: string) {
+    if (!vehicleId) return;
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const mockGarages: Garage[] = [
-        {
-          id: "1",
-          name: "Premium Auto Service Center",
-          address: "123 Main Street, Andheri West, Mumbai",
-          distance: 2.3,
-          rating: 4.8,
-          lat: lat + 0.01,
-          lng: lng + 0.01,
-          services: [
-            { id: "s1", name: "Oil Change", price: 1500, duration: "30 min" },
-            {
-              id: "s2",
-              name: "Brake Inspection",
-              price: 800,
-              duration: "45 min",
-            },
-            {
-              id: "s3",
-              name: "Full Service",
-              price: 3500,
-              duration: "2 hours",
-            },
-            {
-              id: "s4",
-              name: "Wheel Alignment",
-              price: 1200,
-              duration: "1 hour",
-            },
-          ],
-        },
-        {
-          id: "2",
-          name: "QuickFix Auto Workshop",
-          address: "456 Park Avenue, Bandra East, Mumbai",
-          distance: 3.5,
-          rating: 4.6,
-          lat: lat + 0.02,
-          lng: lng - 0.01,
-          services: [
-            {
-              id: "s5",
-              name: "Engine Diagnostic",
-              price: 2000,
-              duration: "1 hour",
-            },
-            {
-              id: "s6",
-              name: "AC Service",
-              price: 2500,
-              duration: "1.5 hours",
-            },
-            {
-              id: "s7",
-              name: "Battery Replacement",
-              price: 4500,
-              duration: "30 min",
-            },
-            {
-              id: "s8",
-              name: "Car Wash Premium",
-              price: 500,
-              duration: "45 min",
-            },
-          ],
-        },
-        {
-          id: "3",
-          name: "Expert Car Care Solutions",
-          address: "789 Highway Road, Powai, Mumbai",
-          distance: 4.8,
-          rating: 4.9,
-          lat: lat - 0.01,
-          lng: lng + 0.02,
-          services: [
-            {
-              id: "s9",
-              name: "Transmission Service",
-              price: 3000,
-              duration: "2 hours",
-            },
-            {
-              id: "s10",
-              name: "Suspension Repair",
-              price: 5000,
-              duration: "3 hours",
-            },
-            {
-              id: "s11",
-              name: "Paint Protection",
-              price: 8000,
-              duration: "4 hours",
-            },
-            {
-              id: "s12",
-              name: "Detailing Complete",
-              price: 3500,
-              duration: "3 hours",
-            },
-          ],
-        },
-        {
-          id: "4",
-          name: "City Motors Service Hub",
-          address: "321 Lake View Road, Goregaon, Mumbai",
-          distance: 5.2,
-          rating: 4.5,
-          lat: lat + 0.03,
-          lng: lng + 0.01,
-          services: [
-            {
-              id: "s13",
-              name: "Tire Rotation",
-              price: 600,
-              duration: "30 min",
-            },
-            {
-              id: "s14",
-              name: "Exhaust Repair",
-              price: 2800,
-              duration: "1.5 hours",
-            },
-            {
-              id: "s15",
-              name: "Windshield Replacement",
-              price: 6000,
-              duration: "2 hours",
-            },
-            {
-              id: "s16",
-              name: "General Checkup",
-              price: 1000,
-              duration: "1 hour",
-            },
-          ],
-        },
-      ];
-      setGarages(mockGarages);
+      const res = await getVehicleDetailsById(vehicleId);
+      console.log(res, "++++++++");
+      setVehicleData(res);
     } catch (error) {
-      console.error("Error fetching garages:", error);
+      console.error(error);
+      if (error instanceof Error) errorToast(error.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  const fetchNearbyGarages = useCallback(
+    async (lat: number, lng: number) => {
+      if (!location) return;
+      setLoading(true);
+      try {
+        const res = await fetchNearByGaragesApi(lat, lng);
+        setGarages(res);
+      } catch (error) {
+        console.error(error);
+        if (error instanceof Error) errorToast(error.message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [location]
+  );
+
+  const fetchAvailableServices = async (garageId: string, category: string) => {
+    try {
+      const res = await fetchServicesByGarageIdApi(garageId, category);
+      setServices(res);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -353,8 +192,8 @@ const CarServiceAppointmentForm: React.FC = () => {
 
   const handleBookAppointment = () => {
     if (isFormValid()) {
-      const selectedServiceDetails = selectedGarage?.services.filter((s) =>
-        selectedServices.includes(s.id)
+      const selectedServiceDetails = services.filter((s) =>
+        selectedServices.includes(s._id)
       );
       alert("Appointment booked successfully!");
       console.log({
@@ -370,8 +209,8 @@ const CarServiceAppointmentForm: React.FC = () => {
   };
 
   const totalPrice =
-    selectedGarage?.services
-      .filter((s) => selectedServices.includes(s.id))
+    services
+      .filter((s) => selectedServices.includes(s._id))
       .reduce((sum, s) => sum + s.price, 0) || 0;
 
   return (
@@ -448,10 +287,22 @@ const CarServiceAppointmentForm: React.FC = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <select
-                value={vehicleData.makeName}
-                onChange={(e) =>
-                  setVehicleData({ ...vehicleData, makeName: e.target.value })
-                }
+                value={vehicleData.make?._id}
+                onChange={(e) => {
+                  const selectedMake = brands.find(
+                    (make) => make._id === e.target.value
+                  );
+
+                  if (!selectedMake) return;
+
+                  setVehicleData({
+                    ...vehicleData,
+                    make: {
+                      _id: selectedMake._id,
+                      name: selectedMake.name,
+                    },
+                  });
+                }}
                 className="px-4 py-3 rounded-xl bg-gray-700 text-white border border-gray-600 focus:border-gray-500 focus:outline-none transition-all"
               >
                 <option value="">Select Car Make</option>
@@ -461,11 +312,24 @@ const CarServiceAppointmentForm: React.FC = () => {
                   </option>
                 ))}
               </select>
+
               <select
-                value={vehicleData.model}
-                onChange={(e) =>
-                  setVehicleData({ ...vehicleData, model: e.target.value })
-                }
+                value={vehicleData.model?._id}
+                onChange={(e) => {
+                  const selectedModel = models.find(
+                    (model) => model._id === e.target.value
+                  );
+
+                  if (!selectedModel) return;
+
+                  setVehicleData({
+                    ...vehicleData,
+                    model: {
+                      _id: selectedModel._id,
+                      name: selectedModel.name,
+                    },
+                  });
+                }}
                 className="px-4 py-3 rounded-xl bg-gray-700 text-white border border-gray-600 focus:border-gray-500 focus:outline-none transition-all"
               >
                 <option value="">Select Model Name</option>
@@ -484,7 +348,7 @@ const CarServiceAppointmentForm: React.FC = () => {
                 onChange={(e) =>
                   setVehicleData({
                     ...vehicleData,
-                    registrationYear: Number(e.target.value),
+                    registrationYear: e.target.value,
                   })
                 }
                 className="px-4 py-3 rounded-xl bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:border-gray-500 focus:outline-none transition-all"
@@ -504,7 +368,10 @@ const CarServiceAppointmentForm: React.FC = () => {
               <select
                 value={vehicleData.fuelType}
                 onChange={(e) =>
-                  setVehicleData({ ...vehicleData, fuelType: e.target.value })
+                  setVehicleData({
+                    ...vehicleData,
+                    fuelType: e.target.value as fuelTypeType,
+                  })
                 }
                 className="px-4 py-3 rounded-xl bg-gray-700 text-white border border-gray-600 focus:border-gray-500 focus:outline-none transition-all"
               >
@@ -567,47 +434,7 @@ const CarServiceAppointmentForm: React.FC = () => {
 
         {/* Location Selection */}
         {selectedCategory && (
-          <section className="mb-12">
-            <div className="bg-[#2a2a2a] rounded-2xl p-8 shadow-xl">
-              <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                <MapPin className="h-8 w-8 text-gray-400" />
-                Find Nearby Garages
-              </h2>
-              <div className="flex gap-3 mb-6">
-                <div className="relative flex-1">
-                  <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search for a location..."
-                    value={locationName}
-                    onChange={(e) => setLocationName(e.target.value)}
-                    className="pl-12 pr-4 py-4 rounded-xl bg-gray-700 text-white placeholder-gray-400 w-full border border-gray-600 focus:border-gray-500 focus:outline-none transition-all"
-                  />
-                </div>
-                <button
-                  onClick={getCurrentLocation}
-                  disabled={loading}
-                  className="px-6 py-4 bg-gray-700 rounded-xl hover:bg-gray-600 transition-all disabled:opacity-50 flex items-center gap-2 font-semibold shadow-lg"
-                >
-                  <Navigation className="h-5 w-5" />
-                  Current Location
-                </button>
-              </div>
-              {location && (
-                <div className="bg-gray-900 rounded-xl p-6 border border-gray-700 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gray-800/30" />
-                  <div className="relative flex items-center justify-center h-48">
-                    <MapPinned className="h-16 w-16 text-gray-400 animate-pulse" />
-                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 px-4 py-2 rounded-lg">
-                      <p className="text-sm text-gray-300">
-                        📍 {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </section>
+          <MapSection setLocation={setLocation} location={location} />
         )}
 
         {/* Nearby Garages */}
@@ -619,13 +446,14 @@ const CarServiceAppointmentForm: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {garages.map((garage) => (
                 <button
-                  key={garage.id}
+                  key={garage._id}
                   onClick={() => {
                     setSelectedGarage(garage);
                     setSelectedServices([]);
+                    fetchAvailableServices(garage.userId, selectedCategory!);
                   }}
                   className={`relative overflow-hidden rounded-2xl p-6 text-left transition-all transform hover:scale-102 ${
-                    selectedGarage?.id === garage.id
+                    selectedGarage?._id === garage._id
                       ? "bg-red-500 shadow-2xl"
                       : "bg-[#2a2a2a]"
                   }`}
@@ -634,22 +462,25 @@ const CarServiceAppointmentForm: React.FC = () => {
                     <div className="flex-1">
                       <h3 className="text-xl font-bold mb-2">{garage.name}</h3>
                       <p className="text-sm opacity-80 mb-3">
-                        {garage.address}
+                        {`${garage.address.city} ${garage.address.district} ${garage.address.state} ${garage.address.pincode}`}
                       </p>
                     </div>
-                    {selectedGarage?.id === garage.id && (
+                    {selectedGarage?._id === garage._id && (
                       <CheckCircle className="h-6 w-6 flex-shrink-0" />
                     )}
                   </div>
                   <div className="flex items-center gap-4 text-sm">
                     <span className="bg-black/30 px-3 py-1 rounded-full">
-                      📍 {garage.distance} km
+                      📍 {metersToKm(garage.distance)} km
                     </span>
                     <span className="bg-black/30 px-3 py-1 rounded-full">
-                      ⭐ {garage.rating}
+                      RSA{" "}
+                      {garage.isRSAEnabled
+                        ? "Road-side assistance available"
+                        : "Not avaialable for RSA"}
                     </span>
                     <span className="bg-black/30 px-3 py-1 rounded-full">
-                      {garage.services.length} Services
+                      {garage.supportedFuelTypes.join(", ")} Vehicles
                     </span>
                   </div>
                 </button>
@@ -666,19 +497,19 @@ const CarServiceAppointmentForm: React.FC = () => {
                 Available Services at {selectedGarage.name}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {selectedGarage.services.map((service) => (
+                {services.map((service) => (
                   <button
-                    key={service.id}
-                    onClick={() => toggleService(service.id)}
+                    key={service._id}
+                    onClick={() => toggleService(service._id)}
                     className={`p-5 rounded-xl text-left transition-all ${
-                      selectedServices.includes(service.id)
+                      selectedServices.includes(service._id)
                         ? "bg-red-500 shadow-lg"
                         : "bg-gray-700/50"
                     }`}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <h4 className="font-bold text-lg">{service.name}</h4>
-                      {selectedServices.includes(service.id) && (
+                      {selectedServices.includes(service._id) && (
                         <CheckCircle className="h-5 w-5" />
                       )}
                     </div>
@@ -687,7 +518,7 @@ const CarServiceAppointmentForm: React.FC = () => {
                         ₹{service.price}
                       </span>
                       <span className="bg-black/30 px-3 py-1 rounded-full">
-                        ⏱️ {service.duration}
+                        ⏱️ {service.durationMinutes}
                       </span>
                     </div>
                   </button>
@@ -776,12 +607,10 @@ const CarServiceAppointmentForm: React.FC = () => {
                     Customer & Vehicle
                   </h3>
                   <div className="space-y-2 text-gray-300">
+                    <p>👤 {userData.name}</p>
                     <p>
-                      👤 {userData.firstName} {userData.lastName}
-                    </p>
-                    <p>
-                      🚗 {vehicleData.make} {vehicleData.model} (
-                      {vehicleData.year})
+                      🚗 {vehicleData.make?.name} {vehicleData.model?.name} (
+                      {vehicleData.registrationYear})
                     </p>
                     <p>🔖 {vehicleData.licensePlate}</p>
                   </div>
@@ -811,6 +640,7 @@ const CarServiceAppointmentForm: React.FC = () => {
           </section>
         )}
       </div>
+      <Spinner loading={loading} />
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { VehicleDocument } from "../models/vehicle";
 
 export interface IVehicle {
   userId: Types.ObjectId;
@@ -16,22 +17,6 @@ export interface IVehicle {
   lastServicedKM: string;
 }
 
-export interface IVehiclePopulated {
-  _id: Types.ObjectId;
-  userId: Types.ObjectId;
-  licensePlate: string;
-  make: { name: string };
-  model: { name: string };
-  registrationYear: number;
-  fuelType: string;
-  variant?: string;
-  color?: string;
-  imageUrl?: string;
-  insuranceValidity: Date;
-  puccValidity: Date;
-  isDeleted?: boolean;
-}
-
 export interface IVehicleDTO {
   _id: Types.ObjectId;
   licensePlate: string;
@@ -44,4 +29,15 @@ export interface IVehicleDTO {
   imageUrl?: string;
   insuranceValidity: Date;
   puccValidity: Date;
+}
+
+export interface IPopulatedVehicle extends Omit<VehicleDocument, "make" | "model"> {
+  make: {
+    _id: Types.ObjectId;
+    name: string;
+  },
+  model: {
+    _id: Types.ObjectId;
+    name: string;
+  }
 }

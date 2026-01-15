@@ -1,3 +1,4 @@
+import type { fuelTypeType } from "@/types/VehicleTypes";
 
 export const daysOfWeek = [
   "Monday",
@@ -9,7 +10,7 @@ export const daysOfWeek = [
   "Sunday",
 ];
 
-export const fuelTypes = ["Petrol", "Diesel", "Electric", "Hybrid", "CNG"]
+export const fuelTypes:fuelTypeType[] = ["Petrol", "Diesel", "Electric", "Hybrid", "CNG"]
 
 export const getTimeOptions = () => {
   const timeOptions = [];

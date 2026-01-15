@@ -19,12 +19,19 @@ export class GarageController implements IGarageController {
 
   onboarding = async (req: Request, res: Response) => {
     try {
-      const { name, userId, startTime, endTime, mobile, isRSAEnabled, numOfServiceBays } =
-        req.body;
+      const {
+        name,
+        userId,
+        startTime,
+        endTime,
+        mobile,
+        isRSAEnabled,
+        numOfServiceBays,
+      } = req.body;
       const location = JSON.parse(req.body.location);
       const address = JSON.parse(req.body.address);
       const selectedHolidays = JSON.parse(req.body.selectedHolidays);
-      const supportedFuelTypes = JSON.parse(req.body.supportedFuelTypes)
+      const supportedFuelTypes = JSON.parse(req.body.supportedFuelTypes);
 
       let image: Express.Multer.File | undefined;
       let document: Express.Multer.File | undefined;
@@ -67,31 +74,6 @@ export class GarageController implements IGarageController {
         supportedFuelTypes
       );
       res.status(HttpStatus.OK).json({ garage: response });
-    } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
-    }
-  };
-
-  getAddressFromCoordinates = async (req: Request, res: Response) => {
-    try {
-      const lat = req.query.lat as string;
-      const lng = req.query.lng as string;
-
-      if (!lat || !lng) {
-        throw {
-          status: HttpStatus.BAD_REQUEST,
-          message: "Latitude and Longitude cannot be blank.",
-        };
-      }
-      const response = await this._garageService.getAddressFromCoordinates(
-        lat,
-        lng
-      );
-      res.json(response);
     } catch (error) {
       console.error(error);
       const err = error as Error;
@@ -181,5 +163,29 @@ export class GarageController implements IGarageController {
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: err?.message || SERVER_ERROR });
     }
-  }
+  };
+
+  findNearbyGarages = async (req: Request, res: Response) => {
+    try {
+      const lat = Number(req.query.lat);
+      const lng = Number(req.query.lng);
+
+      if (!lat || !lng) {
+        throw {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Latitude and Longitude cannot be blank.",
+        };
+      }
+
+      const response = await this._garageService.findNearbyGarages(lat, lng);
+
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      console.error(error);
+      const err = error as Error;
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: err?.message || SERVER_ERROR });
+    }
+  };
 }

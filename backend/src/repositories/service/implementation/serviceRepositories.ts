@@ -38,16 +38,17 @@ export class ServiceRepository
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
-      .populate({path:"categoryId", select:"name -_id"})
-      .lean()
+      .populate({ path: "categoryId", select: "name -_id" })
+      .lean();
 
     const totalServices = await this.model.countDocuments(searchFilter);
     const totalPages = Math.ceil(totalServices / limit);
 
-    return { 
-      services: services as unknown as IServicePopulated[], 
-      totalServices, 
-      totalPages };
+    return {
+      services: services as unknown as IServicePopulated[],
+      totalServices,
+      totalPages,
+    };
   }
 
   async findOneAndUpdate(
@@ -57,7 +58,22 @@ export class ServiceRepository
     return await this.model.findByIdAndUpdate(serviceId, { $set: data });
   }
 
-  async getServiceById(serviceId: string): Promise<HydratedDocument<IService> | null> {
-    return await this.model.findById(serviceId)
+  async getServiceById(
+    serviceId: string
+  ): Promise<HydratedDocument<IService> | null> {
+    return await this.model.findById(serviceId);
+  }
+
+  async getServicesByGarageId(
+    garageId: string,
+    categoryId: string
+  ): Promise<HydratedDocument<IService>[]> {
+    console.log(garageId);
+    return await this.getAll({
+      garageId,
+      categoryId,
+      isDeleted: false,
+      isBlocked: false,
+    });
   }
 }

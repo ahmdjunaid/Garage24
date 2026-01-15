@@ -3,8 +3,7 @@ import IGarageService from "../interface/IGarageService";
 import { IAuthRepository } from "../../../repositories/auth/interface/IAuthRepositories";
 import mongoose from "mongoose";
 import { deleteFromS3, uploadFile } from "../../../config/s3Service";
-import axios from "axios";
-import { IAddress, IGarage } from "../../../types/garage";
+import { GarageNearbyDto, IAddress, IGarage } from "../../../types/garage";
 import { deleteLocalFile } from "../../../helper/helper";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
@@ -102,38 +101,6 @@ export class GarageService implements IGarageService {
     return garageData;
   }
 
-  async getAddressFromCoordinates(lat: string, lng: string) {
-    const response = await axios.get(
-      "https://nominatim.openstreetmap.org/reverse",
-      {
-        params: {
-          lat,
-          lon: lng,
-          format: "json",
-        },
-        headers: {
-          "User-Agent": "Garage24-Backend/1.0 (contact: support@garage24.com)",
-          "Accept-Language": "en",
-        },
-        timeout: 5000,
-      }
-    );
-
-    const data = response.data;
-
-    return {
-      city:
-        data.address?.city ||
-        data.address?.town ||
-        data.address?.village ||
-        data.address?.county ||
-        "",
-      district: data.address?.state_district || "",
-      state: data.address?.state || "",
-      pincode: data.address?.postcode || "",
-    };
-  }
-
   async getApprovalStatus(userId: string) {
     const garage = await this._garageRepository.findOne({ userId: userId });
 
@@ -169,5 +136,9 @@ export class GarageService implements IGarageService {
     ]);
 
     return { garage, subscription, mechanics };
+  }
+
+  async findNearbyGarages(lat: number, lng: number): Promise<GarageNearbyDto[]> {
+    return await this._garageRepository.findNearbyGarages(lat, lng)
   }
 }
