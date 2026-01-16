@@ -14,6 +14,7 @@ import userRouter from "../src/routes/userRouter";
 import cookieParser from "cookie-parser";
 import { connectRedis } from "./config/redisClient";
 import "reflect-metadata";
+import { GarageRepository } from "./repositories/garage/implementation/garageRepositories";
 
 const app = express();
 const server = http.createServer(app);

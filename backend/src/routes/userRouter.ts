@@ -11,6 +11,7 @@ import { AppointmentController } from "../controllers/appointment/implementation
 import { LocationController } from "../controllers/location/implementation/locationController";
 import { GarageController } from "../controllers/garage/implementation/garageController";
 import { ServiceController } from "../controllers/service/implementation/serviceController";
+import { SlotController } from "../controllers/slot/implementation/slotController";
 
 
 const router = express.Router()
@@ -21,6 +22,7 @@ const appointmentController = container.get<AppointmentController>(TYPES.Appoint
 const locationController = container.get<LocationController>(TYPES.LocationController)
 const garageController = container.get<GarageController>(TYPES.GarageController)
 const serviceController = container.get<ServiceController>(TYPES.ServiceController)
+const slotController = container.get<SlotController>(TYPES.SlotController)
 
 router.route("/vehicles").post(verifyJWT, uploadVehicleImage, authorizeRoles("user"), vehicleController.createVehicle)
 router.route("/vehicles").get(verifyJWT, authorizeRoles("user"), vehicleController.getAllVehicleByUserId)
@@ -32,5 +34,7 @@ router.route('/get-address').get(verifyJWT,authorizeRoles("user"),locationContro
 router.route('/get-coordinates').get(verifyJWT,authorizeRoles("user"),locationController.getCoordinatesFromName)
 router.route("/garages/nearby").get(verifyJWT, authorizeRoles("user"), garageController.findNearbyGarages)
 router.route("/services/available").get(verifyJWT, authorizeRoles("user"), serviceController.getServicesByGarageId)
+router.route("/slots/available").get(verifyJWT, authorizeRoles("user"), slotController.getSlotsByGarageIdAndDate)
+router.route("/appointment/book").post(verifyJWT, authorizeRoles("user"), appointmentController.createAppointment)
 
 export default router;

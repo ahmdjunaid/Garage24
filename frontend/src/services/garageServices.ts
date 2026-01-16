@@ -125,3 +125,9 @@ export const getAllServiceCatoriesApi = () => {
     .get(`${GARAGE_BASE_ROUTE}/service-categories`)
     .then(res => res.data)
 }
+
+export const getActiveAppointmentsApi = (page = 1, limit = 5, searchQuery = "") => {
+  return api
+    .get(`${GARAGE_BASE_ROUTE}/appointments?page=${page}&limit=${limit}&searchQuery=${searchQuery}`)
+    .then(res => res.data)
+}

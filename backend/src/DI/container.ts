@@ -84,6 +84,12 @@ import { ILocationService } from "../services/location/interface/ILocationServic
 import { LocationService } from "../services/location/implementation/locationService";
 import { ILocationController } from "../controllers/location/interface/ILocationController";
 import { LocationController } from "../controllers/location/implementation/locationController";
+import { ISlotController } from "../controllers/slot/interface/ISlotController";
+import { SlotController } from "../controllers/slot/implementation/slotController";
+import { IAppointmentService } from "../services/appointment/interface/IAppointmentService";
+import { AppointmentService } from "../services/appointment/implementation/appointmentService";
+import { IAppointmentRepository } from "../repositories/appointment/interface/IAppointmentRepository";
+import { AppointmentRepository } from "../repositories/appointment/implementation/appointmentRepository";
 
 const container = new Container();
 
@@ -152,9 +158,11 @@ container.bind<IServiceCategoryController>(TYPES.ServiceCategoryController).to(S
 //Slot
 container.bind<ISlotRepository>(TYPES.SlotRepository).to(SlotRepository);
 container.bind<ISlotService>(TYPES.SlotService).to(SlotService);
-// container.bind<>
+container.bind<ISlotController>(TYPES.SlotController).to(SlotController);
 
 //Appointment
+container.bind<IAppointmentRepository>(TYPES.AppointmentRepository).to(AppointmentRepository);
+container.bind<IAppointmentService>(TYPES.AppointmentService).to(AppointmentService);
 container.bind<IAppointmentController>(TYPES.AppointmentController).to(AppointmentController);
 
 // Location

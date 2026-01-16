@@ -5,13 +5,15 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store/store";
 import type { IUsersMappedData } from "@/types/UserTypes";
 import {
+    bookAppointmentApi,
   fetchNearByGaragesApi,
   fetchServicesByGarageIdApi,
   getAppointmentMetaData,
+  getAvailableSlotsByGarageId,
   getVehicleDetailsById,
   getVehicleModelsByBrandApi,
 } from "@/services/userRouter";
-import { errorToast } from "@/utils/notificationAudio";
+import { errorToast, successToast } from "@/utils/notificationAudio";
 import type { fuelTypeType, IPopulatedVehicle } from "@/types/VehicleTypes";
 import type { IServiceCategory } from "@/types/ServiceCategoryTypes";
 import { fuelTypes } from "@/constants/constantDatas";
@@ -22,11 +24,11 @@ import type { GarageNearbyDto } from "@/types/GarageTypes";
 import type { IService } from "@/types/ServicesTypes";
 import { metersToKm } from "@/utils/meterToKMs";
 import Spinner from "@/components/elements/Spinner";
+import type { ISlots } from "@/types/SlotTypes";
 
-interface TimeSlot {
-  id: string;
-  time: string;
-  available: boolean;
+interface timeSlot {
+    startTime: string;
+    slotId: string;
 }
 
 const CarServiceAppointmentForm: React.FC = () => {
@@ -61,13 +63,14 @@ const CarServiceAppointmentForm: React.FC = () => {
     null
   );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedTime, setSelectedTime] = useState<timeSlot | null>(null);
   const [serviceCategories, setServiceCategories] = useState<
     IServiceCategory[] | []
   >([]);
   const [brands, setBrands] = useState<IBrand[] | []>([]);
   const [models, setModels] = useState<IVehicleModel[] | []>([]);
   const [services, setServices] = useState<IService[] | []>([]);
+  const [TimeSlots, setTimeSlots] = useState<ISlots[]|[]>([])
   const [loading, setLoading] = useState(false);
   const { user } = useSelector((state: RootState) => state.auth);
 
@@ -153,19 +156,6 @@ const CarServiceAppointmentForm: React.FC = () => {
     }
   };
 
-  const getTimeSlots = (): TimeSlot[] => {
-    return [
-      { id: "1", time: "09:00 AM", available: true },
-      { id: "2", time: "10:00 AM", available: true },
-      { id: "3", time: "11:00 AM", available: false },
-      { id: "4", time: "12:00 PM", available: true },
-      { id: "5", time: "02:00 PM", available: true },
-      { id: "6", time: "03:00 PM", available: true },
-      { id: "7", time: "04:00 PM", available: false },
-      { id: "8", time: "05:00 PM", available: true },
-    ];
-  };
-
   const toggleService = (serviceId: string) => {
     setSelectedServices((prev) =>
       prev.includes(serviceId)
@@ -179,8 +169,8 @@ const CarServiceAppointmentForm: React.FC = () => {
       userData.name &&
       userData.email &&
       userData.mobileNumber &&
-      vehicleData.makeName &&
-      vehicleData.model &&
+      vehicleData.make?._id &&
+      vehicleData.model?._id &&
       vehicleData.licensePlate &&
       selectedCategory &&
       selectedGarage &&
@@ -190,21 +180,53 @@ const CarServiceAppointmentForm: React.FC = () => {
     );
   };
 
-  const handleBookAppointment = () => {
+  useEffect(()=> {
+    if(!selectedDate) return
+    getAvailableTimeSlots()
+  },[selectedDate])
+
+  const getAvailableTimeSlots = async () => {
+    if (!selectedGarage?.userId || !selectedDate) return;
+    try {
+      setLoading(true);
+      const res = await getAvailableSlotsByGarageId(
+        selectedGarage?.userId,
+        selectedDate
+      );
+      setTimeSlots(res)
+    } catch (error) {
+      console.error(error);
+      if (error instanceof Error) errorToast(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBookAppointment = async () => {
     if (isFormValid()) {
       const selectedServiceDetails = services.filter((s) =>
         selectedServices.includes(s._id)
       );
-      alert("Appointment booked successfully!");
-      console.log({
+      const data = {
         userData,
         vehicleData,
         category: selectedCategory,
         services: selectedServiceDetails,
-        garage: selectedGarage,
+        garage: selectedGarage?._id,
         date: selectedDate,
         time: selectedTime,
-      });
+      }
+      console.log(data);
+
+      try {
+          await bookAppointmentApi(data)
+          successToast("Appointment booked successfully!")
+        } catch (error) {
+        console.error(error)
+        if(error instanceof Error)
+        errorToast(error.message)
+      }
+
     }
   };
 
@@ -547,23 +569,35 @@ const CarServiceAppointmentForm: React.FC = () => {
               Pick Your Date
             </h2>
             <div className="flex gap-4 overflow-x-auto pb-4 flex justify-center">
-              {getNext7Days().map((day) => (
-                <button
-                  key={day.date}
-                  onClick={() => {
-                    setSelectedDate(day.date);
-                  }}
-                  className={`flex-shrink-0 w-24 p-4 rounded-2xl transition-all transform hover:scale-105 ${
-                    selectedDate === day.date
-                      ? "bg-red-500 shadow-2xl"
-                      : "bg-[#2a2a2a]"
-                  }`}
-                >
-                  <div className="text-sm opacity-80 mb-1">{day.day}</div>
-                  <div className="text-3xl font-bold mb-1">{day.dayNum}</div>
-                  <div className="text-sm opacity-80">{day.month}</div>
-                </button>
-              ))}
+              {getNext7Days().map((day) => {
+                const isClosed = selectedGarage?.selectedHolidays.includes(
+                  day.dayFull
+                );
+
+                return (
+                  <div key={day.date} className="relative group">
+                    <button
+                      onClick={() => {
+                        setSelectedDate(day.date)
+                    }}
+                      disabled={isClosed}
+                      className={`flex-shrink-0 w-24 p-4 rounded-2xl transition-all transform
+                        ${selectedDate === day.date ? "bg-red-500 shadow-2xl" : "bg-[#2a2a2a]"}
+                        disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {isClosed && (
+                        <span className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full" />
+                      )}
+
+                      <div className="text-sm opacity-80 mb-1">{day.day}</div>
+                      <div className="text-3xl font-bold mb-1">
+                        {day.dayNum}
+                      </div>
+                      <div className="text-sm opacity-80">{day.month}</div>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </section>
         )}
@@ -572,24 +606,24 @@ const CarServiceAppointmentForm: React.FC = () => {
         {selectedDate && (
           <section className="mb-12">
             <h2 className="text-3xl font-bold mb-6 text-center">
-              Choose Your Time
+              { TimeSlots.length > 0 ? "Choose Your Time" : "No slots available — try another date"}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
-              {getTimeSlots().map((slot) => (
+              {TimeSlots.map((slot) => (
                 <button
-                  key={slot.id}
-                  onClick={() => slot.available && setSelectedTime(slot.time)}
-                  disabled={!slot.available}
-                  className={`p-4 rounded-xl transition-all font-semibold ${
-                    selectedTime === slot.time
+                  key={slot._id}
+                  onClick={() => slot.capacity > 0 && setSelectedTime({slotId:slot._id, startTime:slot.startTime})}
+                  disabled={slot.capacity < 0}
+                  className={`p-4 rounded-xl transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed ${
+                    selectedTime?.startTime === slot.startTime
                       ? "bg-red-500 shadow-lg"
-                      : slot.available
+                      : slot.capacity > 0
                         ? "bg-[#2a2a2a]"
                         : "bg-[#2a2a2a] opacity-40 cursor-not-allowed"
                   }`}
                 >
                   <Clock className="h-5 w-5 mx-auto mb-2" />
-                  {slot.time}
+                  {slot.startTime}
                 </button>
               ))}
             </div>
@@ -622,7 +656,7 @@ const CarServiceAppointmentForm: React.FC = () => {
                   <div className="space-y-2 text-gray-300">
                     <p>🏢 {selectedGarage?.name}</p>
                     <p>📅 {selectedDate}</p>
-                    <p>⏰ {selectedTime}</p>
+                    <p>⏰ {selectedTime.startTime}</p>
                     <p className="text-xl font-bold text-white mt-3">
                       💰 Total: ₹{totalPrice}
                     </p>

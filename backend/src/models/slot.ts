@@ -8,7 +8,7 @@ const slotSchema = new Schema<ISlot>(
       ref: "Garage",
       required: true
     },
-    date: { type: String, required: true },
+    date: { type: Date, required: true },
     startTime: String,
     endTime: String,
 

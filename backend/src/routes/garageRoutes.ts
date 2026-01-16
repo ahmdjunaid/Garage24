@@ -11,6 +11,7 @@ import { hasActivePlan } from "../middleware/checkSubscription";
 import { ServiceController } from "../controllers/service/implementation/serviceController";
 import { ServiceCategoryController } from "../controllers/serviceCategory/implementation/serviceCategoryController";
 import { LocationController } from "../controllers/location/implementation/locationController";
+import { AppointmentController } from "../controllers/appointment/implementation/appointmentController";
 
 
 const router = express.Router()
@@ -21,6 +22,7 @@ const planController = container.get<PlanController>(TYPES.PlanController)
 const serviceController = container.get<ServiceController>(TYPES.ServiceController)
 const serviceCategoryController = container.get<ServiceCategoryController>(TYPES.ServiceCategoryController)
 const locationController = container.get<LocationController>(TYPES.LocationController)
+const appointmentController = container.get<AppointmentController>(TYPES.AppointmentController)
 
 router.route('/onboarding').post(verifyJWT,authorizeRoles("garage"),uploadOnboardingImages,garageController.onboarding)
 router.route('/get-address').get(verifyJWT,authorizeRoles("garage"),locationController.getAddressFromCoordinates)
@@ -39,5 +41,6 @@ router.route('/services/:serviceId').patch(verifyJWT,authorizeRoles("garage"),se
 router.route('/services/:serviceId').delete(verifyJWT,authorizeRoles("garage"),serviceController.deleteService)
 router.route('/get-garage').get(verifyJWT,authorizeRoles("garage"),garageController.getGarageById)
 router.route('/service-categories').get(verifyJWT, authorizeRoles("garage"), serviceCategoryController.getAllServiceCategories)
+router.route("/appointments").get(verifyJWT, authorizeRoles("garage"), appointmentController.getActiveAppointments)
 
 export default router;

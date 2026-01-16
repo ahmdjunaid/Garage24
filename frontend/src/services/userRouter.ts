@@ -12,35 +12,30 @@ export const registerVehicleApi = (data: FormData) => {
 };
 
 export const getVehiclesByUserIdApi = () => {
+  return api.get(`${USER_BASE_ROUTE}/vehicles`).then((res) => res.data);
+};
+
+export const getAllBrandsApi = () => {
+  return api.get(`${USER_BASE_ROUTE}/brands`).then((res) => res.data);
+};
+
+export const getVehicleModelsByBrandApi = (brandId: string) => {
   return api
-    .get(`${USER_BASE_ROUTE}/vehicles`)
+    .get(`${USER_BASE_ROUTE}/${brandId}/vehicle-models`)
     .then((res) => res.data);
 };
 
-
-export const getAllBrandsApi = () => {
+export const getVehicleDetailsById = (vehicleId: string) => {
   return api
-    .get(`${USER_BASE_ROUTE}/brands`)
-    .then(res => res.data)
-}
-
-export const getVehicleModelsByBrandApi = (brandId:string) => {
-  return api
-    .get(`${USER_BASE_ROUTE}/${brandId}/vehicle-models`)
-    .then(res => res.data)
-}
-
-export const getVehicleDetailsById = (vehicleId:string) => {
-    return api
-      .get(`${USER_BASE_ROUTE}/vehicle?vehicleId=${vehicleId}`)
-      .then(res => res.data)
-}
+    .get(`${USER_BASE_ROUTE}/vehicle?vehicleId=${vehicleId}`)
+    .then((res) => res.data);
+};
 
 export const getAppointmentMetaData = () => {
-    return api
-      .get(`${USER_BASE_ROUTE}/appointment/page-meta`)
-      .then(res => res.data)
-}
+  return api
+    .get(`${USER_BASE_ROUTE}/appointment/page-meta`)
+    .then((res) => res.data);
+};
 
 export const fetchAddressForAppointmentApi = (lat: number, lng: number) => {
   return api
@@ -60,8 +55,25 @@ export const fetchNearByGaragesApi = (lat: number, lng: number) => {
     .then((res) => res.data);
 };
 
-export const fetchServicesByGarageIdApi = (garageId:string, category:string) => {
+export const fetchServicesByGarageIdApi = (
+  garageId: string,
+  category: string
+) => {
   return api
-    .get(`/${USER_BASE_ROUTE}/services/available?garageId=${garageId}&categoryId=${category}`)
+    .get(
+      `/${USER_BASE_ROUTE}/services/available?garageId=${garageId}&categoryId=${category}`
+    )
+    .then((res) => res.data);
+};
+
+export const getAvailableSlotsByGarageId = (garageId: string, date: string) => {
+  return api
+    .get(`/${USER_BASE_ROUTE}/slots/available?garageId=${garageId}&date=${date}`)
+    .then((res) => res.data);
+};
+
+export const bookAppointmentApi = (data) => {
+  return api
+    .post(`/${USER_BASE_ROUTE}/appointment/book`,data)
     .then((res) => res.data);
 };

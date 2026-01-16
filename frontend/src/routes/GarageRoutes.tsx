@@ -8,6 +8,7 @@ import GarageMechanic from "../pages/garages/GarageMechanic";
 import PageNotFound from "../pages/auth/PageNotFound";
 import GaragePlans from "../pages/garages/GaragePlans";
 import GarageServices from "@/pages/garages/GarageServices";
+import GarageAppointments from "@/pages/garages/GarageAppointments";
 
 const GarageRoutes = () => {
   return (
@@ -21,6 +22,7 @@ const GarageRoutes = () => {
         <Route path="/mechanics" element={<GarageMechanic />} />
         <Route path="/services" element={<GarageServices />} />
         <Route path="/plans" element={<GaragePlans />} />
+        <Route path="/appointments" element={<GarageAppointments />} />
         <Route path="*" element={<PageNotFound/>}/>
       </Route>
     </Routes>

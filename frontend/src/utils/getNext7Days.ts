@@ -6,6 +6,7 @@ export const getNext7Days = () => {
     days.push({
       date: date.toISOString().split("T")[0],
       day: date.toLocaleDateString("en-US", { weekday: "short" }),
+      dayFull: date.toLocaleDateString("en-US", { weekday: "long" }),
       dayNum: date.getDate(),
       month: date.toLocaleDateString("en-US", { month: "short" }),
     });
