@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import IMechanicController from "../interface/IMechanicController";
 import IMechanicService from "../../../services/mechanic/interface/IMechanicService";
 import HttpStatus from "../../../constants/httpStatusCodes";
@@ -17,7 +17,7 @@ export class MechanicController implements IMechanicController {
     @inject(TYPES.MechanicService) private _mechanicService: IMechanicService
   ) {}
 
-  onboarding = async (req: Request, res: Response) => {
+  onboarding = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name, userId, skills, mobile, password, newPassword } = req.body;
       const image = req.file as Express.Multer.File;
@@ -46,7 +46,7 @@ export class MechanicController implements IMechanicController {
     }
   };
 
-  registerMechanic = async (req: Request, res: Response) => {
+  registerMechanic = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name, email, role } = req.body;
       const garageId = req.user?.id;
@@ -74,7 +74,7 @@ export class MechanicController implements IMechanicController {
     }
   };
 
-  getAllMechanics = async (req: Request, res: Response) => {
+  getAllMechanics = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page = 1, limit = 10, searchQuery = "" } = req.query;
       const garageId = req.user?.id;
@@ -102,7 +102,7 @@ export class MechanicController implements IMechanicController {
     }
   };
 
-  toggleStatus = async (req: Request, res: Response) => {
+  toggleStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { action } = req.body;
       const userId = req.params.userId;
@@ -123,7 +123,7 @@ export class MechanicController implements IMechanicController {
     }
   };
 
-  deleteMechanic = async (req: Request, res: Response) => {
+  deleteMechanic = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.params.userId;
       console.log(userId)
@@ -143,7 +143,7 @@ export class MechanicController implements IMechanicController {
     }
   };
 
-  resendMechanicInvite = async (req: Request, res: Response) => {
+  resendMechanicInvite = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const mechanicId = req.params.mechanicId;
       if (!mechanicId) {

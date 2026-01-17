@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import IGarageController from "../interface/IGarageController";
 import IGarageService from "../../../services/garage/interface/IGarageService";
 import HttpStatus from "../../../constants/httpStatusCodes";
@@ -17,7 +17,7 @@ export class GarageController implements IGarageController {
     @inject(TYPES.GarageService) private _garageService: IGarageService
   ) {}
 
-  onboarding = async (req: Request, res: Response) => {
+  onboarding = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const {
         name,
@@ -83,7 +83,7 @@ export class GarageController implements IGarageController {
     }
   };
 
-  getApprovalStatus = async (req: Request, res: Response) => {
+  getApprovalStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user?.id;
 
@@ -103,7 +103,7 @@ export class GarageController implements IGarageController {
     }
   };
 
-  getCurrentPlan = async (req: Request, res: Response) => {
+  getCurrentPlan = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const garageId = req.params.garageId;
       if (!garageId) {
@@ -125,7 +125,7 @@ export class GarageController implements IGarageController {
     }
   };
 
-  getGarageById = async (req: Request, res: Response) => {
+  getGarageById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const garageId = req.query.garageId as string;
 
@@ -145,7 +145,7 @@ export class GarageController implements IGarageController {
     }
   };
 
-  getGarageDetailsById = async (req: Request, res: Response) => {
+  getGarageDetailsById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const garageId = req.query.garageId as string;
 
@@ -165,7 +165,7 @@ export class GarageController implements IGarageController {
     }
   };
 
-  findNearbyGarages = async (req: Request, res: Response) => {
+  findNearbyGarages = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const lat = Number(req.query.lat);
       const lng = Number(req.query.lng);

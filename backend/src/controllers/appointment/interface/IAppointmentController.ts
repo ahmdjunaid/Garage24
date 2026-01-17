@@ -1,7 +1,7 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 
 export interface IAppointmentController {
-    getAppointmentMetaData(req:Request, res:Response):Promise<void>;
-    createAppointment(req:Request, res:Response):Promise<void>;
-    getActiveAppointments(req:Request, res:Response):Promise<void>;
+    getAppointmentMetaData(req:Request, res:Response, next: NextFunction):Promise<void>;
+    createAppointment(req:Request, res:Response, next: NextFunction):Promise<void>;
+    getActiveAppointments(req:Request, res:Response, next: NextFunction):Promise<void>;
 }

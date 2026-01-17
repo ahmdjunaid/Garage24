@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import { IVehicleModelController } from "../interface/IVehicleModelController";
 import { TYPES } from "../../../DI/types";
 import { IVehicleModelService } from "../../../services/vehicleModel/interface/IVehicleModelService";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { ERROR_WHILE_FETCH_DATA, SERVER_ERROR } from "../../../constants/messages";
 
@@ -13,7 +13,7 @@ export class VehicleModelController implements IVehicleModelController {
     private _vehicleModelService: IVehicleModelService
   ) {}
 
-  getAllVehicleModelsByBrand = async (req: Request, res: Response) => {
+  getAllVehicleModelsByBrand = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const brandId = req.params.brandId
 

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { inject, injectable } from "inversify";
 import { IAppointmentController } from "../interface/IAppointmentController";
 import { TYPES } from "../../../DI/types";
@@ -19,7 +19,7 @@ export class AppointmentController implements IAppointmentController {
     private _appointmentService: IAppointmentService
   ) {}
 
-  getAppointmentMetaData = async (req: Request, res: Response) => {
+  getAppointmentMetaData = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const [categories, brands] = await Promise.all([
         this._serviceCategoryService.getAllServiceCategories(),
@@ -35,7 +35,7 @@ export class AppointmentController implements IAppointmentController {
     }
   };
 
-  createAppointment = async (req: Request, res: Response) => {
+  createAppointment = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user?.id;
       const { userData, vehicleData, services, garage, date, time } = req.body;
@@ -73,7 +73,7 @@ export class AppointmentController implements IAppointmentController {
     }
   };
 
-  getActiveAppointments = async (req: Request, res: Response) => {
+  getActiveAppointments = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page = 1, limit = 10, searchQuery = "" } = req.query;
       const garageId = req.user?.id;

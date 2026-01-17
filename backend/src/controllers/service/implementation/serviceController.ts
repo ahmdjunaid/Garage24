@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import IServiceController from "../interface/IServiceController";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { ALL_FIELDS_REQUIRED, SERVER_ERROR } from "../../../constants/messages";
@@ -13,7 +13,7 @@ export class ServiceController implements IServiceController {
     @inject(TYPES.ServiceService) private _serviceService: IServiceService
   ) {}
 
-  createService = async (req: Request, res: Response) => {
+  createService = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { categoryId, name, price, durationMinutes } = req.body;
       const garageId = req.user?.id;
@@ -37,7 +37,7 @@ export class ServiceController implements IServiceController {
     }
   };
 
-  getAllServices = async (req: Request, res: Response) => {
+  getAllServices = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page = 1, limit = 10, searchQuery = "" } = req.query;
       const garageId = req.user?.id;
@@ -61,7 +61,7 @@ export class ServiceController implements IServiceController {
     }
   };
 
-  toggleStatus = async (req: Request, res: Response) => {
+  toggleStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { action } = req.body;
       const serviceId = req.params.serviceId;
@@ -85,7 +85,7 @@ export class ServiceController implements IServiceController {
     }
   };
 
-  deleteService = async (req: Request, res: Response) => {
+  deleteService = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const serviceId = req.params.serviceId;
 
@@ -104,7 +104,7 @@ export class ServiceController implements IServiceController {
     }
   };
 
-  getServicesByGarageId = async (req: Request, res: Response) => {
+  getServicesByGarageId = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const garageId = req.query.garageId as string;
       const categoryId = req.query.categoryId as string;

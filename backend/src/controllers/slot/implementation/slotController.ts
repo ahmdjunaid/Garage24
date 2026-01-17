@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { ISlotController } from "../interface/ISlotController";
 import { ALL_FIELDS_REQUIRED, SERVER_ERROR } from "../../../constants/messages";
 import HttpStatus from "../../../constants/httpStatusCodes";
@@ -10,7 +10,7 @@ import { ISlotService } from "../../../services/slot/interface/ISlotService";
 export class SlotController implements ISlotController {
   constructor(@inject(TYPES.SlotService) private _slotService: ISlotService) {}
 
-  getSlotsByGarageIdAndDate = async (req: Request, res: Response) => {
+  getSlotsByGarageIdAndDate = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const garageId = req.query.garageId as string;
       const date = req.query.date as string;

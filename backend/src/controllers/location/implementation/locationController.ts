@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { ILocationController } from "../interface/ILocationController";
 import { TYPES } from "../../../DI/types";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { ALL_FIELDS_REQUIRED, SERVER_ERROR } from "../../../constants/messages";
 import { ILocationService } from "../../../services/location/interface/ILocationService";
@@ -12,7 +12,7 @@ export class LocationController implements ILocationController {
     @inject(TYPES.LocationService) private _locationService: ILocationService
   ) {}
 
-  getAddressFromCoordinates = async (req: Request, res: Response) => {
+  getAddressFromCoordinates = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const lat = req.query.lat as string;
       const lng = req.query.lng as string;
@@ -37,7 +37,7 @@ export class LocationController implements ILocationController {
     }
   };
 
-  getCoordinatesFromName = async (req: Request, res: Response) => {
+  getCoordinatesFromName = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const name = req.query.name as string;
 

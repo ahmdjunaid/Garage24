@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import {
   ALL_FIELDS_REQUIRED,
@@ -16,7 +16,7 @@ export class VehicleController implements IVehicleController {
     @inject(TYPES.VehicleService) private _vehicleService: IVehicleService
   ) {}
 
-  createVehicle = async (req: Request, res: Response) => {
+  createVehicle = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const {
         licensePlate,
@@ -73,7 +73,7 @@ export class VehicleController implements IVehicleController {
     }
   };
 
-  getAllVehicleByUserId = async (req: Request, res: Response) => {
+  getAllVehicleByUserId = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -95,7 +95,7 @@ export class VehicleController implements IVehicleController {
     }
   };
 
-  getVehicleById = async (req: Request, res: Response) => {
+  getVehicleById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const vehicleId = req.query.vehicleId as string;
       if (!vehicleId) {

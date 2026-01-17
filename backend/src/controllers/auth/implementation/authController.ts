@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import IAuthController from "../interface/IAuthController";
 import {
@@ -24,7 +24,7 @@ export class Authcontroller implements IAuthController {
   constructor(
     @inject(TYPES.AuthService) private _authService: IAuthService) {}
 
-  register = async (req: Request, res: Response) => {
+  register = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const parsed = registerSchema.safeParse(req.body);
 
@@ -49,7 +49,7 @@ export class Authcontroller implements IAuthController {
     }
   };
 
-  login = async (req: Request, res: Response): Promise<void> => {
+  login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const parsed = loginSchema.safeParse(req.body);
 
@@ -80,7 +80,7 @@ export class Authcontroller implements IAuthController {
     }
   };
 
-  verifyOtp = async (req: Request, res: Response) => {
+  verifyOtp = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, otp, context } = req.body;
       const { token, message, userId } = await this._authService.verifyOtp(email, otp, context);
@@ -98,7 +98,7 @@ export class Authcontroller implements IAuthController {
     }
   };
 
-  logout = async (req: Request, res: Response) => {
+  logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
       res.clearCookie("refresh_token", {
         httpOnly: true,
@@ -114,7 +114,7 @@ export class Authcontroller implements IAuthController {
     }
   };
 
-  forgotPassword = async (req: Request, res: Response) => {
+  forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email } = req.body;
 
@@ -136,7 +136,7 @@ export class Authcontroller implements IAuthController {
     }
   };
 
-  resendOtp = async (req: Request, res: Response) => {
+  resendOtp = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, context } = req.body;
 
@@ -161,7 +161,7 @@ export class Authcontroller implements IAuthController {
     }
   };
 
-  resetPassword = async (req: Request, res: Response) => {
+  resetPassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const parsed = loginSchema.safeParse(req.body);
 
@@ -186,7 +186,7 @@ export class Authcontroller implements IAuthController {
     }
   };
 
-  googleAuth = async (req: Request, res: Response) => {
+  googleAuth = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { accessToken } = req.body;
       const { user, token, refreshToken } =
@@ -209,7 +209,7 @@ export class Authcontroller implements IAuthController {
     }
   };
 
-  refreshToken = async (req: Request, res: Response) => {
+  refreshToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const refreshToken = req.cookies?.refresh_token;
 

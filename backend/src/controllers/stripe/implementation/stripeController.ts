@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import IStripeController from "../interface/IStripeController";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import {
@@ -18,7 +18,7 @@ export class StripeController implements IStripeController {
     @inject(TYPES.StripeService) private _stripeService: IStripeService
   ) {}
 
-  createSubscribeSession = async (req: Request, res: Response) => {
+  createSubscribeSession = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { planId, planName, planPrice } = req.body;
       const garageId = req.user?.id;
@@ -46,7 +46,7 @@ export class StripeController implements IStripeController {
     }
   };
 
-  handleWebhook = async (req: Request, res: Response) => {
+  handleWebhook = async (req: Request, res: Response, next: NextFunction) => {
     const sig = req.headers["stripe-signature"];
     if (!sig) {
       throw { status: HttpStatus.BAD_REQUEST, message: WEBHOOK_ERROR };
@@ -69,7 +69,7 @@ export class StripeController implements IStripeController {
     }
   };
 
-  getCheckoutSession = async (req: Request, res: Response) => {
+  getCheckoutSession = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const sessionId = req.params.sessionId;
       if (!sessionId) {

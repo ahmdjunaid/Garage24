@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { ALL_FIELDS_REQUIRED, SERVER_ERROR } from "../../../constants/messages";
 import { GetPaginationQuery } from "../../../types/common";
@@ -13,7 +13,7 @@ export class AdminController implements IAdminController {
     @inject(TYPES.AdminService) private _adminService: IAdminService
   ) {}
 
-  getAllGarages = async (req: Request, res: Response) => {
+  getAllGarages = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page = 1, limit = 10, searchQuery = "" } = req.query;
 
@@ -39,7 +39,7 @@ export class AdminController implements IAdminController {
     }
   };
 
-  getAllUsers = async (req: Request, res: Response) => {
+  getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page = 1, limit = 10, searchQuery = "" } = req.query;
 
@@ -65,7 +65,7 @@ export class AdminController implements IAdminController {
     }
   };
 
-  toggleStatus = async (req: Request, res: Response) => {
+  toggleStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { action } = req.body;
       const userId = req.params.userId;
@@ -86,7 +86,7 @@ export class AdminController implements IAdminController {
     }
   };
 
-  garageApproval = async (req: Request, res: Response) => {
+  garageApproval = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { action } = req.body;
       const userId = req.params.userId;

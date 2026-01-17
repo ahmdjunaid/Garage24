@@ -1,18 +1,29 @@
-// import { Request, Response, NextFunction } from "express";
-// import HttpStatus from "../constants/httpStatusCodes";
+import { Request, Response, NextFunction } from "express";
+import HttpStatus from "../constants/httpStatusCodes";
 
-// export const errorHandler = (
-//   err: any,
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   console.error(err);
+export class AppError extends Error {
+  status: number;
 
-//   const statusCode = err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
-//   const message = err.message || "Something went wrong";
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
 
-//   res.status(statusCode).json({
-//     message
-//   });
-// };
+export const errorHandler = (
+  err: AppError,
+  req: Request,
+  res: Response,
+  _next: NextFunction
+) => {
+  void _next;
+  console.error(err);
+
+  const statusCode = err.status || HttpStatus.INTERNAL_SERVER_ERROR;
+  const message = err.message || "Something went wrong";
+
+  res.status(statusCode).json({
+    message,
+  });
+};

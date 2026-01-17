@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IServiceCategoryController } from "../interface/IServiceCategoryController";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
@@ -13,7 +13,7 @@ export class ServiceCategoryController implements IServiceCategoryController {
     private _serviceCatgoryService: IServiceCategoryService
   ) {}
 
-  getAllServiceCategories = async (req: Request, res: Response) => {
+  getAllServiceCategories = async (req: Request, res: Response, next: NextFunction) => {
     try {
     const serviceCategories = await this._serviceCatgoryService.getAllServiceCategories()
 

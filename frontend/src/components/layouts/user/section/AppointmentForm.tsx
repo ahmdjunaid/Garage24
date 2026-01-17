@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store/store";
 import type { IUsersMappedData } from "@/types/UserTypes";
 import {
-    bookAppointmentApi,
+  bookAppointmentApi,
   fetchNearByGaragesApi,
   fetchServicesByGarageIdApi,
   getAppointmentMetaData,

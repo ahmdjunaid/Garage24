@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { ALL_FIELDS_REQUIRED, SERVER_ERROR } from "../../../constants/messages";
 import { GetPaginationQuery } from "../../../types/common";
@@ -11,7 +11,7 @@ import IPlanService from "../../../services/plan/interface/IPlanService";
 export class PlanController implements IPlanController {
   constructor(@inject(TYPES.PlanService) private _planService: IPlanService) {}
 
-  createPlans = async (req: Request, res: Response) => {
+  createPlans = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name, price, validity, noOfMechanics, noOfServices } = req.body;
 
@@ -33,7 +33,7 @@ export class PlanController implements IPlanController {
     }
   };
 
-  getAllPlans = async (req: Request, res: Response) => {
+  getAllPlans = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page = 1, limit = 10, searchQuery = "" } = req.query;
 
@@ -59,7 +59,7 @@ export class PlanController implements IPlanController {
     }
   };
 
-  toggleStatus = async (req: Request, res: Response) => {
+  toggleStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { action } = req.body;
       const planId = req.params.planId;
@@ -80,7 +80,7 @@ export class PlanController implements IPlanController {
     }
   };
 
-  deletePlan = async (req: Request, res: Response) => {
+  deletePlan = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const planId = req.params.planId;
 
@@ -99,7 +99,7 @@ export class PlanController implements IPlanController {
     }
   };
 
-  updatePlan = async (req: Request, res: Response) => {
+  updatePlan = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const planId = req.params.planId
       const {name, price, validity, noOfMechanics, noOfServices} = req.body
