@@ -1,11 +1,15 @@
 import { NextFunction, Request, Response } from "express";
 import IServiceController from "../interface/IServiceController";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import { ALL_FIELDS_REQUIRED, SERVER_ERROR } from "../../../constants/messages";
+import {
+  ALL_FIELDS_REQUIRED,
+  INVALID_INPUT,
+} from "../../../constants/messages";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
 import IServiceService from "../../../services/service/interface/IServiceService";
 import { GetPaginationQuery } from "../../../types/common";
+import { AppError } from "../../../middleware/errorHandler";
 
 @injectable()
 export class ServiceController implements IServiceController {
@@ -19,7 +23,7 @@ export class ServiceController implements IServiceController {
       const garageId = req.user?.id;
 
       if (!categoryId || !name || !price || !durationMinutes || !garageId) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
 
       const response = await this._serviceService.createService({
@@ -29,11 +33,7 @@ export class ServiceController implements IServiceController {
 
       res.status(HttpStatus.ACCEPTED).json(response);
     } catch (error) {
-      console.error(error, "Error from creating service");
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
   };
 
@@ -53,11 +53,7 @@ export class ServiceController implements IServiceController {
 
       res.status(HttpStatus.OK).json({ ...response });
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
   };
 
@@ -67,7 +63,7 @@ export class ServiceController implements IServiceController {
       const serviceId = req.params.serviceId;
 
       if (!serviceId || !action) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
 
       const response = await this._serviceService.toggleStatus(
@@ -77,11 +73,7 @@ export class ServiceController implements IServiceController {
 
       res.status(HttpStatus.ACCEPTED).json({ message: response.message });
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
   };
 
@@ -90,37 +82,35 @@ export class ServiceController implements IServiceController {
       const serviceId = req.params.serviceId;
 
       if (!serviceId) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
 
       const response = await this._serviceService.deleteService(serviceId);
       res.status(HttpStatus.ACCEPTED).json({ message: response.message });
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
   };
 
-  getServicesByGarageId = async (req: Request, res: Response, next: NextFunction) => {
+  getServicesByGarageId = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const garageId = req.query.garageId as string;
       const categoryId = req.query.categoryId as string;
-      if(!garageId || !categoryId){
-        throw {status:HttpStatus.BAD_REQUEST, message: "Garage Id is required"}
+      if (!garageId || !categoryId) {
+        throw new AppError(HttpStatus.BAD_REQUEST, INVALID_INPUT);
       }
-      const response = await this._serviceService.getServicesByGarageId(garageId, categoryId)
+      const response = await this._serviceService.getServicesByGarageId(
+        garageId,
+        categoryId
+      );
 
-      res.status(HttpStatus.OK).json(response)
-      
+      res.status(HttpStatus.OK).json(response);
     } catch (error) {
-            console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
-  }
+  };
 }

@@ -2,18 +2,17 @@ import { NextFunction, Request, Response } from "express";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import IAuthController from "../interface/IAuthController";
 import {
-  ERROR_WHILE_FORGOT_PASS,
-  ERROR_WHILE_RESEND_OTP,
-  GOOGLE_AUTH_ERROR,
   INVALID_EMAIL,
+  LOGGED_OUT_MESSAGE,
   NO_REFRESH_TOKEN_FOUND,
-  SERVER_ERROR,
 } from "../../../constants/messages";
 import IAuthService from "../../../services/auth/interface/IAuthService";
 import dotenv from "dotenv";
 import { loginSchema, registerSchema } from "../../../utils/zodValidate";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
+import { AppError } from "../../../middleware/errorHandler";
+import { emailRegex } from "../../../constants/commonRegex";
 dotenv.config();
 
 const refreshTokenMaxAge =
@@ -21,15 +20,14 @@ const refreshTokenMaxAge =
 
 @injectable()
 export class Authcontroller implements IAuthController {
-  constructor(
-    @inject(TYPES.AuthService) private _authService: IAuthService) {}
+  constructor(@inject(TYPES.AuthService) private _authService: IAuthService) {}
 
   register = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const parsed = registerSchema.safeParse(req.body);
 
       if (!parsed.success) {
-        throw { status: HttpStatus.NOT_FOUND, message: parsed.error.message };
+        throw new AppError(HttpStatus.NOT_FOUND, parsed.error.message);
       }
 
       const { name, email, password, role } = parsed.data;
@@ -42,16 +40,20 @@ export class Authcontroller implements IAuthController {
 
       res.status(HttpStatus.OK).json({ message });
     } catch (error) {
-      next(error)
+      next(error);
     }
   };
 
-  login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  login = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const parsed = loginSchema.safeParse(req.body);
 
       if (!parsed.success) {
-        throw { status: HttpStatus.NOT_FOUND, message: parsed.error.message };
+        throw new AppError(HttpStatus.NOT_FOUND, parsed.error.message);
       }
 
       const { email, password } = parsed.data;
@@ -70,22 +72,26 @@ export class Authcontroller implements IAuthController {
 
       res.json({ user, token });
     } catch (error) {
-      next(error)
+      next(error);
     }
   };
 
   verifyOtp = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, otp, context } = req.body;
-      const { token, message, userId } = await this._authService.verifyOtp(email, otp, context);
+      const { token, message, userId } = await this._authService.verifyOtp(
+        email,
+        otp,
+        context
+      );
 
       res.status(HttpStatus.OK).json({
         message: message,
         token,
-        userId
+        userId,
       });
     } catch (error) {
-     next(error)
+      next(error);
     }
   };
 
@@ -97,9 +103,9 @@ export class Authcontroller implements IAuthController {
         sameSite: "strict",
       });
 
-      res.status(HttpStatus.OK).json({ message: "Logged out successfully." });
+      res.status(HttpStatus.OK).json({ message: LOGGED_OUT_MESSAGE });
     } catch (error) {
-     next(error)
+      next(error);
     }
   };
 
@@ -107,17 +113,15 @@ export class Authcontroller implements IAuthController {
     try {
       const { email } = req.body;
 
-      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-
       if (!email || !emailRegex.test(email)) {
-        throw { status: HttpStatus.BAD_REQUEST, message: INVALID_EMAIL };
+        throw new AppError(HttpStatus.BAD_REQUEST, INVALID_EMAIL);
       }
 
       const { message } = await this._authService.forgotPassword(email);
 
       res.status(HttpStatus.OK).json({ message: message });
     } catch (error) {
-      next(error)
+      next(error);
     }
   };
 
@@ -125,10 +129,8 @@ export class Authcontroller implements IAuthController {
     try {
       const { email, context } = req.body;
 
-      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-
       if (!email || !emailRegex.test(email)) {
-        throw { status: HttpStatus.BAD_REQUEST, message: INVALID_EMAIL };
+        throw new AppError(HttpStatus.BAD_REQUEST, INVALID_EMAIL);
       }
 
       const { message } = await this._authService.resendOtp(email, context);
@@ -138,7 +140,7 @@ export class Authcontroller implements IAuthController {
         message: message,
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   };
 
@@ -147,7 +149,7 @@ export class Authcontroller implements IAuthController {
       const parsed = loginSchema.safeParse(req.body);
 
       if (!parsed.success) {
-        throw { status: HttpStatus.NOT_FOUND, message: parsed.error.message };
+        throw new AppError(HttpStatus.NOT_FOUND, parsed.error.message);
       }
 
       const { email, password } = parsed.data;
@@ -159,7 +161,7 @@ export class Authcontroller implements IAuthController {
 
       res.status(HttpStatus.OK).json({ message });
     } catch (error) {
-     next(error)
+      next(error);
     }
   };
 
@@ -178,11 +180,7 @@ export class Authcontroller implements IAuthController {
 
       res.status(HttpStatus.OK).json({ user, token });
     } catch (error) {
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || GOOGLE_AUTH_ERROR });
-      console.error("Error while google authentication.", err);
+      next(error);
     }
   };
 
@@ -191,10 +189,7 @@ export class Authcontroller implements IAuthController {
       const refreshToken = req.cookies?.refresh_token;
 
       if (!refreshToken) {
-        throw {
-          status: HttpStatus.UNAUTHORIZED,
-          message: NO_REFRESH_TOKEN_FOUND,
-        };
+        throw new AppError(HttpStatus.UNAUTHORIZED, NO_REFRESH_TOKEN_FOUND);
       }
 
       const { newAccessToken } =
@@ -202,11 +197,7 @@ export class Authcontroller implements IAuthController {
 
       res.status(HttpStatus.OK).json({ accessToken: newAccessToken });
     } catch (error) {
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || NO_REFRESH_TOKEN_FOUND });
-      console.error("Error while creating refreshToken.", err);
+      next(error);
     }
   };
 }

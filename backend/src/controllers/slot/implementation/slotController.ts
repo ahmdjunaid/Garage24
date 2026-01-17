@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { ISlotController } from "../interface/ISlotController";
-import { ALL_FIELDS_REQUIRED, SERVER_ERROR } from "../../../constants/messages";
+import { ALL_FIELDS_REQUIRED } from "../../../constants/messages";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
 import { ISlotService } from "../../../services/slot/interface/ISlotService";
+import { AppError } from "../../../middleware/errorHandler";
 
 @injectable()
 export class SlotController implements ISlotController {
@@ -16,7 +17,7 @@ export class SlotController implements ISlotController {
       const date = req.query.date as string;
 
       if (!garageId || !date) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED)
       }
 
       const convertedDate = new Date(date);
@@ -27,11 +28,7 @@ export class SlotController implements ISlotController {
 
       res.status(HttpStatus.OK).json(response);
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err.message || SERVER_ERROR });
+      next(error)
     }
   };
 }

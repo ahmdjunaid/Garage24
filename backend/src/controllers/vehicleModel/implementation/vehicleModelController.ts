@@ -4,7 +4,8 @@ import { TYPES } from "../../../DI/types";
 import { IVehicleModelService } from "../../../services/vehicleModel/interface/IVehicleModelService";
 import { NextFunction, Request, Response } from "express";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import { ERROR_WHILE_FETCH_DATA, SERVER_ERROR } from "../../../constants/messages";
+import { ERROR_WHILE_FETCH_DATA } from "../../../constants/messages";
+import { AppError } from "../../../middleware/errorHandler";
 
 @injectable()
 export class VehicleModelController implements IVehicleModelController {
@@ -18,7 +19,7 @@ export class VehicleModelController implements IVehicleModelController {
       const brandId = req.params.brandId
 
       if(!brandId){
-        throw {status:HttpStatus.BAD_REQUEST, message: ERROR_WHILE_FETCH_DATA}
+        throw new AppError(HttpStatus.BAD_REQUEST, ERROR_WHILE_FETCH_DATA)
       }
 
       const vehicleModels =
@@ -26,11 +27,7 @@ export class VehicleModelController implements IVehicleModelController {
 
       res.status(HttpStatus.OK).json(vehicleModels);
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err.message || SERVER_ERROR });
+      next(error)
     }
   };
 }

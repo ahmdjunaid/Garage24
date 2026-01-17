@@ -12,6 +12,7 @@ import { GetMappedPlanResponse, IPlan } from "../../../types/plan";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
 import { IPlanRepository } from "../../../repositories/plan/interface/IPlanRepository";
+import { AppError } from "../../../middleware/errorHandler";
 
 @injectable()
 export class PlanService implements IPlanService {
@@ -23,16 +24,13 @@ export class PlanService implements IPlanService {
     const existing = await this._planRepository.getPlanByName(data.name!);
 
     if (existing) {
-      throw { status: HttpStatus.CONFLICT, message: PLAN_ALREADY_EXIST };
+      throw new AppError(HttpStatus.CONFLICT, PLAN_ALREADY_EXIST);
     }
 
     const response = await this._planRepository.createPlan(data);
 
     if (!response) {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: ERROR_WHILE_CREATINGPLAN,
-      };
+      throw new AppError(HttpStatus.BAD_REQUEST, ERROR_WHILE_CREATINGPLAN);
     }
 
     return { message: PLAN_CREATED_SUCCESS };
@@ -53,8 +51,7 @@ export class PlanService implements IPlanService {
   async getPlanById(id: string): Promise<IPlan | null> {
     const plan = await this._planRepository.getPlanById(id);
 
-    if (!plan) throw { status: HttpStatus.NOT_FOUND, message: PLAN_NOT_FOUND };
-
+    if (!plan) throw new AppError(HttpStatus.NOT_FOUND, PLAN_NOT_FOUND);
     return plan;
   }
 
@@ -65,37 +62,33 @@ export class PlanService implements IPlanService {
     const response = await this._planRepository.findOneAndUpdate(planId, data);
 
     if (!response) {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: ERROR_WHILE_PLAN_UPDATE,
-      };
+      throw new AppError(HttpStatus.BAD_REQUEST, ERROR_WHILE_PLAN_UPDATE);
     }
 
     return { message: `${action}ed successfull` };
   }
 
   async deletePlan(planId: string): Promise<{ message: string }> {
-
     const response = await this._planRepository.findOneAndUpdate(planId, {
       isDeleted: true,
     });
 
     if (!response) {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: ERROR_WHILE_PLAN_UPDATE,
-      };
+      throw new AppError(HttpStatus.BAD_REQUEST, ERROR_WHILE_PLAN_UPDATE);
     }
 
     return { message: "Deleted successfull" };
   }
 
-  async updatePlan(planId: string, data: Partial<IPlan>): Promise<{ message: string; }> {
-    const plan = await this._planRepository.findOneAndUpdate(planId,data)
-    if(!plan){
-      throw {status: HttpStatus.BAD_REQUEST, message: PLAN_NOT_FOUND}
+  async updatePlan(
+    planId: string,
+    data: Partial<IPlan>
+  ): Promise<{ message: string }> {
+    const plan = await this._planRepository.findOneAndUpdate(planId, data);
+    if (!plan) {
+      throw new AppError(HttpStatus.BAD_REQUEST, PLAN_NOT_FOUND);
     }
 
-    return { message: "Plan updated successful" }
+    return { message: "Plan updated successful" };
   }
 }

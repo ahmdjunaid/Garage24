@@ -11,6 +11,7 @@ import {
 import mongoose from "mongoose";
 import { IPlanRepository } from "../../../repositories/plan/interface/IPlanRepository";
 import { PaymentStatus } from "../../../types/payments";
+import { AppError } from "../../../middleware/errorHandler";
 
 @injectable()
 export class SubscriptionService implements ISubscriptionService {
@@ -25,16 +26,18 @@ export class SubscriptionService implements ISubscriptionService {
     sessionId: string,
     paymentIntent: string
   ) {
-    if (!garageId || !planId || !sessionId) {
-      throw { status: HttpStatus.BAD_REQUEST, message: SUBSCRIPTION_ERROR };
+    if (!garageId || !planId || !sessionId || !paymentIntent) {
+      throw new AppError(HttpStatus.BAD_REQUEST, SUBSCRIPTION_ERROR)
     }
+    
     const garageIdConverted = new mongoose.Types.ObjectId(garageId);
     const planIdConverted = new mongoose.Types.ObjectId(planId);
 
     const plan = await this._planRepository.getPlanById(planId);
 
+
     if (!plan) {
-      throw { status: HttpStatus.NOT_FOUND, message: PLAN_NOT_FOUND };
+      throw new AppError(HttpStatus.NOT_FOUND, PLAN_NOT_FOUND)
     }
 
     const expiryDate = new Date();
@@ -72,10 +75,7 @@ export class SubscriptionService implements ISubscriptionService {
         { paymentStatus }
       );
     if (!updatedSubscription) {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: ERROR_WHILE_PLAN_UPDATE,
-      };
+      throw new AppError(HttpStatus.BAD_REQUEST, ERROR_WHILE_PLAN_UPDATE)
     }
 
     return updatedSubscription;

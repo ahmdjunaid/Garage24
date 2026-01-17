@@ -14,10 +14,6 @@ export class SubscriptionRepository
     super(subscription);
   }
   async upsertSubscription(data: Partial<ISubscription>) {
-    if (!data.paymentIntent) {
-      throw new Error("paymentIntent is required");
-    }
-
     const update = {
       $set: {
         startDate: data.startDate,

@@ -11,6 +11,7 @@ import { ISubscriptionRepository } from "../../../repositories/subscription/inte
 import { extractS3KeyFromUrl } from "../../../utils/extractS3KeyFromUrl";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { IMechanicRepository } from "../../../repositories/mechanic/interface/IMechanicRepository";
+import { AppError } from "../../../middleware/errorHandler";
 
 @injectable()
 export class GarageService implements IGarageService {
@@ -44,10 +45,7 @@ export class GarageService implements IGarageService {
     });
 
     if (existing && existing.approvalStatus !== "rejected") {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: "Onboarding update not allowed",
-      };
+      throw new AppError(HttpStatus.BAD_REQUEST, "Onboarding update not allowed")
     }
 
     const imageUrl = await uploadFile(image, "garages");

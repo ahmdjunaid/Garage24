@@ -7,6 +7,7 @@ import HttpStatus from "../../../constants/httpStatusCodes";
 import { IMechanicRepository } from "../../../repositories/mechanic/interface/IMechanicRepository";
 import { createSlotsForDay } from "../../../utils/slotCreateForTheDay";
 import { IGarageRepository } from "../../../repositories/garage/interface/IGarageRepository";
+import { AppError } from "../../../middleware/errorHandler";
 
 @injectable()
 export class SlotService implements ISlotService {
@@ -33,7 +34,7 @@ export class SlotService implements ISlotService {
 
     const garage = await this._garageRepository.findOne({ userId: garageId });
     if (!garage) {
-      throw { status: HttpStatus.NOT_FOUND, message: "Garage not found." };
+      throw new AppError(HttpStatus.NOT_FOUND, "Garage not found.")
     }
 
     const numberOfMechanics =
@@ -41,7 +42,7 @@ export class SlotService implements ISlotService {
 
     const capacity = Math.min(numberOfMechanics, garage.numOfServiceBays);
     if (capacity < 1) {
-      throw { status: HttpStatus.NOT_FOUND, message: "Garage doesnt have capcity to issue slots." };
+      throw new AppError(HttpStatus.NOT_FOUND, "Garage doesnt have capcity to issue slots.")
     }
 
     const slotsToCreate = createSlotsForDay({

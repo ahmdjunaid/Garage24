@@ -18,12 +18,14 @@ import { generatePassword } from "../../../utils/generatePassword";
 import { sentMechanicInvitation } from "../../../utils/sendOtp";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
+import { AppError } from "../../../middleware/errorHandler";
 const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
 
 @injectable()
 export class MechanicService implements IMechanicService {
   constructor(
-    @inject(TYPES.MechanicRepository) private _mechanicRepository: IMechanicRepository,
+    @inject(TYPES.MechanicRepository)
+    private _mechanicRepository: IMechanicRepository,
     @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository
   ) {}
 
@@ -38,19 +40,19 @@ export class MechanicService implements IMechanicService {
   ) {
     const user = await this._authRepository.findById(userId);
     if (!user) {
-      throw { status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND };
+      throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND);
     }
 
     if (!password || !user.password) {
-      throw { status: HttpStatus.BAD_REQUEST, message: "Password missing" };
+      throw new AppError(HttpStatus.BAD_REQUEST, "Password missing");
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: "One-time password is incorrect",
-      };
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        "One-time password is incorrect"
+      );
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -70,15 +72,15 @@ export class MechanicService implements IMechanicService {
       data
     );
     if (!mechanicData)
-      throw { status: HttpStatus.NOT_FOUND, message: "Mechanic not found" };
+      throw new AppError(HttpStatus.NOT_FOUND, "Mechanic not found");
 
     await this._authRepository.findOneAndUpdate(userId, {
       isOnboardingRequired: false,
       password: hashedPassword,
-      imageUrl: imageUrl
+      imageUrl: imageUrl,
     });
 
-    return {mechanic: mechanicData };
+    return { mechanic: mechanicData };
   }
 
   async registerMechanic(
@@ -90,14 +92,16 @@ export class MechanicService implements IMechanicService {
   ) {
     const userExists = await this._authRepository.findByEmail(email);
     if (userExists) {
-      throw { status: HttpStatus.BAD_REQUEST, message: EMAIL_ALREADY_EXIST };
+      throw new AppError(HttpStatus.BAD_REQUEST, EMAIL_ALREADY_EXIST);
     }
 
-    const noOfMechanics = await this._mechanicRepository.countDocuments(garageId)
-    if(noOfMechanics >= allowedMechanics){
-      throw {
-        status:HttpStatus.BAD_REQUEST, 
-        message: `Mechanic limit reached. Your plan allows only ${allowedMechanics} mechanics.`}
+    const noOfMechanics =
+      await this._mechanicRepository.countDocuments(garageId);
+    if (noOfMechanics >= allowedMechanics) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        `Mechanic limit reached. Your plan allows only ${allowedMechanics} mechanics.`
+      );
     }
 
     const customId = generateCustomId("mechanic");
@@ -136,19 +140,19 @@ export class MechanicService implements IMechanicService {
 
     return mappedResponse;
   }
-  
+
   async toggleStatus(userId: string, action: string) {
     const data = {
       isBlocked: action === "block" ? true : false,
     };
     const response = await this._authRepository.findByIdAndUpdate(userId, data);
-    const mechResponse = await this._mechanicRepository.findOneAndUpdate(userId, data);
+    const mechResponse = await this._mechanicRepository.findOneAndUpdate(
+      userId,
+      data
+    );
 
     if (!response || !mechResponse) {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: USER_STATUS_UPDATE_FAILED,
-      };
+      throw new AppError(HttpStatus.BAD_REQUEST, USER_STATUS_UPDATE_FAILED);
     }
 
     return { message: `${action}ed successfull` };
@@ -163,10 +167,7 @@ export class MechanicService implements IMechanicService {
     });
 
     if (!response) {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: USER_STATUS_UPDATE_FAILED,
-      };
+      throw new AppError(HttpStatus.BAD_REQUEST, USER_STATUS_UPDATE_FAILED);
     }
 
     return { message: "Deleted successfull" };
@@ -175,7 +176,7 @@ export class MechanicService implements IMechanicService {
   async resendMechanicInvite(mechanicId: string): Promise<{ message: string }> {
     const mechanic = await this._authRepository.findById(mechanicId);
     if (!mechanic) {
-      throw { status: HttpStatus.NOT_FOUND, message: USER_NOT_FOUND };
+      throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND);
     }
 
     const password = generatePassword();

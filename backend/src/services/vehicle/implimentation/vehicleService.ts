@@ -12,6 +12,7 @@ import { uploadFile } from "../../../config/s3Service";
 import { deleteLocalFile } from "../../../helper/helper";
 import { normalizePlate } from "../../../utils/normalizeLicencePlate";
 import { IPopulatedVehicle, IVehicleDTO,  } from "../../../types/vehicle";
+import { AppError } from "../../../middleware/errorHandler";
 
 @injectable()
 export class VehicleService implements IVehicleService {
@@ -57,10 +58,7 @@ export class VehicleService implements IVehicleService {
     });
 
     if (!response) {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: ERROR_WHILE_CREATING_VEHICLE,
-      };
+      throw new AppError(HttpStatus.BAD_REQUEST, ERROR_WHILE_CREATING_VEHICLE)
     }
 
     return { message: VEHICLE_CREATED_SUCCESS };

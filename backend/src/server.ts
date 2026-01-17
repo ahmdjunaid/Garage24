@@ -14,7 +14,7 @@ import userRouter from "../src/routes/userRouter";
 import cookieParser from "cookie-parser";
 import { connectRedis } from "./config/redisClient";
 import "reflect-metadata";
-import { GarageRepository } from "./repositories/garage/implementation/garageRepositories";
+import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
 const server = http.createServer(app);
@@ -42,6 +42,8 @@ app.use("/api/mechanic", mechanicRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/stripe", stripeRouter);
 app.use("/api/user", userRouter);
+
+app.use(errorHandler)
 
 connectDB();
 

@@ -4,7 +4,6 @@ import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
 import { IBrandService } from "../../../services/brand/interface/IBrandService";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import { SERVER_ERROR } from "../../../constants/messages";
 
 @injectable()
 export class BrandController implements IBrandController {
@@ -17,10 +16,7 @@ export class BrandController implements IBrandController {
 
       res.status(HttpStatus.OK).json(brand)
     } catch (error) {
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error)
     }
   };
 }

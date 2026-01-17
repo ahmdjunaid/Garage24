@@ -16,6 +16,7 @@ import {
 } from "../../../constants/messages";
 import { GetPaginationQuery } from "../../../types/common";
 import { HydratedDocument } from "mongoose";
+import { AppError } from "../../../middleware/errorHandler";
 
 @injectable()
 export class ServiceService implements IServiceService {
@@ -28,7 +29,7 @@ export class ServiceService implements IServiceService {
     const serviceExist = await this._serviceRepository.findByName(data.name!);
 
     if (serviceExist) {
-      throw { status: HttpStatus.CONFLICT, message: SERVICE_ALREADY_EXIST };
+      throw new AppError(HttpStatus.CONFLICT, SERVICE_ALREADY_EXIST)
     }
 
     await this._serviceRepository.create(data);
@@ -67,7 +68,7 @@ export class ServiceService implements IServiceService {
   ): Promise<{ message: string }> {
     const exist = await this._serviceRepository.getServiceById(serviceId);
     if (!exist) {
-      throw { status: HttpStatus.NOT_FOUND, message: SERVICE_DOESNT_EXIST };
+      throw new AppError(HttpStatus.NOT_FOUND, SERVICE_DOESNT_EXIST)
     }
 
     const isBlocked = action === "blocked";
@@ -80,7 +81,7 @@ export class ServiceService implements IServiceService {
   async deleteService(serviceId: string): Promise<{ message: string }> {
     const exist = await this._serviceRepository.getServiceById(serviceId);
     if (!exist) {
-      throw { status: HttpStatus.NOT_FOUND, message: SERVICE_DOESNT_EXIST };
+      throw new AppError(HttpStatus.NOT_FOUND, SERVICE_DOESNT_EXIST)
     }
 
     await this._serviceRepository.findOneAndUpdate(serviceId, {

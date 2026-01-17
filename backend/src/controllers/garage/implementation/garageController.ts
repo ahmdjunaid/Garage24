@@ -5,11 +5,12 @@ import HttpStatus from "../../../constants/httpStatusCodes";
 import {
   ALL_FIELDS_REQUIRED,
   ERROR_WHILE_FETCH_DATA,
-  SERVER_ERROR,
+  POINTS_MISSING,
   USER_ID_REQUIRED,
 } from "../../../constants/messages";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
+import { AppError } from "../../../middleware/errorHandler";
 
 @injectable()
 export class GarageController implements IGarageController {
@@ -55,7 +56,7 @@ export class GarageController implements IGarageController {
         !numOfServiceBays ||
         !supportedFuelTypes
       ) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
 
       const response = await this._garageService.onboarding(
@@ -75,31 +76,27 @@ export class GarageController implements IGarageController {
       );
       res.status(HttpStatus.OK).json({ garage: response });
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
   };
 
-  getApprovalStatus = async (req: Request, res: Response, next: NextFunction) => {
+  getApprovalStatus = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const userId = req.user?.id;
 
       if (!userId) {
-        throw { status: HttpStatus.BAD_REQUEST, message: USER_ID_REQUIRED };
+        throw new AppError(HttpStatus.BAD_REQUEST, USER_ID_REQUIRED);
       }
 
       const data = await this._garageService.getApprovalStatus(userId);
 
       res.status(HttpStatus.OK).json(data);
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
   };
 
@@ -107,21 +104,14 @@ export class GarageController implements IGarageController {
     try {
       const garageId = req.params.garageId;
       if (!garageId) {
-        throw {
-          status: HttpStatus.BAD_REQUEST,
-          message: ERROR_WHILE_FETCH_DATA,
-        };
+        throw new AppError(HttpStatus.BAD_REQUEST, ERROR_WHILE_FETCH_DATA);
       }
 
       const response = await this._garageService.getCurrentPlan(garageId);
 
       res.status(HttpStatus.OK).json(response);
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
   };
 
@@ -130,62 +120,55 @@ export class GarageController implements IGarageController {
       const garageId = req.query.garageId as string;
 
       if (!garageId) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
 
       const garageData = await this._garageService.getGarageById(garageId);
 
       res.status(HttpStatus.OK).json(garageData);
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
   };
 
-  getGarageDetailsById = async (req: Request, res: Response, next: NextFunction) => {
+  getGarageDetailsById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const garageId = req.query.garageId as string;
 
       if (!garageId) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
 
       const garageData = await this._garageService.getGarageDetails(garageId);
 
       res.status(HttpStatus.OK).json(garageData);
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
   };
 
-  findNearbyGarages = async (req: Request, res: Response, next: NextFunction) => {
+  findNearbyGarages = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const lat = Number(req.query.lat);
       const lng = Number(req.query.lng);
 
       if (!lat || !lng) {
-        throw {
-          status: HttpStatus.BAD_REQUEST,
-          message: "Latitude and Longitude cannot be blank.",
-        };
+        throw new AppError(HttpStatus.BAD_REQUEST, POINTS_MISSING);
       }
 
       const response = await this._garageService.findNearbyGarages(lat, lng);
 
       res.status(HttpStatus.OK).json(response);
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
   };
 }

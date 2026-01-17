@@ -4,13 +4,13 @@ import HttpStatus from "../../../constants/httpStatusCodes";
 import {
   ALL_FIELDS_REQUIRED,
   PAYMENT_DETAILS_ERROR,
-  SERVER_ERROR,
   WEBHOOK_ERROR,
 } from "../../../constants/messages";
 import IStripeService from "../../../services/stripe/interface/IStripeService";
 import { stripe } from "../../../config/stripe";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
+import { AppError } from "../../../middleware/errorHandler";
 
 @injectable()
 export class StripeController implements IStripeController {
@@ -18,16 +18,17 @@ export class StripeController implements IStripeController {
     @inject(TYPES.StripeService) private _stripeService: IStripeService
   ) {}
 
-  createSubscribeSession = async (req: Request, res: Response, next: NextFunction) => {
+  createSubscribeSession = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const { planId, planName, planPrice } = req.body;
       const garageId = req.user?.id;
 
       if (!garageId || !planId || !planName || !planPrice) {
-        throw {
-          status: HttpStatus.BAD_REQUEST,
-          message: ALL_FIELDS_REQUIRED,
-        };
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
       const session = await this._stripeService.createSubscribeSession({
         planId,
@@ -35,21 +36,17 @@ export class StripeController implements IStripeController {
         planPrice,
         garageId,
       });
-      
+
       res.status(HttpStatus.OK).json(session);
     } catch (error) {
-      console.error(error)
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err.message || SERVER_ERROR });
+      next(error);
     }
   };
 
   handleWebhook = async (req: Request, res: Response, next: NextFunction) => {
     const sig = req.headers["stripe-signature"];
     if (!sig) {
-      throw { status: HttpStatus.BAD_REQUEST, message: WEBHOOK_ERROR };
+      throw new AppError(HttpStatus.BAD_REQUEST, WEBHOOK_ERROR);
     }
 
     try {
@@ -62,31 +59,26 @@ export class StripeController implements IStripeController {
       await this._stripeService.handleWebhookEvent(event);
       res.status(HttpStatus.OK).json({ received: true });
     } catch (error) {
-      const err = error as Error;
-      res
-        .status(HttpStatus.BAD_REQUEST)
-        .json({ message: err.message || SERVER_ERROR });
+      next(error);
     }
   };
 
-  getCheckoutSession = async (req: Request, res: Response, next: NextFunction) => {
+  getCheckoutSession = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const sessionId = req.params.sessionId;
       if (!sessionId) {
-        throw {
-          status: HttpStatus.BAD_REQUEST,
-          message: PAYMENT_DETAILS_ERROR,
-        };
+        throw new AppError(HttpStatus.BAD_REQUEST, PAYMENT_DETAILS_ERROR);
       }
 
-      const response = await this._stripeService.retriveDetails(sessionId)
+      const response = await this._stripeService.retriveDetails(sessionId);
 
-      res.status(HttpStatus.OK).json(response)
+      res.status(HttpStatus.OK).json(response);
     } catch (error) {
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err.message || SERVER_ERROR });
+      next(error);
     }
-  }
+  };
 }

@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import { ALL_FIELDS_REQUIRED, SERVER_ERROR } from "../../../constants/messages";
+import { ALL_FIELDS_REQUIRED } from "../../../constants/messages";
 import { GetPaginationQuery } from "../../../types/common";
 import IAdminController from "../interface/IAdminController";
 import IAdminService from "../../../services/superAdmin/interface/IAdminService";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
+import { AppError } from "../../../middleware/errorHandler";
 
 @injectable()
 export class AdminController implements IAdminController {
@@ -31,11 +32,7 @@ export class AdminController implements IAdminController {
         totalPages: response.totalPages,
       });
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
   };
 
@@ -57,11 +54,7 @@ export class AdminController implements IAdminController {
         totalPages: response.totalPages,
       });
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
   };
 
@@ -71,18 +64,14 @@ export class AdminController implements IAdminController {
       const userId = req.params.userId;
 
       if (!userId || !action) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
 
       const response = await this._adminService.toggleStatus(userId, action);
 
       res.status(HttpStatus.ACCEPTED).json({ message: response.message });
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
   };
 
@@ -92,18 +81,14 @@ export class AdminController implements IAdminController {
       const userId = req.params.userId;
 
       if (!userId || !action) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
 
       const response = await this._adminService.garageApproval(userId, action);
 
       res.status(HttpStatus.ACCEPTED).json({ message: response.message });
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error);
     }
   };
 }

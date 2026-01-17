@@ -9,6 +9,7 @@ export const USER_ALREADY_EXISTS = "User already exists";
 export const REGISTRATION_ALREADY_INITATED = "Your account registration is already in progress. Please try again later.";
 export const ACCOUNT_IS_BLOCKED = "This account is blocked by Admin.";
 export const SIGNUP_SESSION_EXPIRED = "Signup session expired"
+export const LOGGED_OUT_MESSAGE = "Logged out successfully."
 
 //Email
 export const INVALID_EMAIL = 'Invalid email address'
@@ -66,3 +67,6 @@ export const SERVICE_DOESNT_EXIST="Service does't exist."
 export const VEHICLE_ALREADY_EXIST="Vehicle already exist in your Garage."
 export const ERROR_WHILE_CREATING_VEHICLE="Error while creating vehicle"
 export const VEHICLE_CREATED_SUCCESS="Vehicle created successful"
+
+// location
+export const POINTS_MISSING = "Latitude and Longitude cannot be blank."

@@ -1,4 +1,5 @@
 import HttpStatus from "../../../constants/httpStatusCodes";
+import { AppError } from "../../../middleware/errorHandler";
 import { IAddress } from "../../../types/garage";
 import { ILocationService } from "../interface/ILocationService";
 import axios from "axios";
@@ -58,7 +59,7 @@ export class LocationService implements ILocationService {
     const data = response.data;
 
     if (!Array.isArray(data) || data.length === 0) {
-      throw { status: HttpStatus.NOT_FOUND, message: "Location not found" };
+      throw new AppError(HttpStatus.NOT_FOUND, "Location not found")
     }
 
     return {

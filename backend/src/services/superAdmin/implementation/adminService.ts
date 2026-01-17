@@ -13,6 +13,7 @@ import {
 import { IGarageRepository } from "../../../repositories/garage/interface/IGarageRepository";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
+import { AppError } from "../../../middleware/errorHandler";
 
 @injectable()
 export class AdminService implements IAdminService {
@@ -62,10 +63,7 @@ export class AdminService implements IAdminService {
     );
 
     if (!response) {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: USER_STATUS_UPDATE_FAILED,
-      };
+      throw new AppError(HttpStatus.BAD_REQUEST, USER_STATUS_UPDATE_FAILED)
     }
 
     return { message: `${action}ed successfull` };
@@ -82,10 +80,7 @@ export class AdminService implements IAdminService {
     );
 
     if (!response) {
-      throw {
-        status: HttpStatus.BAD_REQUEST,
-        message: GARAGE_APPROVAL_FAILED,
-      };
+      throw new AppError(HttpStatus.BAD_REQUEST, GARAGE_APPROVAL_FAILED)
     }
 
     return { message: `${action}ed successfull` };
