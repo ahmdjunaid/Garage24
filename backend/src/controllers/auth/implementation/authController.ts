@@ -42,10 +42,7 @@ export class Authcontroller implements IAuthController {
 
       res.status(HttpStatus.OK).json({ message });
     } catch (error) {
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error)
     }
   };
 
@@ -73,10 +70,7 @@ export class Authcontroller implements IAuthController {
 
       res.json({ user, token });
     } catch (error) {
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+      next(error)
     }
   };
 
@@ -91,10 +85,7 @@ export class Authcontroller implements IAuthController {
         userId
       });
     } catch (error) {
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || SERVER_ERROR });
+     next(error)
     }
   };
 
@@ -107,10 +98,8 @@ export class Authcontroller implements IAuthController {
       });
 
       res.status(HttpStatus.OK).json({ message: "Logged out successfully." });
-    } catch (err) {
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: "Logout failed", error: err });
+    } catch (error) {
+     next(error)
     }
   };
 
@@ -128,11 +117,7 @@ export class Authcontroller implements IAuthController {
 
       res.status(HttpStatus.OK).json({ message: message });
     } catch (error) {
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || ERROR_WHILE_FORGOT_PASS });
-      console.log(error, "Error while forgot password");
+      next(error)
     }
   };
 
@@ -153,11 +138,7 @@ export class Authcontroller implements IAuthController {
         message: message,
       });
     } catch (error) {
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || ERROR_WHILE_RESEND_OTP });
-      console.error("Error while resend OTP.", err);
+      next(error)
     }
   };
 
@@ -178,11 +159,7 @@ export class Authcontroller implements IAuthController {
 
       res.status(HttpStatus.OK).json({ message });
     } catch (error) {
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || ERROR_WHILE_RESEND_OTP });
-      console.error("Error while reset password.", err);
+     next(error)
     }
   };
 

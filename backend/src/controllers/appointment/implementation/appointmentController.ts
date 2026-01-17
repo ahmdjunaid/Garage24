@@ -8,6 +8,7 @@ import HttpStatus from "../../../constants/httpStatusCodes";
 import { IAppointmentService } from "../../../services/appointment/interface/IAppointmentService";
 import { ALL_FIELDS_REQUIRED } from "../../../constants/messages";
 import { GetPaginationQuery } from "../../../types/common";
+import { AppError } from "../../../middleware/errorHandler";
 
 @injectable()
 export class AppointmentController implements IAppointmentController {
@@ -19,7 +20,11 @@ export class AppointmentController implements IAppointmentController {
     private _appointmentService: IAppointmentService
   ) {}
 
-  getAppointmentMetaData = async (req: Request, res: Response, next: NextFunction) => {
+  getAppointmentMetaData = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const [categories, brands] = await Promise.all([
         this._serviceCategoryService.getAllServiceCategories(),
@@ -28,14 +33,15 @@ export class AppointmentController implements IAppointmentController {
 
       res.status(HttpStatus.OK).json({ categories, brands });
     } catch (error) {
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || "Error while fetching data." });
+      next(error);
     }
   };
 
-  createAppointment = async (req: Request, res: Response, next: NextFunction) => {
+  createAppointment = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const userId = req.user?.id;
       const { userData, vehicleData, services, garage, date, time } = req.body;
@@ -49,7 +55,7 @@ export class AppointmentController implements IAppointmentController {
         !time ||
         !userId
       ) {
-        throw { status: HttpStatus.BAD_REQUEST, message: ALL_FIELDS_REQUIRED };
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED)
       }
 
       const response = await this._appointmentService.createAppointment({
@@ -65,15 +71,15 @@ export class AppointmentController implements IAppointmentController {
 
       res.status(HttpStatus.OK).json(response);
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || "Error while fetching data." });
+      next(error);
     }
   };
 
-  getActiveAppointments = async (req: Request, res: Response, next: NextFunction) => {
+  getActiveAppointments = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const { page = 1, limit = 10, searchQuery = "" } = req.query;
       const garageId = req.user?.id;
@@ -90,11 +96,7 @@ export class AppointmentController implements IAppointmentController {
 
       res.status(HttpStatus.OK).json(response);
     } catch (error) {
-      console.error(error);
-      const err = error as Error;
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: err?.message || "Error while fetching data." });
+      next(error);
     }
   };
 }
