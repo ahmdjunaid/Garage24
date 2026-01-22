@@ -27,13 +27,13 @@ export const fetchGarageByIdApi = (garageId: string) => {
 
 export const toggleStatusApi = (userId: string, action: string) => {
   return api
-    .patch(`/${ADMIN_BASE_ROUTE}/toggle-status/${userId}`, { action: action })
+    .patch(`/${ADMIN_BASE_ROUTE}/toggle-status/${userId}`, { action })
     .then((res) => res.data);
 };
 
-export const garageApprovalApi = (userId: string, action: string) => {
+export const garageApprovalApi = (userId:string, action:string, reason:string) => {
   return api
-    .patch(`/${ADMIN_BASE_ROUTE}/garage-approval/${userId}`, { action: action })
+    .patch(`/${ADMIN_BASE_ROUTE}/garage-approval/${userId}`, { action, reason })
     .then((res) => res.data);
 };
 

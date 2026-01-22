@@ -1,8 +1,9 @@
 import { Types } from "mongoose";
 import { BillType, PaymentStatus } from "../../../types/payments";
+import Stripe from "stripe";
 
 export default interface IPaymentService {
-  create(data: {
+  createPayment(data: {
     userId: Types.ObjectId;
     paymentIntentId: string;
     provider: "stripe";
@@ -11,4 +12,5 @@ export default interface IPaymentService {
     amount: number;
     status: PaymentStatus;
   }): Promise<{ message: string }>;
+  handleWebhookEvent(event: Stripe.Event): Promise<void>;
 }

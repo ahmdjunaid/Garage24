@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-import { resendOtpEmail, sendOtpEmail } from "../../../utils/sendOtp";
 import IAuthService from "../interface/IAuthService";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { IAuthRepository } from "../../../repositories/auth/interface/IAuthRepositories";
@@ -34,13 +33,16 @@ import redisClient from "../../../config/redisClient";
 import { injectable, inject } from "inversify";
 import { TYPES } from "../../../DI/types";
 import { AppError } from "../../../middleware/errorHandler";
+import { IEmailService } from "../../email/interface/IEmailService";
 
 const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
 
 @injectable()
 export class AuthService implements IAuthService {
   constructor(
-    @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository) {}
+    @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository,
+    @inject(TYPES.EmailService) private _emailService: IEmailService
+  ) {}
 
   async register(name: string, email: string, password: string, role: Role) {
     const existUser = await this._authRepository.findByEmail(email);
@@ -69,7 +71,7 @@ export class AuthService implements IAuthService {
     await redisClient.setEx(redisDataKey, 600, JSON.stringify(userData));
     await redisClient.setEx(redisOtpKey, 120, hashedOtp);
 
-    await sendOtpEmail(email, otp);
+    await this._emailService.sendOtpEmail(email, otp);
     return { message: OTP_SENT_SUCCESSFULLY };
   }
 
@@ -157,7 +159,7 @@ export class AuthService implements IAuthService {
     const redisOtpKey = `otp:${email}`;
     await redisClient.setEx(redisOtpKey, 120, hashedOtp);
 
-    await sendOtpEmail(email, otp);
+    await this._emailService.sendOtpEmail(email, otp);
 
     return new AppError(HttpStatus.OK, OTP_SENT_SUCCESSFULLY )
   }
@@ -180,7 +182,7 @@ export class AuthService implements IAuthService {
     const redisOtpKey = `otp:${email}`;
     await redisClient.setEx(redisOtpKey, 120, hashedOtp);
 
-    await resendOtpEmail(email, otp);
+    await this._emailService.resendOtpEmail(email, otp);
 
     return { status: HttpStatus.OK, message: OTP_RESENT_SUCCESSFULLY };
   }

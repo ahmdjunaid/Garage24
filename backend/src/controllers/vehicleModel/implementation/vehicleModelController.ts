@@ -14,12 +14,16 @@ export class VehicleModelController implements IVehicleModelController {
     private _vehicleModelService: IVehicleModelService
   ) {}
 
-  getAllVehicleModelsByBrand = async (req: Request, res: Response, next: NextFunction) => {
+  getAllVehicleModelsByBrand = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const brandId = req.params.brandId
+      const brandId = req.params.brandId;
 
-      if(!brandId){
-        throw new AppError(HttpStatus.BAD_REQUEST, ERROR_WHILE_FETCH_DATA)
+      if (!brandId) {
+        throw new AppError(HttpStatus.BAD_REQUEST, ERROR_WHILE_FETCH_DATA);
       }
 
       const vehicleModels =
@@ -27,7 +31,7 @@ export class VehicleModelController implements IVehicleModelController {
 
       res.status(HttpStatus.OK).json(vehicleModels);
     } catch (error) {
-      next(error)
+      next(error);
     }
   };
 }

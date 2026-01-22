@@ -12,6 +12,7 @@ import { ServiceController } from "../controllers/service/implementation/service
 import { ServiceCategoryController } from "../controllers/serviceCategory/implementation/serviceCategoryController";
 import { LocationController } from "../controllers/location/implementation/locationController";
 import { AppointmentController } from "../controllers/appointment/implementation/appointmentController";
+import { SubscriptionController } from "../controllers/subscription/implementation/subscriptionController";
 
 
 const router = express.Router()
@@ -23,6 +24,7 @@ const serviceController = container.get<ServiceController>(TYPES.ServiceControll
 const serviceCategoryController = container.get<ServiceCategoryController>(TYPES.ServiceCategoryController)
 const locationController = container.get<LocationController>(TYPES.LocationController)
 const appointmentController = container.get<AppointmentController>(TYPES.AppointmentController)
+const subscriptionController = container.get<SubscriptionController>(TYPES.SubscriptionController)
 
 router.route('/onboarding').post(verifyJWT,authorizeRoles("garage"),uploadOnboardingImages,garageController.onboarding)
 router.route('/get-address').get(verifyJWT,authorizeRoles("garage"),locationController.getAddressFromCoordinates)
@@ -34,6 +36,7 @@ router.route('/mechanic/:userId')
             .delete(verifyJWT,authorizeRoles("garage"),mechanicController.deleteMechanic)
 router.route('/get-status').get(verifyJWT,authorizeRoles("garage"),garageController.getApprovalStatus)
 router.route('/plans').get(verifyJWT,authorizeRoles("garage"),planController.getAllPlans)
+router.route('/create-subscribe-session').post(verifyJWT,subscriptionController.subscribePlan);
 router.route('/get-current-plan/:garageId').get(verifyJWT,authorizeRoles("garage"),garageController.getCurrentPlan)
 router.route('/services').post(verifyJWT,hasActivePlan,authorizeRoles("garage"),serviceController.createService)
 router.route('/services').get(verifyJWT,authorizeRoles("garage"),serviceController.getAllServices)
@@ -41,6 +44,6 @@ router.route('/services/:serviceId').patch(verifyJWT,authorizeRoles("garage"),se
 router.route('/services/:serviceId').delete(verifyJWT,authorizeRoles("garage"),serviceController.deleteService)
 router.route('/get-garage').get(verifyJWT,authorizeRoles("garage"),garageController.getGarageById)
 router.route('/service-categories').get(verifyJWT, authorizeRoles("garage"), serviceCategoryController.getAllServiceCategories)
-router.route("/appointments").get(verifyJWT, authorizeRoles("garage"), appointmentController.getActiveAppointments)
+router.route('/appointments').get(verifyJWT, authorizeRoles("garage"), appointmentController.getActiveAppointments)
 
 export default router;

@@ -4,6 +4,7 @@ import {
   GetMappedGarageResponse,
   IAddress,
   IGarage,
+  IPopulatedGarage,
 } from "../../../types/garage";
 import { GetPaginationQuery } from "../../../types/common";
 
@@ -27,11 +28,11 @@ export interface IGarageRepository {
     supportedFuelTypes: string[];
   }): Promise<HydratedDocument<IGarage>>;
 
-  getAllGarages({
-    page,
-    limit,
-    searchQuery,
-  }: GetPaginationQuery): Promise<GetMappedGarageResponse>;
+  getAllGarages({ page, limit, searchQuery }: GetPaginationQuery): Promise<{
+    garages: IPopulatedGarage[];
+    totalGarages: number;
+    totalPages: number;
+  }>;
   findOneAndDelete(
     filter: FilterQuery<IGarage>
   ): Promise<HydratedDocument<IGarage> | null>;

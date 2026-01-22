@@ -7,4 +7,6 @@ export default interface IGarageController {
     getGarageById(req:Request, res:Response, next: NextFunction): Promise<void>;
     getGarageDetailsById(req:Request, res:Response, next: NextFunction): Promise<void>;
     findNearbyGarages(req:Request, res:Response, next: NextFunction): Promise<void>;
+    getAllGarages(req:Request, res:Response, next: NextFunction): Promise<void>;
+    garageApproval(req:Request, res:Response, next: NextFunction): Promise<void>;
 }

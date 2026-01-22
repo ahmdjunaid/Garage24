@@ -1,11 +1,13 @@
 import { GarageDocument } from "../../../models/garage";
 import { MechanicDocument } from "../../../models/mechanic";
 import { SubscriptionDocument } from "../../../models/subscription";
+import { GetPaginationQuery } from "../../../types/common";
 import {
   GarageNearbyDto,
   GarageStatusResponse,
+  GetMappedGarageResponse,
   IAddress,
-  IGarage
+  IGarage,
 } from "../../../types/garage";
 
 export default interface IGarageService {
@@ -35,4 +37,6 @@ export default interface IGarageService {
     mechanics: MechanicDocument[] | null;
   }>;
   findNearbyGarages(lat: number, lng: number): Promise<GarageNearbyDto[]>;
+  getAllGarages(query: GetPaginationQuery): Promise<GetMappedGarageResponse>;
+  garageApproval(userId:string, action:string, reason:string): Promise<{ message: string }>;
 }

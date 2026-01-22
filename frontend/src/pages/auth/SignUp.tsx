@@ -8,7 +8,7 @@ import passwordIcon from "@assets/icons/password.svg";
 import emailIcon from "@assets/icons/email.svg";
 import userIcon from "@assets/icons/user.svg";
 import companyIcon from "@assets/icons/company.svg";
-import { googleLoginApi, signUpApi } from "@/services/authServices";
+import { googleLoginApi, signUpApi, type TokenResponse } from "@/services/authServices";
 import Spinner from "@components/elements/Spinner";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/redux/store/store";
@@ -124,7 +124,7 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        const res = await googleLoginApi(tokenResponse);
+        const res = await googleLoginApi(tokenResponse as TokenResponse);
         dispatch(login({ user: res.user, token: res.token }));
 
         if (res.user.role === "user") {

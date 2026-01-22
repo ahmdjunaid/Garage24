@@ -2,9 +2,9 @@ import { BaseRepository } from "../../IBaseRepository";
 import { IGarageRepository } from "../interface/IGarageRepository";
 import {
   GarageNearbyDto,
-  GetMappedGarageResponse,
   IAddress,
   IGarage,
+  IPopulatedGarage,
 } from "../../../types/garage";
 import { Garage } from "../../../models/garage";
 import { FilterQuery, HydratedDocument, Types, UpdateQuery } from "mongoose";
@@ -46,7 +46,7 @@ export class GarageRepository
     page,
     limit,
     searchQuery,
-  }: GetPaginationQuery): Promise<GetMappedGarageResponse> {
+  }: GetPaginationQuery) {
     const skip = (page - 1) * limit;
     const searchFilter = searchQuery
       ? { name: { $regex: searchQuery, $options: "i" } }
@@ -57,7 +57,8 @@ export class GarageRepository
       .populate("userId")
       .skip(skip)
       .limit(limit)
-      .sort({ "userId.createdAt": -1 });
+      .sort({ createdAt: -1 })
+      .exec() as unknown as IPopulatedGarage[];
 
     const totalGarages = await this.model.countDocuments(searchFilter);
     const totalPages = Math.ceil(totalGarages / limit);

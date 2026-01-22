@@ -29,7 +29,7 @@ export const ERROR_WHILE_FORGOT_PASS='Password reset failed'
 export const ERROR_WHILE_RESEND_OTP='Error while resend OTP.'
 export const FORGOT_PASSWORD_EMAIL_SENT =
 "Email sent successfully for forgot password";
-export const PASSWORD_RESET_SUCCESSFULLY = "Password reset successfully";
+export const PASSWORD_RESET_SUCCESSFULLY = "Password reset successful. Please login with your new credentials.";
 export const NO_REFRESH_TOKEN_FOUND = "No refresh token found";
 export const INVALID_TOKEN = "Invalid token";
 export const GOOGLE_AUTH_ERROR="Error while google authentication"
@@ -40,6 +40,7 @@ export const ERROR_WHILE_CREATINGPLAN = "Error while creating plan."
 export const PLAN_ALREADY_EXIST = "Plan with this name already exists."
 export const PLAN_CREATED_SUCCESS = "Plan created successfully."
 export const ERROR_WHILE_PLAN_UPDATE="An error occured while update status."
+export const RENEWAL_POLICY_VIOLATION = "Renewal is available only within 7 days of plan expiry."
 
 //garage messages
 export const GARAGE_APPROVAL_FAILED = "Error while approval/rejection"

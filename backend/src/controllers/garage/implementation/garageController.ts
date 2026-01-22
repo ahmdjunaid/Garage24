@@ -11,6 +11,7 @@ import {
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
 import { AppError } from "../../../middleware/errorHandler";
+import { GetPaginationQuery } from "../../../types/common";
 
 @injectable()
 export class GarageController implements IGarageController {
@@ -167,6 +168,54 @@ export class GarageController implements IGarageController {
       const response = await this._garageService.findNearbyGarages(lat, lng);
 
       res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getAllGarages = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { page = 1, limit = 10, searchQuery = "" } = req.query;
+
+      const query: GetPaginationQuery = {
+        page: Number(page),
+        limit: Number(limit),
+        searchQuery: String(searchQuery),
+      };
+
+      const response = await this._garageService.getAllGarages(query);
+
+      res.status(HttpStatus.OK).json({
+        garages: response.garages,
+        totalGarages: response.totalGarages,
+        totalPages: response.totalPages,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  garageApproval = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { action, reason } = req.body;
+
+      const userId = req.params.userId;
+
+      if (!userId || !action) {
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
+      }
+
+      if(action==="rejected" && !reason){
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
+      }
+
+      const response = await this._garageService.garageApproval(
+        userId,
+        action,
+        reason
+      );
+
+      res.status(HttpStatus.ACCEPTED).json({ message: response.message });
     } catch (error) {
       next(error);
     }

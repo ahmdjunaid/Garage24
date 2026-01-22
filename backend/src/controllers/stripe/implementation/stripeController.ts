@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import IStripeController from "../interface/IStripeController";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import {
-  ALL_FIELDS_REQUIRED,
   PAYMENT_DETAILS_ERROR,
   WEBHOOK_ERROR,
 } from "../../../constants/messages";
@@ -17,31 +16,6 @@ export class StripeController implements IStripeController {
   constructor(
     @inject(TYPES.StripeService) private _stripeService: IStripeService
   ) {}
-
-  createSubscribeSession = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const { planId, planName, planPrice } = req.body;
-      const garageId = req.user?.id;
-
-      if (!garageId || !planId || !planName || !planPrice) {
-        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
-      }
-      const session = await this._stripeService.createSubscribeSession({
-        planId,
-        planName,
-        planPrice,
-        garageId,
-      });
-
-      res.status(HttpStatus.OK).json(session);
-    } catch (error) {
-      next(error);
-    }
-  };
 
   handleWebhook = async (req: Request, res: Response, next: NextFunction) => {
     const sig = req.headers["stripe-signature"];

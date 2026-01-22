@@ -50,11 +50,11 @@ const GarageDetailsSection: React.FC<GarageDetailsSectionProps> = ({
     fetchGarage();
   }, [garageId, onBack]);
 
-  const handleApproval = async () => {
+  const handleApproval = async (reason:string) => {
     if (!approval) return;
     try {
       setLoading(true);
-      await garageApprovalApi(approval.id, approval.action);
+      await garageApprovalApi(approval.id, approval.action, reason);
       setGarage((prev) => {
         if (!prev) return prev;
         return { ...prev, approvalStatus: approval.action };
@@ -272,8 +272,10 @@ const GarageDetailsSection: React.FC<GarageDetailsSectionProps> = ({
         message={`Are you sure want ${approval?.action} ${approval?.name}`}
         isReasonRequired={approval?.action === "rejected"}
         onClose={() => setApproval(null)}
-        onConfirm={() => handleApproval()}
-        onCancel={() => setApproval(null)}
+        onConfirm={(r) => handleApproval(r)}
+        onCancel={() =>{
+        setApproval(null)
+        }}  
       />
 
       <MechanicDetailsModal

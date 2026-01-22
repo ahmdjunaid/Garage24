@@ -119,7 +119,7 @@ export class Authcontroller implements IAuthController {
 
       const { message } = await this._authService.forgotPassword(email);
 
-      res.status(HttpStatus.OK).json({ message: message });
+      res.status(HttpStatus.OK).json(message);
     } catch (error) {
       next(error);
     }

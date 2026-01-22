@@ -72,7 +72,7 @@ export const subscribePlanApi = (data: {
   planPrice: number;
 }) => {
   return api
-    .post(`/${STRIPE_BASE_ROUTE}/create-subscribe-session`, data)
+    .post(`/${GARAGE_BASE_ROUTE}/create-subscribe-session`, data)
     .then((res) => res.data);
 };
 

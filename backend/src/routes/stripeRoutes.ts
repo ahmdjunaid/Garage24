@@ -8,8 +8,7 @@ const router = express.Router()
 
 const stripeController = container.get<StripeController>(TYPES.StripeController);
 
-router.route('/create-subscribe-session').post(verifyJWT,stripeController.createSubscribeSession);
-router.post("/stripe", express.raw({ type: "application/json" }),stripeController.handleWebhook);
-router.route("/session/:sessionId").get(verifyJWT,stripeController.getCheckoutSession);
+router.post('/stripe', express.raw({ type: "application/json" }),stripeController.handleWebhook);
+router.route('/session/:sessionId').get(verifyJWT,stripeController.getCheckoutSession);
 
 export default router;

@@ -5,10 +5,13 @@ export const TYPES = {
   AuthService: Symbol.for("AuthService"),
   AuthController: Symbol.for("AuthController"),
 
-  //Admin
-  AdminRepository: Symbol.for("AdminRepository"),
-  AdminService: Symbol.for("AdminService"),
-  AdminController: Symbol.for("AdminController"),
+  //Email
+  EmailService: Symbol.for("EmailService"),
+
+  //User
+  UserRepository: Symbol.for("UserRepository"),
+  UserService: Symbol.for("UserService"),
+  UserController: Symbol.for("UserController"),
 
   //Garage
   GarageRepository: Symbol.for("GarageRepository"),
@@ -23,6 +26,7 @@ export const TYPES = {
   //Subscription
   SubscriptionRepository: Symbol.for("SubscriptionRepository"),
   SubscriptionService: Symbol.for("SubscriptionService"),
+  SubscriptionController: Symbol.for("SubscriptionController"),
 
   //Stripe
   StripeService: Symbol.for("StripeService"),

@@ -15,10 +15,10 @@ import { GetMappedMechanicResponse } from "../../../types/mechanic";
 import { mechanicDataMapping } from "../../../utils/dto/mechanicDto";
 import { generateCustomId } from "../../../utils/generateUniqueIds";
 import { generatePassword } from "../../../utils/generatePassword";
-import { sentMechanicInvitation } from "../../../utils/sendOtp";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
 import { AppError } from "../../../middleware/errorHandler";
+import { IEmailService } from "../../email/interface/IEmailService";
 const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
 
 @injectable()
@@ -26,7 +26,8 @@ export class MechanicService implements IMechanicService {
   constructor(
     @inject(TYPES.MechanicRepository)
     private _mechanicRepository: IMechanicRepository,
-    @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository
+    @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository,
+    @inject(TYPES.EmailService) private __emailService: IEmailService
   ) {}
 
   async onboarding(
@@ -121,7 +122,7 @@ export class MechanicService implements IMechanicService {
       garageId,
       name: user.name,
     });
-    await sentMechanicInvitation(email, password, user.name);
+    await this.__emailService.sendMechanicInvitation(email, password, user.name);
     return { message: "Mechanic created successfully" };
   }
 
@@ -186,7 +187,7 @@ export class MechanicService implements IMechanicService {
       password: hashedPassword,
     });
 
-    await sentMechanicInvitation(mechanic.email, password, mechanic.name);
+    await this.__emailService.sendMechanicInvitation(mechanic.email, password, mechanic.name);
 
     return { message: "Invitation resend successfull" };
   }

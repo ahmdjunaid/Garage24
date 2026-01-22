@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import HttpStatus from "../constants/httpStatusCodes";
+import logger from "../config/logger";
 
 export class AppError extends Error {
   status: number;
@@ -18,7 +19,7 @@ export const errorHandler = (
   _next: NextFunction
 ) => {
   void _next;
-  console.error(err);
+  logger.error(err)
 
   const statusCode = err.status || HttpStatus.INTERNAL_SERVER_ERROR;
   const message = err.message || "Something went wrong";

@@ -1,7 +1,13 @@
-import { AxiosError } from "axios";
 import api from "./api";
 import { AUTH_BASE_ROUTE } from "../constants/apiRoutes";
-const GOOGLE_CALLBACK_URL = import.meta.env.VITE_GOOGLE_CALLBACK_URL
+const GOOGLE_CALLBACK_URL = import.meta.env.VITE_GOOGLE_CALLBACK_URL;
+
+export interface TokenResponse {
+  access_token: string;
+  expires_in: number;
+  scope: string;
+  token_type: "Bearer";
+}
 
 export const signUpApi = async (data: {
   name: string;
@@ -9,130 +15,50 @@ export const signUpApi = async (data: {
   password: string;
   role: string;
 }) => {
-  try {
-    const response = await api.post(`/${AUTH_BASE_ROUTE}/signup`, data);
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("SignUp Error:", error.response);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+  return api.post(`/${AUTH_BASE_ROUTE}/signup`, data).then((res) => res.data);
 };
 
-export const loginApi = async (data: { email: string; password: string }) => {
-  try {
-    const response = await api.post(`/${AUTH_BASE_ROUTE}/login`, data);
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Login error:", error.response?.data);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const loginApi = (data: { email: string; password: string }) => {
+  return api.post(`/${AUTH_BASE_ROUTE}/login`, data).then((res) => res.data);
 };
 
-export const verifyOtpApi = async (data: { email: string; otp: string, context: "register" | "other"}) => {
-  try {
-    const response = await api.post(`/${AUTH_BASE_ROUTE}/verify-otp`, data);
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Verify-Otp error:", error.response?.data);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const verifyOtpApi = (data: {
+  email: string;
+  otp: string;
+  context: "register" | "other";
+}) => {
+  return api
+    .post(`/${AUTH_BASE_ROUTE}/verify-otp`, data)
+    .then((res) => res.data);
 };
 
 export const logoutApi = async () => {
-  try {
-    await api.post(`/${AUTH_BASE_ROUTE}/logout`);
-    return { success: true, message: "Logged out successfully" };
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Logout error:", error.response?.data);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+  return api.post(`/${AUTH_BASE_ROUTE}/logout`).then((res) => res.data);
 };
 
-export const forgotPasswordApi = async (data: { email: string }) => {
-  try {
-    await api.post(`/${AUTH_BASE_ROUTE}/forgot-password`, data);
-    return { success: true, message: "Otp sent to email address." };
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Forgotpassword error:", error.response?.data);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const forgotPasswordApi = (data: { email: string }) => {
+  return api
+    .post(`/${AUTH_BASE_ROUTE}/forgot-password`, data)
+    .then((res) => res.data);
 };
 
-export const resendOtpApi = async (data: { email: string, context: "register" | "other"}) => {
-  try {
-    const response = await api.post(`/${AUTH_BASE_ROUTE}/resend-otp`, data);
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const resendOtpApi = (data: {
+  email: string;
+  context: "register" | "other";
+}) => {
+  return api
+    .post(`/${AUTH_BASE_ROUTE}/resend-otp`, data)
+    .then((res) => res.data);
 };
 
-export const resetPasswordApi = async (data: { email: string, password: string}) => {
-  try {
-    await api.post(`/${AUTH_BASE_ROUTE}/reset-password`, data);
-    return { success: true, message: "Password reset successful. Please login with your new credentials." };
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error("Reset password error:", error.response?.data);
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const resetPasswordApi = (data: { email: string; password: string }) => {
+  return api
+    .post(`/${AUTH_BASE_ROUTE}/reset-password`, data)
+    .then((res) => res.data);
 };
 
-export const googleLoginApi = async (credentialResponse: any) => {
-  try {
-    const accessToken = credentialResponse.access_token;
-    const res = await api.post(GOOGLE_CALLBACK_URL, {
-      accessToken,
-    });
-    return res.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      throw new Error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    }
-    throw new Error("Something went wrong. Please try again.");
-  }
+export const googleLoginApi = (credentialResponse: TokenResponse) => {
+  return api
+    .post(GOOGLE_CALLBACK_URL, { accessToken: credentialResponse.access_token })
+    .then((res) => res.data);
 };

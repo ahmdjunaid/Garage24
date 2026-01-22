@@ -26,7 +26,9 @@ const GaragePlans = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [paymentData, setPaymentData] = useState<IRetriveSessionData | null>(null);
+  const [paymentData, setPaymentData] = useState<IRetriveSessionData | null>(
+    null,
+  );
   const [loading, setLoading] = useState<boolean>(false);
   const [hasActivePlan, setActivePlan] = useState<boolean>(false);
   const [isPaymentFailed, setPaymentFailed] = useState<boolean>(false);
@@ -35,7 +37,10 @@ const GaragePlans = () => {
   const location = useLocation();
   const { user } = useSelector((state: RootState) => state.auth);
 
-  const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const queryParams = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search],
+  );
   const sessionId = queryParams.get("session_id");
 
   useEffect(() => {
@@ -61,19 +66,24 @@ const GaragePlans = () => {
   const fetchPlans = useCallback(
     async (currentPage: number, searchQuery: string) => {
       try {
-        const response = await fetchAllPlansApi(currentPage, plansPerPage, searchQuery);
+        const response = await fetchAllPlansApi(
+          currentPage,
+          plansPerPage,
+          searchQuery,
+        );
         setPlans(response.plans);
         setTotalPages(response.totalPages);
       } catch (error) {
         console.error("Error fetching plans:", error);
       }
     },
-    [plansPerPage]
+    [plansPerPage],
   );
 
   const debouncedFetch = useMemo(
-    () => _.debounce((page: number, query: string) => fetchPlans(page, query), 300),
-    [fetchPlans]
+    () =>
+      _.debounce((page: number, query: string) => fetchPlans(page, query), 300),
+    [fetchPlans],
   );
 
   useEffect(() => {
@@ -83,24 +93,53 @@ const GaragePlans = () => {
     return () => debouncedFetch.cancel();
   }, [currentPage, searchQuery, fetchPlans, debouncedFetch]);
 
-  // Subscribe handler
-  const handleSubscribe = async (planId: string, planName: string, planPrice: number) => {
+  const handleSubscribe = async (
+    planId: string,
+    planName: string,
+    planPrice: number,
+  ) => {
     if (hasActivePlan) {
-      errorToast("You currently have an active subscription. You can buy another plan after it expires.");
+      errorToast(
+        "You currently have an active subscription. You can buy another plan after it expires.",
+      );
       return;
     }
 
     try {
       const response = await subscribePlanApi({ planId, planName, planPrice });
       if (response.url) window.location.href = response.url;
-      else throw new Error("No checkout URL received");
+      else errorToast("No checkout URL received");
     } catch (error) {
-      console.error(error)
-      errorToast((error as Error).message || "Error while creating payment session.");
+      console.error(error);
+      errorToast(
+        (error as Error).message || "Error while creating payment session.",
+      );
     }
   };
 
-  // Fetch Stripe transaction details
+  const handleRenew = async (
+    planId: string,
+    planName: string,
+    planPrice: number,
+    daysLeft: number,
+  ) => {
+    if (!hasActivePlan && daysLeft > 7) {
+      errorToast("Renewal is available only within 7 days of plan expiry.");
+      return;
+    }
+
+    try {
+      const response = await subscribePlanApi({ planId, planName, planPrice });
+      if (response.url) window.location.href = response.url;
+      else errorToast("No checkout URL received");
+    } catch (error) {
+      console.error(error);
+      errorToast(
+        (error as Error).message || "Error while creating payment session.",
+      );
+    }
+  };
+
   useEffect(() => {
     const fetchTransaction = async () => {
       if (!sessionId) return;
@@ -109,8 +148,8 @@ const GaragePlans = () => {
         const res = await retriveTransactionApi(sessionId);
         setPaymentData(res);
       } catch (error) {
-        if(error instanceof Error)
-        errorToast("Failed to fetch transaction details");
+        if (error instanceof Error)
+          errorToast("Failed to fetch transaction details");
       } finally {
         setLoading(false);
       }
@@ -118,7 +157,6 @@ const GaragePlans = () => {
     fetchTransaction();
   }, [sessionId]);
 
-  // Safer way to get active plan details
   const activePlan = useMemo(() => {
     if (!currentPlan) return null;
     return plans.find((p) => p._id === currentPlan.planId) || null;
@@ -129,7 +167,11 @@ const GaragePlans = () => {
       <AdminSidebar role="garage" />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <AdminHeader text="Plans" searchPlaceholder="Search Plans..." setSearchQuery={setSearchQuery} />
+        <AdminHeader
+          text="Plans"
+          searchPlaceholder="Search Plans..."
+          setSearchQuery={setSearchQuery}
+        />
 
         {sessionId ? (
           <PaymentSuccess paymentData={paymentData} />
@@ -142,11 +184,14 @@ const GaragePlans = () => {
                   <h3 className="text-gray-300 text-lg">
                     Your current plan will expire on{" "}
                     <span className="text-red-500 font-semibold">
-                      {new Date(currentPlan.expiryDate).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {new Date(currentPlan.expiryDate).toLocaleDateString(
+                        "en-GB",
+                        {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        },
+                      )}
                     </span>
                     .
                   </h3>
@@ -154,11 +199,14 @@ const GaragePlans = () => {
                   <h3 className="text-red-500 text-lg font-semibold">
                     Your plan expired on{" "}
                     <span className="text-gray-300 font-normal">
-                      {new Date(currentPlan.expiryDate).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {new Date(currentPlan.expiryDate).toLocaleDateString(
+                        "en-GB",
+                        {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        },
+                      )}
                     </span>
                     .
                   </h3>
@@ -169,19 +217,37 @@ const GaragePlans = () => {
             {/* Plans Section */}
             <div className="flex flex-wrap justify-center gap-8">
               {activePlan ? (
-                <PlanCard plan={activePlan} isCurrent={true} handleSubscribe={handleSubscribe} />
+                <PlanCard
+                  plan={activePlan}
+                  currentPlan={currentPlan}
+                  handleRenew={handleRenew}
+                />
               ) : (
                 plans.map((plan) => (
-                  <PlanCard key={plan._id} plan={plan} isCurrent={false} handleSubscribe={handleSubscribe} />
+                  <PlanCard
+                    key={plan._id}
+                    plan={plan}
+                    currentPlan={currentPlan}
+                    handleSubscribe={handleSubscribe}
+                  />
                 ))
               )}
             </div>
 
             <Spinner loading={loading} />
 
-            <PaymentFailed isOpen={isPaymentFailed} onClose={() => setPaymentFailed(false)} />
+            <PaymentFailed
+              isOpen={isPaymentFailed}
+              onClose={() => setPaymentFailed(false)}
+            />
 
-            <Pagination totalPages={totalPages} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+            {!currentPlan && (
+              <Pagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+              />
+            )}
           </div>
         )}
       </div>

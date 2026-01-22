@@ -3,7 +3,13 @@ import IGarageService from "../interface/IGarageService";
 import { IAuthRepository } from "../../../repositories/auth/interface/IAuthRepositories";
 import mongoose from "mongoose";
 import { deleteFromS3, uploadFile } from "../../../config/s3Service";
-import { GarageNearbyDto, IAddress, IGarage } from "../../../types/garage";
+import {
+  GarageNearbyDto,
+  GetMappedGarageResponse,
+  IAddress,
+  IGarage,
+  IPopulatedGarage,
+} from "../../../types/garage";
 import { deleteLocalFile } from "../../../helper/helper";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
@@ -12,6 +18,10 @@ import { extractS3KeyFromUrl } from "../../../utils/extractS3KeyFromUrl";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { IMechanicRepository } from "../../../repositories/mechanic/interface/IMechanicRepository";
 import { AppError } from "../../../middleware/errorHandler";
+import { GARAGE_APPROVAL_FAILED } from "../../../constants/messages";
+import { garageDataMapping } from "../../../utils/dto/garagesDto";
+import { GetPaginationQuery } from "../../../types/common";
+import { IEmailService } from "../../email/interface/IEmailService";
 
 @injectable()
 export class GarageService implements IGarageService {
@@ -22,7 +32,8 @@ export class GarageService implements IGarageService {
     @inject(TYPES.SubscriptionRepository)
     private _subscriptionRepository: ISubscriptionRepository,
     @inject(TYPES.MechanicRepository)
-    private _mechanicRepository: IMechanicRepository
+    private _mechanicRepository: IMechanicRepository,
+    @inject(TYPES.EmailService) private _emailService: IEmailService
   ) {}
   async onboarding(
     name: string,
@@ -45,7 +56,10 @@ export class GarageService implements IGarageService {
     });
 
     if (existing && existing.approvalStatus !== "rejected") {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Onboarding update not allowed")
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        "Onboarding update not allowed"
+      );
     }
 
     const imageUrl = await uploadFile(image, "garages");
@@ -128,7 +142,7 @@ export class GarageService implements IGarageService {
 
   async getGarageDetails(garageId: string) {
     const [garage, subscription, mechanics] = await Promise.all([
-      this._garageRepository.findOne({userId: garageId}),
+      this._garageRepository.findOne({ userId: garageId }),
       this._subscriptionRepository.getSubscriptionByGarageId(garageId),
       this._mechanicRepository.getMechnaicsByGarageId(garageId),
     ]);
@@ -136,7 +150,62 @@ export class GarageService implements IGarageService {
     return { garage, subscription, mechanics };
   }
 
-  async findNearbyGarages(lat: number, lng: number): Promise<GarageNearbyDto[]> {
-    return await this._garageRepository.findNearbyGarages(lat, lng)
+  async findNearbyGarages(
+    lat: number,
+    lng: number
+  ): Promise<GarageNearbyDto[]> {
+    return await this._garageRepository.findNearbyGarages(lat, lng);
+  }
+
+  async getAllGarages(
+    query: GetPaginationQuery
+  ): Promise<GetMappedGarageResponse> {
+    const response = await this._garageRepository.getAllGarages(query);
+    const mappedResponse = {
+      garages: response.garages.map((garage: IPopulatedGarage) =>
+        garageDataMapping(garage)
+      ) as unknown as IGarage[],
+      totalGarages: response.totalGarages,
+      totalPages: response.totalPages,
+    };
+
+    return mappedResponse;
+  }
+
+  async garageApproval(
+    userId: string,
+    action: string,
+    reason: string
+  ): Promise<{ message: string }> {
+    const updateData =
+      action === "approved"
+        ? { approvalStatus: action, rejectionReason: null }
+        : { approvalStatus: action, rejectionReason: reason };
+
+    const response = await this._garageRepository.findOneAndUpdate(
+      { userId },
+      updateData
+    );
+
+    if (!response) {
+      throw new AppError(HttpStatus.BAD_REQUEST, GARAGE_APPROVAL_FAILED);
+    }
+
+    const garage = await this._authRepository.findById(userId);
+
+    if (response?.approvalStatus === "approved" && garage) {
+      await this._emailService.sendGarageApprovalEmail(
+        garage?.email,
+        garage?.name
+      );
+    } else if (response?.approvalStatus === "rejected" && garage) {
+      await this._emailService.sendGarageRejectionEmail(
+        garage?.email,
+        garage?.name,
+        reason
+      );
+    }
+
+    return { message: `${action}ed successfull` };
   }
 }

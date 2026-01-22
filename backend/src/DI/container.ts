@@ -1,37 +1,29 @@
 import { Container } from "inversify";
 import { TYPES } from "./types";
 import { AuthRepository } from "../repositories/auth/implementation/authRepositories";
-import { AdminRepository } from "../repositories/superAdmin/implementation/adminRepositories";
 import { GarageRepository } from "../repositories/garage/implementation/garageRepositories";
 import { MechanicRepository } from "../repositories/mechanic/implementation/mechanicRepositories";
 import { SubscriptionRepository } from "../repositories/subscription/implementation/subscriptionRepository";
 import { AuthService } from "../services/auth/implementation/authServices";
-import { AdminService } from "../services/superAdmin/implementation/adminService";
 import { GarageService } from "../services/garage/implementation/garageServices";
 import { MechanicService } from "../services/mechanic/implementation/mechanicService";
 import { StripeService } from "../services/stripe/implementation/stripeServices";
 import { Authcontroller } from "../controllers/auth/implementation/authController";
-import { AdminController } from "../controllers/superAdmin/implementation/adminController";
 import { GarageController } from "../controllers/garage/implementation/garageController";
 import { MechanicController } from "../controllers/mechanic/implementation/mechanicController";
 import { StripeController } from "../controllers/stripe/implementation/stripeController";
 import { IAuthRepository } from "../repositories/auth/interface/IAuthRepositories";
-import { IAdminRepository } from "../repositories/superAdmin/interface/IAdminRepository";
 import { IGarageRepository } from "../repositories/garage/interface/IGarageRepository";
 import { IMechanicRepository } from "../repositories/mechanic/interface/IMechanicRepository";
 import { ISubscriptionRepository } from "../repositories/subscription/interface/ISubscriptionRepository";
 import IAuthService from "../services/auth/interface/IAuthService";
-import IAdminService from "../services/superAdmin/interface/IAdminService";
 import IGarageService from "../services/garage/interface/IGarageService";
 import IMechanicService from "../services/mechanic/interface/IMechanicService";
 import IStripeService from "../services/stripe/interface/IStripeService";
 import IAuthController from "../controllers/auth/interface/IAuthController";
-import IAdminController from "../controllers/superAdmin/interface/IAdminController";
 import IGarageController from "../controllers/garage/interface/IGarageController";
 import IMechanicController from "../controllers/mechanic/interface/IMechanicController";
 import IStripeController from "../controllers/stripe/interface/IStripeController";
-import { User } from "../models/user";
-import { Garage } from "../models/garage";
 import ISubscriptionService from "../services/subscription/interface/ISubscriptionService";
 import { SubscriptionService } from "../services/subscription/implimentation/subscriptionService";
 import { IPlanRepository } from "../repositories/plan/interface/IPlanRepository";
@@ -90,6 +82,16 @@ import { IAppointmentService } from "../services/appointment/interface/IAppointm
 import { AppointmentService } from "../services/appointment/implementation/appointmentService";
 import { IAppointmentRepository } from "../repositories/appointment/interface/IAppointmentRepository";
 import { AppointmentRepository } from "../repositories/appointment/implementation/appointmentRepository";
+import { IEmailService } from "../services/email/interface/IEmailService";
+import { EmailService } from "../services/email/implementation/emailService";
+import { IUserRepository } from "../repositories/user/interface/IUserRepository";
+import { UserRepository } from "../repositories/user/implementation/userRepository";
+import IUserService from "../services/user/interface/IUserService";
+import { UserService } from "../services/user/implementation/userService";
+import IUserController from "../controllers/user/interface/IUserController";
+import { UserController } from "../controllers/user/implementation/userController";
+import ISubscriptionController from "../controllers/subscription/interface/ISubscriptionController";
+import { SubscriptionController } from "../controllers/subscription/implementation/subscriptionController";
 
 const container = new Container();
 
@@ -98,10 +100,13 @@ container.bind<IAuthRepository>(TYPES.AuthRepository).to(AuthRepository);
 container.bind<IAuthService>(TYPES.AuthService).to(AuthService);
 container.bind<IAuthController>(TYPES.AuthController).to(Authcontroller);
 
-//Admin
-container.bind<IAdminRepository>(TYPES.AdminRepository).toDynamicValue(() => new AdminRepository(User, Garage));
-container.bind<IAdminService>(TYPES.AdminService).to(AdminService);
-container.bind<IAdminController>(TYPES.AdminController).to(AdminController);
+//Email
+container.bind<IEmailService>(TYPES.EmailService).to(EmailService);
+
+//User
+container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
+container.bind<IUserService>(TYPES.UserService).to(UserService);
+container.bind<IUserController>(TYPES.UserController).to(UserController);
 
 //Garage
 container.bind<IGarageRepository>(TYPES.GarageRepository).to(GarageRepository);
@@ -116,6 +121,7 @@ container.bind<IMechanicController>(TYPES.MechanicController).to(MechanicControl
 //Subscription
 container.bind<ISubscriptionRepository>(TYPES.SubscriptionRepository).to(SubscriptionRepository);
 container.bind<ISubscriptionService>(TYPES.SubscriptionService).to(SubscriptionService);
+container.bind<ISubscriptionController>(TYPES.SubscriptionController).to(SubscriptionController)
 
 //Stripe
 container.bind<IStripeService>(TYPES.StripeService).to(StripeService);

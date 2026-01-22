@@ -8,7 +8,7 @@ import passwordIcon from "@assets/icons/password.svg";
 import emailIcon from "@assets/icons/email.svg";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/redux/store/store";
-import { googleLoginApi, loginApi } from "@/services/authServices";
+import { googleLoginApi, loginApi, type TokenResponse } from "@/services/authServices";
 import { login } from "@/redux/slice/userSlice";
 import type { Role } from "@/types/UserTypes";
 import { errorToast } from "@/utils/notificationAudio";
@@ -87,12 +87,10 @@ useEffect(() => {
           }
         }
         setLoading(false);
-      } catch (err) {
-        if(err instanceof Error){
-          errorToast(err.message);
-        }else{
-          errorToast("Error while login");
-        }
+      } catch (error) {
+        console.log(error,'+-999999999999999999999999')
+        if(error instanceof Error)
+          errorToast(error.message)
         setLoading(false);
       } finally {
         setLoading(false);
@@ -103,7 +101,7 @@ useEffect(() => {
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        const res = await googleLoginApi(tokenResponse);
+        const res = await googleLoginApi(tokenResponse as TokenResponse);
         dispatch(login({ user: res.user, token: res.token }));
 
         if (res.user.role === "user") {

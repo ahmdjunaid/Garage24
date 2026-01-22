@@ -2,21 +2,10 @@ import { ICheckoutSession } from "../../../types/plan";
 import { stripe } from "../../../config/stripe";
 import IStripeService from "../interface/IStripeService";
 import Stripe from "stripe";
-import { inject, injectable } from "inversify";
-import { TYPES } from "../../../DI/types";
-import ISubscriptionService from "../../subscription/interface/ISubscriptionService";
-import HttpStatus from "../../../constants/httpStatusCodes";
-import { SUBSCRIPTION_ERROR } from "../../../constants/messages";
 import { IRetriveSessionData } from "../../../types/subscription";
-import IPaymentService from "../../payment/interface/IPaymentService";
-import { Types } from "mongoose";
 
-@injectable()
 export class StripeService implements IStripeService {
-  constructor(
-    @inject(TYPES.SubscriptionService) private _subscriptionService: ISubscriptionService,
-    @inject(TYPES.PaymentService) private _paymentService: IPaymentService
-  ) {}
+  constructor() {}
 
   async createSubscribeSession(data: ICheckoutSession) {
     const { garageId, planId, planName, planPrice } = data;
@@ -51,90 +40,6 @@ export class StripeService implements IStripeService {
     });
 
     return { url: session.url! };
-  }
-
-  async handleWebhookEvent(event: Stripe.Event): Promise<void> {
-    switch (event.type) {
-      case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
-        const metadata = session.metadata;
-
-        if (
-          !metadata?.garageId ||
-          !metadata?.planId ||
-          !session.payment_intent
-        ) {
-          throw { status: HttpStatus.BAD_REQUEST, message: SUBSCRIPTION_ERROR };
-        }
-
-        await this._subscriptionService.upsertPlanData(
-          metadata.garageId,
-          metadata.planId,
-          session.id,
-          session.payment_intent.toString()
-        );
-        break;
-      }
-
-      case "payment_intent.succeeded": {
-        try {
-          const pi = event.data.object as Stripe.PaymentIntent;
-
-          await this._subscriptionService.upsertPaymentStatus(pi.id, "paid");
-
-          await this._paymentService.create({
-            userId: new Types.ObjectId(pi.metadata.garageId),
-            paymentIntentId: pi.id,
-            amount: pi.amount / 100,
-            BillType: "subscription",
-            provider: "stripe",
-            referenceId: new Types.ObjectId(pi.metadata.planId),
-            status: "paid",
-          });
-        } catch (error) {
-          console.error("ERROR inside payment_intent.succeeded:", error);
-        }
-        break;
-      }
-
-      case "payment_intent.payment_failed": {
-        const pi = event.data.object as Stripe.PaymentIntent;
-
-        // await this._subscriptionService.upsertPaymentStatus(pi.id, "failed");
-
-        await this._paymentService.create({
-          userId: new Types.ObjectId(pi.metadata.garageId),
-          paymentIntentId: pi.id,
-          amount: pi.amount / 100,
-          BillType: "subscription",
-          provider: "stripe",
-          referenceId: new Types.ObjectId(pi.metadata.planId),
-          status: "failed",
-        });
-        break;
-      }
-
-      case "checkout.session.expired": {
-        const session = event.data.object as Stripe.Checkout.Session;
-
-        const paymentIntentId = session.payment_intent;
-
-        if (!paymentIntentId) {
-          console.warn("Expired session has no payment_intent:", session.id);
-          break;
-        }
-
-        // await this._subscriptionService.upsertPaymentStatus(
-        //   paymentIntentId.toString(),
-        //   "failed"
-        // );
-
-        break;
-      }
-
-      default:
-        console.log(`Unhandled event type: ${event.type}`);
-    }
   }
 
   async retriveDetails(sessionId: string): Promise<IRetriveSessionData | null> {
