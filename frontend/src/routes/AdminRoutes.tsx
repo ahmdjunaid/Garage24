@@ -5,6 +5,7 @@ import AdminUser from "@/pages/admin/AdminUsers";
 import AdminGarages from "@/pages/admin/AdminGarages";
 import PageNotFound from "@/pages/auth/PageNotFound";
 import AdminPlans from "@/pages/admin/AdminPlans";
+import ProfilePage from "@/pages/common/Profile";
 
 const AdminRoutes = () => {
   return (
@@ -15,6 +16,7 @@ const AdminRoutes = () => {
           <Route path="/users" element={<AdminUser/>}/>
           <Route path="/garages" element={<AdminGarages/>}/>
           <Route path="/plans" element={<AdminPlans/>}/>
+          <Route path="/profile" element={<ProfilePage />}/>
           <Route path="*" element={<PageNotFound/>}/>
         </Route>
       </Routes>

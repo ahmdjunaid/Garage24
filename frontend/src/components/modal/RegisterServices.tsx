@@ -34,7 +34,6 @@ const RegisterServices: React.FC<ModalProps> = ({
   useEffect(() => {
     const fetchServiceCategories = async () => {
       const res = await getAllServiceCatoriesApi();
-      console.log(res);
       setServiceCategories(res);
     };
 

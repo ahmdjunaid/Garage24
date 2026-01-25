@@ -10,4 +10,6 @@ export default interface IAuthController {
   resetPassword(req:Request, res:Response, next: NextFunction): Promise<void>;
   googleAuth(req:Request, res: Response, next: NextFunction): Promise<void>;
   refreshToken(req:Request, res: Response, next: NextFunction): Promise<void>;
+  getUserDataById(req:Request, res: Response, next: NextFunction): Promise<void>;
+  updateProfileData(req:Request, res: Response, next: NextFunction): Promise<void>;
 }

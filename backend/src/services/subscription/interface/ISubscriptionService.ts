@@ -11,5 +11,6 @@ export default interface ISubscriptionService {
     paymentIntent: string | null,
   ): Promise<{ message: string; }>;
 
-  upsertPaymentStatus(paymentIntent:string, paymentStatus: PaymentStatus):Promise<ISubscription | null>
+  upsertPaymentStatus(paymentIntent:string, paymentStatus: PaymentStatus):Promise<ISubscription | null>;
+  activePendingSubscriptions():Promise<void>;
 }

@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import IAuthService from "../interface/IAuthService";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { IAuthRepository } from "../../../repositories/auth/interface/IAuthRepositories";
-import { Role } from "../../../types/user";
+import { IUser, Role } from "../../../types/user";
 import {
   ACCOUNT_IS_BLOCKED,
   INVALID_CREDENTIALS,
@@ -34,6 +34,11 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "../../../DI/types";
 import { AppError } from "../../../middleware/errorHandler";
 import { IEmailService } from "../../email/interface/IEmailService";
+import { UserDocument } from "../../../models/user";
+import { ProfileDataUpdate } from "../../../types/common";
+import { deleteFromS3, uploadFile } from "../../../config/s3Service";
+import { deleteLocalFile } from "../../../helper/helper";
+import { extractS3KeyFromUrl } from "../../../utils/extractS3KeyFromUrl";
 
 const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
 
@@ -46,14 +51,16 @@ export class AuthService implements IAuthService {
 
   async register(name: string, email: string, password: string, role: Role) {
     const existUser = await this._authRepository.findByEmail(email);
-    if (existUser) throw new AppError(HttpStatus.NOT_FOUND, USER_ALREADY_EXISTS)
+    if (existUser)
+      throw new AppError(HttpStatus.NOT_FOUND, USER_ALREADY_EXISTS);
 
     const redisDataKey = `userData:${email}`;
     const redisOtpKey = `otp:${email}`;
 
-    const initiatedProcess = await redisClient.get(redisDataKey)
+    const initiatedProcess = await redisClient.get(redisDataKey);
 
-    if(initiatedProcess) throw new AppError(HttpStatus.CONFLICT, REGISTRATION_ALREADY_INITATED)
+    if (initiatedProcess)
+      throw new AppError(HttpStatus.CONFLICT, REGISTRATION_ALREADY_INITATED);
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -78,11 +85,11 @@ export class AuthService implements IAuthService {
   async login(email: string, password: string) {
     const user = await this._authRepository.findByEmail(email);
     if (!user) {
-      throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND)
+      throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND);
     }
 
     if (user.isBlocked) {
-      throw new AppError(HttpStatus.FORBIDDEN, ACCOUNT_IS_BLOCKED)
+      throw new AppError(HttpStatus.FORBIDDEN, ACCOUNT_IS_BLOCKED);
     }
 
     if (!user.password) {
@@ -91,7 +98,7 @@ export class AuthService implements IAuthService {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      throw new AppError(HttpStatus.FORBIDDEN, INVALID_CREDENTIALS)
+      throw new AppError(HttpStatus.FORBIDDEN, INVALID_CREDENTIALS);
     }
 
     const token = generateToken(user._id.toString(), user.role);
@@ -105,33 +112,34 @@ export class AuthService implements IAuthService {
     const redisDataKey = `userData:${email}`;
 
     const storedOtp = await redisClient.get(redisOtpKey);
-    if (!storedOtp)
-      throw new AppError(HttpStatus.BAD_REQUEST, OTP_EXPIRED)
+    if (!storedOtp) throw new AppError(HttpStatus.BAD_REQUEST, OTP_EXPIRED);
 
     const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
     if (storedOtp !== hashedOtp)
-      throw new AppError(HttpStatus.BAD_REQUEST, INVALID_OTP)
+      throw new AppError(HttpStatus.BAD_REQUEST, INVALID_OTP);
 
     const response = {
       message: OTP_VERIFIED_SUCCESSFULLY,
       token: "",
-      userId: ""
+      userId: "",
     };
 
     switch (context) {
       case "register": {
         const userData = await redisClient.get(redisDataKey);
         if (!userData)
-          throw new AppError(HttpStatus.BAD_REQUEST, SIGNUP_SESSION_EXPIRED)
+          throw new AppError(HttpStatus.BAD_REQUEST, SIGNUP_SESSION_EXPIRED);
 
-          const {user} = await this._authRepository.register(JSON.parse(userData));
-          response.userId = user._id.toString();
+        const { user } = await this._authRepository.register(
+          JSON.parse(userData)
+        );
+        response.userId = user._id.toString();
         break;
       }
       case "other": {
-        const user = await this._authRepository.findByEmail(email)
-        
-        if(!user) throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND)
+        const user = await this._authRepository.findByEmail(email);
+
+        if (!user) throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND);
 
         const token = generateResetToken(user._id.toString());
         response.token = token;
@@ -142,8 +150,8 @@ export class AuthService implements IAuthService {
         break;
     }
 
-    await redisClient.del(redisOtpKey)
-    await redisClient.del(redisDataKey)
+    await redisClient.del(redisOtpKey);
+    await redisClient.del(redisDataKey);
     return response;
   }
 
@@ -151,7 +159,7 @@ export class AuthService implements IAuthService {
     const user = await this._authRepository.findByEmail(email);
 
     if (!user) {
-      throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND)
+      throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND);
     }
 
     const { otp, hashedOtp } = generateOtp();
@@ -161,20 +169,19 @@ export class AuthService implements IAuthService {
 
     await this._emailService.sendOtpEmail(email, otp);
 
-    return new AppError(HttpStatus.OK, OTP_SENT_SUCCESSFULLY )
+    return new AppError(HttpStatus.OK, OTP_SENT_SUCCESSFULLY);
   }
 
   async resendOtp(email: string, context: "register" | "other") {
-
     const redisDataKey = `userData:${email}`;
-    
-  const userExist =
-    context === "register"
-      ? await redisClient.get(redisDataKey)
-      : await this._authRepository.findByEmail(email);
-    
+
+    const userExist =
+      context === "register"
+        ? await redisClient.get(redisDataKey)
+        : await this._authRepository.findByEmail(email);
+
     if (!userExist) {
-      throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND)
+      throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND);
     }
 
     const { otp, hashedOtp } = generateOtp();
@@ -191,7 +198,7 @@ export class AuthService implements IAuthService {
     const user = await this._authRepository.findByEmail(email);
 
     if (!user) {
-      throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND)
+      throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND);
     }
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -232,24 +239,60 @@ export class AuthService implements IAuthService {
   }
 
   async refreshToken(refreshToken: string) {
-    if (!refreshToken) throw new AppError(HttpStatus.BAD_REQUEST, NO_REFRESH_TOKEN_FOUND);
+    if (!refreshToken)
+      throw new AppError(HttpStatus.BAD_REQUEST, NO_REFRESH_TOKEN_FOUND);
 
     const decoded = verifyRefreshToken(refreshToken);
 
     if (!decoded) {
-      throw new AppError(HttpStatus.FORBIDDEN, INVALID_TOKEN)
+      throw new AppError(HttpStatus.FORBIDDEN, INVALID_TOKEN);
     }
 
     const user = await this._authRepository.findById(decoded.id);
     if (!user) {
-      throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND)
+      throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND);
     }
 
     if (user.isBlocked) {
-      throw new AppError(HttpStatus.FORBIDDEN, ACCOUNT_IS_BLOCKED)
+      throw new AppError(HttpStatus.FORBIDDEN, ACCOUNT_IS_BLOCKED);
     }
     const newAccessToken = generateToken(decoded.id, decoded.role);
 
     return { newAccessToken };
+  }
+
+  async getUserDataById(userId: string): Promise<UserDocument | null> {
+    return await this._authRepository.findById(userId);
+  }
+
+  async updateProfileData(data: ProfileDataUpdate): Promise<IUser | null> {
+    const user = await this._authRepository.findById(data.userId);
+    if (!user) {
+      throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND);
+    }
+    const update: Partial<IUser> = {};
+
+    if (user.name !== data.name) {
+      update.name = data.name;
+    }
+
+    if (user.mobileNumber !== data.mobileNumber) {
+      update.mobileNumber = data.mobileNumber;
+    }
+
+    if (data.image) {
+      const imageUrl = await uploadFile(data.image, "profile");
+      if (user.imageUrl) {
+        const key = extractS3KeyFromUrl(user.imageUrl);
+
+        if (key) {
+          await deleteFromS3(key);
+        }
+      }
+      if (data.image?.path) deleteLocalFile(data.image.path);
+      update.imageUrl = imageUrl;
+    }
+
+    return await this._authRepository.findByIdAndUpdate(data.userId, update);
   }
 }

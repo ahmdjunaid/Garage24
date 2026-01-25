@@ -72,7 +72,7 @@ export class GarageService implements IGarageService {
       userId: convertedUserId,
       location: {
         type: "Point" as const,
-        coordinates: [Number(location.lng), Number(location.lat)] as [
+        coordinates: [Number(location.lat), Number(location.lng)] as [
           number,
           number,
         ],
@@ -129,11 +129,14 @@ export class GarageService implements IGarageService {
   async getCurrentPlan(garageId: string) {
     const currentPlan =
       await this._subscriptionRepository.getSubscriptionByGarageId(garageId);
+    const futureSubs =
+      await this._subscriptionRepository.getFutureSubscriptions(garageId);
+
     if (!currentPlan) {
-      return { isActive: false, plan: null };
+      return { isActive: false, plan: null, pendingSubs: [] };
     }
 
-    return { isActive: true, plan: currentPlan };
+    return { isActive: true, plan: currentPlan, pendingSubs: futureSubs };
   }
 
   async getGarageById(garageId: string): Promise<IGarage | null> {
@@ -189,6 +192,13 @@ export class GarageService implements IGarageService {
 
     if (!response) {
       throw new AppError(HttpStatus.BAD_REQUEST, GARAGE_APPROVAL_FAILED);
+    }
+
+    if (response && action === "rejected") {
+      await Promise.all([
+        deleteFromS3(extractS3KeyFromUrl(response.imageUrl)),
+        deleteFromS3(extractS3KeyFromUrl(response.docUrl)),
+      ]);
     }
 
     const garage = await this._authRepository.findById(userId);

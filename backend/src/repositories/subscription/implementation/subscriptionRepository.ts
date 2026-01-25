@@ -2,8 +2,10 @@ import { BaseRepository } from "../../IBaseRepository";
 import { ISubscriptionRepository } from "../interface/ISubscriptionRepository";
 import { Types } from "mongoose";
 import { ISubscription } from "../../../types/subscription";
-import subscription from "../../../models/subscription";
 import { injectable } from "inversify";
+import subscription, {
+  SubscriptionDocument,
+} from "../../../models/subscription";
 
 @injectable()
 export class SubscriptionRepository
@@ -21,7 +23,8 @@ export class SubscriptionRepository
         sessionId: data.sessionId,
         garageId: new Types.ObjectId(data.garageId!),
         planId: new Types.ObjectId(data.planId!),
-        planSnapShot: data.planSnapShot
+        planSnapShot: data.planSnapShot,
+        status: data.status,
       },
     };
 
@@ -35,12 +38,19 @@ export class SubscriptionRepository
     );
   }
 
-  async getSubscriptionByGarageId(
-    garageId: string
-  ) {
+  async getSubscriptionByGarageId(garageId: string) {
     return await this.getByFilter({
       garageId,
       expiryDate: { $gt: new Date() },
+      status: "active"
+    });
+  }
+
+  async getFutureSubscriptions(garageId: string): Promise<SubscriptionDocument[]> {
+    return await this.model.find({
+      garageId,
+      expiryDate: { $gt: new Date() },
+      status: "pending"
     });
   }
 
@@ -60,6 +70,30 @@ export class SubscriptionRepository
         upsert: true,
         new: true,
       }
+    );
+  }
+
+  async findPendingToActivate(date: Date): Promise<SubscriptionDocument[]> {
+    return await this.model.find({
+      status: "pending",
+      startDate: { $lte: date },
+    });
+  }
+
+  async activatePendingSubs(
+    id: Types.ObjectId
+  ): Promise<SubscriptionDocument | null> {
+    return await this.model.findByIdAndUpdate(id, {
+      $set: { status: "active" },
+    });
+  }
+
+  async expireSubsByUserId(
+    garageId: Types.ObjectId
+  ): Promise<void> {
+    await this.model.updateMany(
+      { garageId, status: "active" },
+      { status: "expired" }
     );
   }
 }

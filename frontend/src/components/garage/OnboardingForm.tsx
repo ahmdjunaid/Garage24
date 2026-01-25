@@ -13,7 +13,11 @@ import {
   onboardingApi,
 } from "@/services/garageServices";
 import { errorToast, successToast } from "@/utils/notificationAudio";
-import { daysOfWeek, fuelTypes, getTimeOptions } from "@/constants/constantDatas";
+import {
+  daysOfWeek,
+  fuelTypes,
+  getTimeOptions,
+} from "@/constants/constantDatas";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import { login } from "@/redux/slice/userSlice";
 import { mobileRegex } from "@/constants/commonRegex";
@@ -22,7 +26,7 @@ import { ConfirmModalLight } from "@components/modal/ConfirmModalLight";
 import MapAutoCenter from "../elements/MapAutoCenter";
 import { Locate } from "lucide-react";
 import FileUploader from "./FileUploader";
-import type { IMappedGarageData } from "@/types/GarageTypes";
+import type { IAddress, IMappedGarageData } from "@/types/GarageTypes";
 
 const markerIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
@@ -50,16 +54,21 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
   const [RSAError, setRSAError] = useState<string>("");
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
-  const [city, setCity] = useState<string>("");
-  const [district, setDistrict] = useState<string>("");
-  const [state, setState] = useState<string>("");
-  const [pincode, setPincode] = useState<string>("");
+  const [address, setAddress] = useState<IAddress>({
+    city: "",
+    district: "",
+    state: "",
+    pincode: "",
+    displayName: "",
+  });
   const [locationError, setLocationError] = useState<string>("");
   const [isRejected, setIsRejected] = useState<boolean>(false);
   const [numOfServiceBays, setNumOfServiceBays] = useState<number | string>("");
   const [serviceBayError, setServiceBayError] = useState<string>("");
   const [supportedFuelTypes, setSupportedFuelTypes] = useState<string[]>([]);
-  const [supportedFuelTypesError, setSupportedFuelTypesError] = useState<string>("");
+  const [rejectionReason, setRejectionReason] = useState<string | null>(null)
+  const [supportedFuelTypesError, setSupportedFuelTypesError] =
+    useState<string>("");
 
   const { user, token } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
@@ -70,6 +79,7 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
       if (!user) return;
       const response: IMappedGarageData = await getGarageDetailsApi(user?._id);
       if (response) {
+        console.log(response,'garageResponseOnBoarding')
         setLocation({
           lat: response.location?.coordinates[0] ?? 0,
           lng: response.location?.coordinates[1] ?? 0,
@@ -79,6 +89,9 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
         setSelectedHolidays(response.selectedHolidays!);
         setMobile(response.mobileNumber!);
         setIsRSAEnabled(response.isRSAEnabled!);
+        setRejectionReason(response.rejectionReason!)
+        setSupportedFuelTypes(response.supportedFuelTypes)
+        setNumOfServiceBays(response.numOfServiceBays)
         setIsRejected(true);
       }
     };
@@ -90,23 +103,20 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
     const getAddress = async () => {
       if (!location) return;
       const address = await fetchAddressApi(location.lat, location.lng);
-      setCity(address.city);
-      setDistrict(address.district);
-      setState(address.state);
-      setPincode(address.pincode);
+      setAddress(address)
     };
     getAddress();
   }, [location]);
 
   const handleCheckboxChange = (day: string) => {
     setSelectedHolidays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
     );
   };
 
   const handleFuelTypeChange = (t: string) => {
     setSupportedFuelTypes((prev) =>
-      prev.includes(t) ? prev.filter((d) => d !== t) : [...prev, t]
+      prev.includes(t) ? prev.filter((d) => d !== t) : [...prev, t],
     );
   };
 
@@ -145,7 +155,7 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
       hasError = true;
     }
 
-    if (!location || !city) {
+    if (!location || !address.city) {
       setLocationError("Select your location from the map.");
       hasError = true;
     }
@@ -162,14 +172,14 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
 
     if (selectedHolidays.length > 6) {
       setSelectedHolidaysError(
-        "At least one working day is required. You can’t mark all days as holidays."
+        "At least one working day is required. You can’t mark all days as holidays.",
       );
       hasError = true;
     }
 
-      if (supportedFuelTypes.length<1) {
+    if (supportedFuelTypes.length < 1) {
       setSupportedFuelTypesError(
-        "Please select the fuel types supported by your garage."
+        "Please select the fuel types supported by your garage.",
       );
       hasError = true;
     }
@@ -191,7 +201,6 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
     setSubmitting(true);
     try {
       const formData = new FormData();
-      const address = { city, district, state, pincode };
 
       formData.append("name", user?.name || "");
       formData.append("userId", user?._id || "");
@@ -213,7 +222,7 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
         login({
           user: { ...user, isOnboardingRequired: false } as User,
           token,
-        })
+        }),
       );
 
       successToast("Successfully submitted for verification.");
@@ -246,7 +255,7 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
       },
       (err) => {
         console.error("Error getting location", err);
-      }
+      },
     );
   };
 
@@ -265,7 +274,7 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
           <div className="bg-red-100 rounded p-2 text-center">
             <p className="text-red-600 text-sm mt-1">
               <strong>Application rejected. </strong>
-              Please check your email for the rejection reason and resubmit
+              Your application is rejected due to "{rejectionReason}" verify and resubmit
               after uploading valid documents.
             </p>
           </div>
@@ -391,25 +400,23 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
                 Supported Fuel Types
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {fuelTypes.map(
-                  (type) => (
-                    <label
-                      key={type}
-                      className="flex items-center space-x-2 text-gray-800"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={supportedFuelTypes.includes(type)}
-                        onChange={() => {
-                          handleFuelTypeChange(type);
-                          setSupportedFuelTypesError("");
-                        }}
-                        className="w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500"
-                      />
-                      <span>{type}</span>
-                    </label>
-                  )
-                )}
+                {fuelTypes.map((type) => (
+                  <label
+                    key={type}
+                    className="flex items-center space-x-2 text-gray-800"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={supportedFuelTypes.includes(type)}
+                      onChange={() => {
+                        handleFuelTypeChange(type);
+                        setSupportedFuelTypesError("");
+                      }}
+                      className="w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                    />
+                    <span>{type}</span>
+                  </label>
+                ))}
               </div>
               {supportedFuelTypesError && (
                 <p className="text-red-600 font-light text-sm mt-1">
@@ -527,8 +534,7 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
                 <p className="text-sm text-gray-500 mt-2">
                   <b>Selected:</b> {location.lat.toFixed(5)},{" "}
                   {location.lng.toFixed(5)} <br />
-                  <b>City:</b> {city} | <b>District:</b> {district} |{" "}
-                  <b>State:</b> {state}
+                  <b>Address:</b> {address.displayName}
                 </p>
               )}
               {locationError && (

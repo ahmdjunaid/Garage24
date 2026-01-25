@@ -34,7 +34,7 @@ const AdminPlans = () => {
         const response = await fetchAllPlansApi(
           currentPage,
           plansPerPage,
-          searchQuery
+          searchQuery,
         );
         setPlans(response.plans);
         setTotalPages(response.totalPages);
@@ -42,7 +42,7 @@ const AdminPlans = () => {
         console.error("Error from page:", error);
       }
     },
-    [plansPerPage]
+    [plansPerPage],
   );
 
   const debouncedFetch = useMemo(
@@ -50,7 +50,7 @@ const AdminPlans = () => {
       _.debounce((page: number, query: string) => {
         fetchPlans(page, query);
       }, 300),
-    [fetchPlans]
+    [fetchPlans],
   );
 
   useEffect(() => {
@@ -79,8 +79,8 @@ const AdminPlans = () => {
         await togglePlanStatusApi(id, act);
         setPlans((prev) =>
           prev.map((p) =>
-            p._id === id ? { ...p, isBlocked: act === "block" } : p
-          )
+            p._id === id ? { ...p, isBlocked: act === "block" } : p,
+          ),
         );
         successToast(`${act}ed successfully`);
       }

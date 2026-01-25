@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { MessageSquare, ChevronRight, Menu, X, LogOut } from "lucide-react";
 import whiteLogo from "@assets/icons/logo-white.png";
 import { logoutApi } from "@/services/authServices";
@@ -10,8 +10,8 @@ import { getMenuItems } from "@/constants/menuItems";
 import type { RootState } from "@/redux/store/store";
 import profileIcon from "@assets/icons/profileIcon.png"
 
-interface AdminSidebarProps {
-  role: "garage" | "mechanic" | "admin";
+export interface AdminSidebarProps {
+  role: "garage" | "mechanic" | "admin" | "user";
 }
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
@@ -151,11 +151,16 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
           ))}
         </div>
 
-        {/* PROFILE + LOGOUT (SEPARATED & CLICKABLE) */}
         <div className="p-4 border-t border-gray-800">
-          <Link
+          <NavLink
             to={`/${role}/profile`}
-            className="flex items-center gap-3 mb-4"
+            className={({ isActive }) => 
+              `flex items-center gap-3 mb-4 p-3 rounded-lg ${
+                isActive 
+                ? "bg-red-700" 
+                : ""
+              }`
+            }
           >
             <img
               src={
@@ -170,10 +175,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
             <div className="flex-1">
               <div className="font-semibold text-sm">{user?.name}</div>
               <div className="text-xs text-gray-400 flex items-center gap-1">
-                View Profile <ChevronRight className="w-3 h-3" />
+                View Profile<ChevronRight className="w-3 h-3" />
               </div>
             </div>
-          </Link>
+          </NavLink>
 
           {/* LOGOUT BUTTON */}
           <button

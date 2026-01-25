@@ -46,5 +46,7 @@ const subscriptionSchema = new Schema<ISubscription>(
   { timestamps: true }
 );
 
+subscriptionSchema.index({ status:1, startDate:1, expiryDate: 1 });
+
 export type SubscriptionDocument = HydratedDocument<ISubscription>;
 export default model<ISubscription>("Subscription", subscriptionSchema);

@@ -38,7 +38,6 @@ const GarageMechanic = () => {
           mechanicsPerPage,
           searchQuery
         );
-        console.log(response.mechanics, "mechanics");
         setMechanics(response.mechanics);
         setTotalPages(response.totalPages);
       } catch (error) {

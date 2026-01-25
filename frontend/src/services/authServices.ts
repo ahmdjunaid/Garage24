@@ -62,3 +62,9 @@ export const googleLoginApi = (credentialResponse: TokenResponse) => {
     .post(GOOGLE_CALLBACK_URL, { accessToken: credentialResponse.access_token })
     .then((res) => res.data);
 };
+
+export const getMeApi = () => {
+  return api
+    .get(`/${AUTH_BASE_ROUTE}/me`)
+    .then(res => res.data)
+}

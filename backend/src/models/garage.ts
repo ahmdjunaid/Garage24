@@ -27,6 +27,7 @@ const garageSchema = new Schema<IGarage>(
       district: { type: String },
       state: { type: String },
       pincode: { type: String },
+      displayName: { type: String },
     },
     startTime: { type: String, required: true },
     endTime: { type: String, required: true },

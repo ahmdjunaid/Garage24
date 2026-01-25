@@ -40,7 +40,8 @@ export const ERROR_WHILE_CREATINGPLAN = "Error while creating plan."
 export const PLAN_ALREADY_EXIST = "Plan with this name already exists."
 export const PLAN_CREATED_SUCCESS = "Plan created successfully."
 export const ERROR_WHILE_PLAN_UPDATE="An error occured while update status."
-export const RENEWAL_POLICY_VIOLATION = "Renewal is available only within 7 days of plan expiry."
+export const RENEWAL_POLICY_VIOLATION = "You can renew your plan only within 7 days of expiry, and only for the same plan."
+export const SUB_LIMIT_EXCEEDED = "You can have a maximum of two active subscriptions."
 
 //garage messages
 export const GARAGE_APPROVAL_FAILED = "Error while approval/rejection"

@@ -10,11 +10,13 @@ import { stripe } from "../../../config/stripe";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
 import { AppError } from "../../../middleware/errorHandler";
+import IPaymentService from "../../../services/payment/interface/IPaymentService";
 
 @injectable()
 export class StripeController implements IStripeController {
   constructor(
-    @inject(TYPES.StripeService) private _stripeService: IStripeService
+    @inject(TYPES.StripeService) private _stripeService: IStripeService,
+    @inject(TYPES.PaymentService) private _paymentService: IPaymentService
   ) {}
 
   handleWebhook = async (req: Request, res: Response, next: NextFunction) => {
@@ -30,7 +32,7 @@ export class StripeController implements IStripeController {
         sig,
         webhookSecret
       );
-      await this._stripeService.handleWebhookEvent(event);
+      await this._paymentService.handleWebhookEvent(event);
       res.status(HttpStatus.OK).json({ received: true });
     } catch (error) {
       next(error);

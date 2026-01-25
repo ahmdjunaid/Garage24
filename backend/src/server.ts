@@ -15,6 +15,10 @@ import cookieParser from "cookie-parser";
 import { connectRedis } from "./config/redisClient";
 import "reflect-metadata";
 import { errorHandler } from "./middleware/errorHandler";
+import { startSubscriptionActivationJob } from "./jobs/subscriptionActivationJobs";
+import { container } from "./DI/container";
+import { SubscriptionService } from "./services/subscription/implimentation/subscriptionService";
+import { TYPES } from "./DI/types";
 
 const app = express();
 const server = http.createServer(app);
@@ -43,16 +47,22 @@ app.use("/api/admin", adminRouter);
 app.use("/api/stripe", stripeRouter);
 app.use("/api/user", userRouter);
 
-app.use(errorHandler)
+app.use(errorHandler);
 
-connectDB();
-
-(async () => {
+async function bootstrap() {
+  await connectDB();
   await connectRedis();
-})();
 
-const PORT = process.env.PORT || 3000;
+  const subscriptionService = container.get<SubscriptionService>(
+    TYPES.SubscriptionService
+  );
 
-server.listen(PORT, () => {
-  logger.info(`Server is running at ${PORT}`);
-});
+  startSubscriptionActivationJob(subscriptionService);
+
+  const PORT = process.env.PORT || 3000;
+  server.listen(PORT, () => {
+    logger.info(`Server is running at ${PORT}`);
+  });
+}
+
+bootstrap();

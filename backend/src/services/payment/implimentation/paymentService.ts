@@ -7,9 +7,7 @@ import { BillType, PaymentStatus } from "../../../types/payments";
 import { Types } from "mongoose";
 import { AppError } from "../../../middleware/errorHandler";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import {
-  SUBSCRIPTION_ERROR,
-} from "../../../constants/messages";
+import { SUBSCRIPTION_ERROR } from "../../../constants/messages";
 import ISubscriptionService from "../../subscription/interface/ISubscriptionService";
 import Stripe from "stripe";
 
@@ -19,7 +17,7 @@ export class PaymentService implements IPaymentService {
     @inject(TYPES.PaymentRepository)
     private _paymentRepository: IPaymentRepository,
     @inject(TYPES.SubscriptionService)
-    private _subscriptionService: ISubscriptionService
+    private _subscriptionService: ISubscriptionService,
   ) {}
   async createPayment(data: {
     userId: Types.ObjectId;
@@ -55,6 +53,7 @@ export class PaymentService implements IPaymentService {
           session.id,
           session.payment_intent.toString()
         );
+
         break;
       }
 
@@ -62,10 +61,7 @@ export class PaymentService implements IPaymentService {
         try {
           const pi = event.data.object as Stripe.PaymentIntent;
 
-          await this._subscriptionService.upsertPaymentStatus(
-            pi.id,
-            "paid"
-          );
+          await this._subscriptionService.upsertPaymentStatus(pi.id, "paid");
 
           await this.createPayment({
             userId: new Types.ObjectId(pi.metadata.garageId),

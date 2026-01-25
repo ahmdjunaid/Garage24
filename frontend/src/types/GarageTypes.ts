@@ -6,10 +6,11 @@ export interface ILocation {
 }
 
 export interface IAddress {
-  city: { type: string };
-  district: { type: string };
-  state: { type: string };
-  pincode: { type: string };
+  city: string;
+  district: string;
+  state: string;
+  pincode: string;
+  displayName: string;
 }
 
 export type approvalStatus = "pending" | "approved" | "rejected";
@@ -39,6 +40,7 @@ export interface IMappedGarageData {
   approvalStatus?: approvalStatus;
   numOfServiceBays: number;
   supportedFuelTypes: string[];
+  rejectionReason?: string;
 }
 
 export interface GarageData {
@@ -69,13 +71,6 @@ export interface GarageData {
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface IAddress {
-  city: { type: string };
-  district: { type: string }
-  state: { type: string };
-  pincode: { type: string };
 }
 
 export interface GarageNearbyDto {

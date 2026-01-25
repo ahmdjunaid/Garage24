@@ -1,6 +1,6 @@
 import express from "express";
 import { Authcontroller } from "../controllers/auth/implementation/authController";
-import { verifyResetJWT } from "../middleware/jwt";
+import { verifyJWT, verifyResetJWT } from "../middleware/jwt";
 import { container } from "../DI/container";
 import { TYPES } from "../DI/types";
 
@@ -17,5 +17,6 @@ router.route('/forgot-password').post(authController.forgotPassword)
 router.route('/reset-password').post(verifyResetJWT,authController.resetPassword)
 router.route('/google/callback').post(authController.googleAuth)
 router.route('/refresh-token').post(authController.refreshToken)
+router.route('/me').get(verifyJWT,authController.getUserDataById)
 
 export default router;

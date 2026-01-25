@@ -14,6 +14,7 @@ export interface IAddress {
   district: { type: string }
   state: { type: string };
   pincode: { type: string };
+  displayName: {type: string}
 }
 
 export interface IGarage {

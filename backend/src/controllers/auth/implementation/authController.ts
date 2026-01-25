@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import IAuthController from "../interface/IAuthController";
 import {
+  ALL_FIELDS_REQUIRED,
   INVALID_EMAIL,
   LOGGED_OUT_MESSAGE,
   NO_REFRESH_TOKEN_FOUND,
@@ -196,6 +197,55 @@ export class Authcontroller implements IAuthController {
         await this._authService.refreshToken(refreshToken);
 
       res.status(HttpStatus.OK).json({ accessToken: newAccessToken });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getUserDataById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
+      }
+
+      const response = await this._authService.getUserDataById(userId);
+
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateProfileData = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { name, mobileNumber } = req.body;
+      const image = req.file as Express.Multer.File;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        throw new AppError(HttpStatus.BAD_REQUEST, "User id requires");
+      }
+
+      if (!image && !name && !mobileNumber) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          "Update request need any fields to be updated"
+        );
+      }
+
+      const response = await this._authService.updateProfileData({
+        userId,
+        name,
+        mobileNumber,
+        image,
+      });
+
+      res.status(HttpStatus.OK).json(response);
     } catch (error) {
       next(error);
     }

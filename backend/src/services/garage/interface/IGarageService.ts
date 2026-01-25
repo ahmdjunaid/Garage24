@@ -29,7 +29,7 @@ export default interface IGarageService {
   getApprovalStatus(userId: string): Promise<GarageStatusResponse>;
   getCurrentPlan(
     garageId: string
-  ): Promise<{ isActive: boolean; plan: SubscriptionDocument | null }>;
+  ): Promise<{ isActive: boolean; plan: SubscriptionDocument | null, pendingSubs: SubscriptionDocument[]}>;
   getGarageById(garageId: string): Promise<IGarage | null>;
   getGarageDetails(garageId: string): Promise<{
     garage: GarageDocument | null;

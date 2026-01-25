@@ -7,7 +7,13 @@ export interface PlanCardProps {
   plan: IPlan;
   currentPlan: ISubscription | null;
   handleSubscribe?: (planId: string, name: string, price: number) => void;
-  handleRenew?: (planId: string, name: string, price: number, daysLeft: number) => void;
+  handleRenew?: (
+    planId: string,
+    name: string,
+    price: number,
+    daysLeft: number,
+  ) => void;
+  isPending?: boolean;
 }
 
 export const PlanCard: React.FC<PlanCardProps> = ({
@@ -15,6 +21,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   currentPlan,
   handleSubscribe,
   handleRenew,
+  isPending,
 }) => {
   let daysLeft;
   if (currentPlan) {
@@ -33,25 +40,28 @@ export const PlanCard: React.FC<PlanCardProps> = ({
         <span className="text-4xl font-bold">₹{plan.price}</span>
         <span className="text-gray-400"> for {plan.validity} Days</span>
       </div>
-
-      <button
-        disabled={!!currentPlan}
-        className={`w-full py-2 mt-2 rounded-lg font-semibold transition-all ${
-          currentPlan
-            ? "bg-gray-800 text-gray-400 cursor-not-allowed"
-            : "bg-red-600 hover:bg-red-800 text-white"
-        }`}
-        onClick={() => handleSubscribe?.(plan._id, plan.name, plan.price)}
-      >
-        {currentPlan ? "Current Plan" : `Get ${plan.name}`}
-      </button>
+      {!isPending && (
+        <button
+          disabled={!!currentPlan}
+          className={`w-full py-2 mt-2 rounded-lg font-semibold transition-all ${
+            currentPlan
+              ? "bg-gray-800 text-gray-400 cursor-not-allowed"
+              : "bg-red-600 hover:bg-red-800 text-white"
+          }`}
+          onClick={() => handleSubscribe?.(plan._id, plan.name, plan.price)}
+        >
+          {currentPlan ? "Current Plan" : `Get ${plan.name}`}
+        </button>
+      )}
 
       {currentPlan && daysLeft !== undefined && daysLeft < 7 && (
         <button
           className="w-full py-2 mt-2 rounded-lg font-semibold transition-all bg-red-600 hover:bg-red-800 text-white"
-          onClick={() => handleRenew?.(plan._id, plan.name, plan.price, daysLeft!)}
+          onClick={() =>
+            handleRenew?.(plan._id, plan.name, plan.price, daysLeft!)
+          }
         >
-          Renew Plan
+          {isPending ? "Upcoming" : "Renew Plan"}
         </button>
       )}
 

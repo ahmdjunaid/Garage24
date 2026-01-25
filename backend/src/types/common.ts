@@ -4,3 +4,10 @@ export interface GetPaginationQuery {
   limit: number;
   searchQuery: string;
 }
+
+export interface ProfileDataUpdate {
+  userId: string;
+  name?: string; 
+  image?: Express.Multer.File, 
+  mobileNumber?: string
+}

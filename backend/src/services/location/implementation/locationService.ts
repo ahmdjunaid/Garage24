@@ -36,6 +36,7 @@ export class LocationService implements ILocationService {
       district: data.address?.state_district || "",
       state: data.address?.state || "",
       pincode: data.address?.postcode || "",
+      displayName: data.display_name
     };
   }
 

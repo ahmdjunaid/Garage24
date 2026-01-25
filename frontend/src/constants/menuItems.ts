@@ -33,7 +33,7 @@ const superAdminMenuItems = [
 ]
 
 
-export function getMenuItems(role: "garage" | "mechanic" | "admin"): MenuItem[] {
+export function getMenuItems(role: "garage" | "mechanic" | "admin" | "user"): MenuItem[] {
   switch (role) {
     case "garage":
       return garageMenuItems;

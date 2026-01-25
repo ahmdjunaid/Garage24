@@ -7,25 +7,36 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store/store";
 import SubscriptionAlertModal from "@/components/modal/SubscriptionAlertModal";
 import { calculateDaysLeft } from "@/utils/calculateDaysLeft";
+import { errorToast } from "@/utils/notificationAudio";
 
 const GarageHome = () => {
   const [currentPlan, setCurrentPlan] = useState<ISubscription | null>(null);
   const [hasActivePlan, setActivePlan] = useState<boolean>(false);
+  const [pendingPlan, setPendingPlan] = useState<ISubscription[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const { user } = useSelector((state: RootState) => state.auth);
 
   let daysLeft;
   if (currentPlan) {
-    daysLeft = calculateDaysLeft(currentPlan?.expiryDate)
+    daysLeft = calculateDaysLeft(currentPlan?.expiryDate);
   }
 
   useEffect(() => {
     const fetchSubscriptionDetails = async () => {
       if (user) {
-        const res = await getCurrentSubscriptionApi(user._id);
-        console.log(res, "dashboard");
-        setCurrentPlan(res.plan);
-        setActivePlan(res.isActive);
+        try {
+          setLoading(true);
+          const res = await getCurrentSubscriptionApi(user._id);
+          setCurrentPlan(res.plan);
+          setActivePlan(res.isActive);
+          setPendingPlan(res.pendingSubs);
+        } catch (error) {
+          console.error(error);
+          if (error instanceof Error) errorToast(error.message);
+        } finally {
+          setLoading(false);
+        }
       }
     };
     fetchSubscriptionDetails();
@@ -39,14 +50,18 @@ const GarageHome = () => {
         <AdminHeader text={"Dashboard"} />
       </div>
 
-      <SubscriptionAlertModal
-        isOpen={!hasActivePlan || (typeof daysLeft === "number" && daysLeft < 7)}
-        onClose={() => {
-          setActivePlan(true)
-          setCurrentPlan(null)
-        }}
-        currentSubscription={currentPlan}
-      />
+      {!loading && pendingPlan === null && (
+        <SubscriptionAlertModal
+          isOpen={
+            !hasActivePlan || (typeof daysLeft === "number" && daysLeft < 7)
+          }
+          onClose={() => {
+            setActivePlan(true);
+            setCurrentPlan(null);
+          }}
+          currentSubscription={currentPlan}
+        />
+      )}
     </div>
   );
 };

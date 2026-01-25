@@ -9,7 +9,7 @@ import {
   RENEWAL_POLICY_VIOLATION,
   SUBSCRIPTION_ERROR,
 } from "../../../constants/messages";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { IPlanRepository } from "../../../repositories/plan/interface/IPlanRepository";
 import { PaymentStatus } from "../../../types/payments";
 import { AppError } from "../../../middleware/errorHandler";
@@ -27,16 +27,27 @@ export class SubscriptionService implements ISubscriptionService {
   ) {}
 
   async subscribePlan(data: ICheckoutSession): Promise<{ url: string }> {
+    const futureSubs = await this._subscriptionRepository.getFutureSubscriptions(
+      data.garageId
+    );
+    if (futureSubs.length >= 1) {
+      throw new AppError(HttpStatus.BAD_REQUEST, RENEWAL_POLICY_VIOLATION);
+    }
+
     const planAlreadyExist =
       await this._subscriptionRepository.getSubscriptionByGarageId(
         data.garageId
       );
 
-    if(planAlreadyExist && calculateDaysLeft(planAlreadyExist.expiryDate) > 7){
-      throw new AppError(HttpStatus.BAD_REQUEST, RENEWAL_POLICY_VIOLATION)
+    if (
+      planAlreadyExist &&
+      calculateDaysLeft(planAlreadyExist.expiryDate) > 7 &&
+      planAlreadyExist.planId !== new Types.ObjectId(data.planId)
+    ) {
+      throw new AppError(HttpStatus.BAD_REQUEST, RENEWAL_POLICY_VIOLATION);
     }
 
-    return await this._stripeService.createSubscribeSession(data)
+    return await this._stripeService.createSubscribeSession(data);
   }
 
   async upsertPlanData(
@@ -49,6 +60,9 @@ export class SubscriptionService implements ISubscriptionService {
       throw new AppError(HttpStatus.BAD_REQUEST, SUBSCRIPTION_ERROR);
     }
 
+    const planAlreadyExist =
+      await this._subscriptionRepository.getSubscriptionByGarageId(garageId);
+
     const garageIdConverted = new mongoose.Types.ObjectId(garageId);
     const planIdConverted = new mongoose.Types.ObjectId(planId);
 
@@ -57,8 +71,11 @@ export class SubscriptionService implements ISubscriptionService {
     if (!plan) {
       throw new AppError(HttpStatus.NOT_FOUND, PLAN_NOT_FOUND);
     }
+    const baseDate = planAlreadyExist
+      ? new Date(planAlreadyExist.expiryDate)
+      : new Date();
 
-    const expiryDate = new Date();
+    const expiryDate = new Date(baseDate);
     expiryDate.setDate(expiryDate.getDate() + plan.validity);
 
     const planSnapShot = {
@@ -73,14 +90,18 @@ export class SubscriptionService implements ISubscriptionService {
       garageId: garageIdConverted,
       planId: planIdConverted,
       planSnapShot,
-      startDate: new Date(),
+      startDate: baseDate,
       expiryDate,
       sessionId,
       paymentIntent,
-      status: "pending",
+      status: planAlreadyExist ? "pending" : "active",
     });
 
-    return { message: "Successfully subscribed" };
+    return {
+      message: planAlreadyExist
+        ? "Plan renewed successfully"
+        : "Subscription activated successfully",
+    };
   }
 
   async upsertPaymentStatus(
@@ -97,5 +118,18 @@ export class SubscriptionService implements ISubscriptionService {
     }
 
     return updatedSubscription;
+  }
+
+  async activePendingSubscriptions(): Promise<void> {
+    const now = new Date();
+
+    const pendingSubs =
+      await this._subscriptionRepository.findPendingToActivate(now);
+
+    for (const sub of pendingSubs) {
+      await this._subscriptionRepository.expireSubsByUserId(sub.garageId);
+
+      await this._subscriptionRepository.activatePendingSubs(sub._id);
+    }
   }
 }

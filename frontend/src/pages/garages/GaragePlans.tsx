@@ -22,6 +22,7 @@ import { PlanCard } from "@/components/elements/PlanCard";
 
 const GaragePlans = () => {
   const [currentPlan, setCurrentPlan] = useState<ISubscription | null>(null);
+  const [pendingPlan, setPendingPlan] = useState<ISubscription[]>([]);
   const [plans, setPlans] = useState<IPlan[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -57,12 +58,12 @@ const GaragePlans = () => {
         const res = await getCurrentSubscriptionApi(user._id);
         setCurrentPlan(res.plan);
         setActivePlan(res.isActive);
+        setPendingPlan(res.pendingSubs);
       }
     };
     fetchSubscriptionDetails();
   }, [user]);
 
-  // Fetch plans
   const fetchPlans = useCallback(
     async (currentPage: number, searchQuery: string) => {
       try {
@@ -162,6 +163,11 @@ const GaragePlans = () => {
     return plans.find((p) => p._id === currentPlan.planId) || null;
   }, [plans, currentPlan]);
 
+  const pendingPlanDocument = useMemo(() => {
+    if (pendingPlan.length <  1) return null;
+    return plans.find((p) => p._id === pendingPlan[0].planId) || null;
+  }, [plans, pendingPlan]);
+
   return (
     <div className="flex h-screen bg-gray-950 text-white overflow-hidden">
       <AdminSidebar role="garage" />
@@ -217,11 +223,20 @@ const GaragePlans = () => {
             {/* Plans Section */}
             <div className="flex flex-wrap justify-center gap-8">
               {activePlan ? (
-                <PlanCard
-                  plan={activePlan}
-                  currentPlan={currentPlan}
-                  handleRenew={handleRenew}
-                />
+                <>
+                  <PlanCard
+                    plan={activePlan}
+                    currentPlan={currentPlan}
+                    handleRenew={handleRenew}
+                  />
+                  { pendingPlan && pendingPlanDocument && (
+                    <PlanCard
+                      plan={pendingPlanDocument}
+                      currentPlan={currentPlan}
+                      isPending={true}
+                    />
+                  )}
+                </>
               ) : (
                 plans.map((plan) => (
                   <PlanCard
