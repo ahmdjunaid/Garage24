@@ -43,5 +43,5 @@ export default interface IAuthService {
   refreshToken(refreshToken: string): Promise<{ newAccessToken: string }>;
   getUserDataById(userId: string): Promise<UserDocument | null>;
   updateProfileData(data:ProfileDataUpdate): Promise<IUser|null>;
-  changePassword(userId:string, oldPassword:string, newPassword:string): Promise<string>
+  changePassword(userId:string, currentPassword:string, newPassword:string): Promise<string>
 }

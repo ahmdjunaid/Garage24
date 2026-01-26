@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-
 import UserFooter from "@components/layouts/user/layout/UserFooter";
 import UserHeader from "@components/layouts/user/layout/UserHeader";
 import UserProcess from "@components/layouts/user/section/UserProcess";

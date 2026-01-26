@@ -37,6 +37,7 @@ export const GOOGLE_AUTH_ERROR="Error while google authentication"
 export const PASSWORD_NOT_SET = "This account doesn’t have a password set. You may have signed up using Google login."
 export const PASSWORD_CHANGED_SUCCESS = "Your password has been changed successfully."
 export const AUTHENTICATION_FAILED = "Your session has expired. Please log in again."
+export const NEW_PASSWORD_CANNOT_BE_SAME = "Your new password cannot be the same as your previous password."
 
 // plan messages
 export const PLAN_NOT_FOUND = "Plan not found!"

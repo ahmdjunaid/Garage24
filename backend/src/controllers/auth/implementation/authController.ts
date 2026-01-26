@@ -253,19 +253,19 @@ export class Authcontroller implements IAuthController {
   changePassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user?.id;
-      const { oldPassword, newPassword } = req.body;
+      const { currentPassword, newPassword } = req.body;
 
       if (!userId) {
         throw new AppError(HttpStatus.BAD_REQUEST, AUTHENTICATION_FAILED);
       }
 
-      if (!oldPassword || !newPassword) {
+      if (!currentPassword || !newPassword) {
         throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
 
       const response = await this._authService.changePassword(
         userId,
-        oldPassword,
+        currentPassword,
         newPassword
       );
 

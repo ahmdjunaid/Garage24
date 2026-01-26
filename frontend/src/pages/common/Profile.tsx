@@ -6,7 +6,7 @@ import {
 } from "@/components/layouts/common/ProfileOverview";
 import { login } from "@/redux/slice/userSlice";
 import type { RootState } from "@/redux/store/store";
-import { getMeApi, updateProfileDataApi } from "@/services/authServices";
+import { changePasswordApi, getMeApi, updateProfileDataApi } from "@/services/authServices";
 import type { IUsersMappedData, Role, User } from "@/types/UserTypes";
 import { errorToast, successToast } from "@/utils/notificationAudio";
 import { useEffect, useState } from "react";
@@ -59,13 +59,15 @@ const ProfilePage = () => {
     }
   };
 
-  // const handlePasswordChange = async () => {
-  //   try {
-      
-  //   } catch (error) {
-      
-  //   }
-  // }
+  const handlePasswordChange = async (data:{currentPassword:string, newPassword:string}) => {
+    try {
+      const response = await changePasswordApi(data)
+      successToast(response)
+    } catch (error) {
+      if(error instanceof Error)
+        errorToast(error.message)
+    }
+  }
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-900 to-black text-white overflow-hidden">
@@ -82,7 +84,7 @@ const ProfilePage = () => {
             role={currentUser?.role}
             mobileNumber={currentUser?.mobileNumber}
             imageUrl={currentUser?.imageUrl}
-            onChangePassword={(data) => console.log(data)}
+            onChangePassword={(data) => handlePasswordChange(data)}
             onUpdateProfile={(data) => handleProfileUpdate(data)}
           />
         </div>

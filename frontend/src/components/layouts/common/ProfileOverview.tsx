@@ -121,7 +121,7 @@ export const CommonProfile: React.FC<CommonProfileProps> = ({
   };
 
   return (
-    <div className="mx-auto">
+    <div className="m-10">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">

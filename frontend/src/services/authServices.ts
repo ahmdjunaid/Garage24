@@ -76,3 +76,12 @@ export const updateProfileDataApi = (data: FormData) => {
     })
     .then((res) => res.data);
 };
+
+export const changePasswordApi = (data: {
+  currentPassword: string;
+  newPassword: string;
+}) => {
+  return api
+    .post(`${AUTH_BASE_ROUTE}/change-password`, data)
+    .then((res) => res.data);
+};

@@ -8,6 +8,7 @@ import {
   INVALID_CREDENTIALS,
   INVALID_OTP,
   INVALID_TOKEN,
+  NEW_PASSWORD_CANNOT_BE_SAME,
   NO_REFRESH_TOKEN_FOUND,
   OTP_EXPIRED,
   OTP_RESENT_SUCCESSFULLY,
@@ -300,7 +301,7 @@ export class AuthService implements IAuthService {
 
   async changePassword(
     userId: string,
-    oldPassword: string,
+    currentPassword: string,
     newPassword: string
   ): Promise<string> {
     const user = await this._authRepository.findById(userId);
@@ -312,10 +313,16 @@ export class AuthService implements IAuthService {
       throw new AppError(HttpStatus.BAD_REQUEST, PASSWORD_NOT_SET);
     }
 
-    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
 
     if(!isMatch){
       throw new AppError(HttpStatus.BAD_REQUEST, INVALID_CREDENTIALS)
+    }
+
+    const isSamePrevPass = await bcrypt.compare(newPassword, user.password)
+
+    if(isSamePrevPass){
+      throw new AppError(HttpStatus.BAD_REQUEST, NEW_PASSWORD_CANNOT_BE_SAME)
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds)
