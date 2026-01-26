@@ -10,6 +10,7 @@ export const REGISTRATION_ALREADY_INITATED = "Your account registration is alrea
 export const ACCOUNT_IS_BLOCKED = "This account is blocked by Admin.";
 export const SIGNUP_SESSION_EXPIRED = "Signup session expired"
 export const LOGGED_OUT_MESSAGE = "Logged out successfully."
+export const PROFILE_FIELDS_EMPTY = "Update request must include at least one field to modify."
 
 //Email
 export const INVALID_EMAIL = 'Invalid email address'
@@ -33,6 +34,9 @@ export const PASSWORD_RESET_SUCCESSFULLY = "Password reset successful. Please lo
 export const NO_REFRESH_TOKEN_FOUND = "No refresh token found";
 export const INVALID_TOKEN = "Invalid token";
 export const GOOGLE_AUTH_ERROR="Error while google authentication"
+export const PASSWORD_NOT_SET = "This account doesn’t have a password set. You may have signed up using Google login."
+export const PASSWORD_CHANGED_SUCCESS = "Your password has been changed successfully."
+export const AUTHENTICATION_FAILED = "Your session has expired. Please log in again."
 
 // plan messages
 export const PLAN_NOT_FOUND = "Plan not found!"

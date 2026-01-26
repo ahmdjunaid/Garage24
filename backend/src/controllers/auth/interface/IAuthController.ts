@@ -12,4 +12,5 @@ export default interface IAuthController {
   refreshToken(req:Request, res: Response, next: NextFunction): Promise<void>;
   getUserDataById(req:Request, res: Response, next: NextFunction): Promise<void>;
   updateProfileData(req:Request, res: Response, next: NextFunction): Promise<void>;
+  changePassword(req:Request, res: Response, next: NextFunction): Promise<void>;
 }

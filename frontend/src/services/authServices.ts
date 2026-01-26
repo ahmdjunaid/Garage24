@@ -64,7 +64,15 @@ export const googleLoginApi = (credentialResponse: TokenResponse) => {
 };
 
 export const getMeApi = () => {
+  return api.get(`/${AUTH_BASE_ROUTE}/me`).then((res) => res.data);
+};
+
+export const updateProfileDataApi = (data: FormData) => {
   return api
-    .get(`/${AUTH_BASE_ROUTE}/me`)
-    .then(res => res.data)
-}
+    .post(`${AUTH_BASE_ROUTE}/profile`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res.data);
+};

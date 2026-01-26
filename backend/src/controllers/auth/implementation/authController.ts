@@ -3,9 +3,11 @@ import HttpStatus from "../../../constants/httpStatusCodes";
 import IAuthController from "../interface/IAuthController";
 import {
   ALL_FIELDS_REQUIRED,
+  AUTHENTICATION_FAILED,
   INVALID_EMAIL,
   LOGGED_OUT_MESSAGE,
   NO_REFRESH_TOKEN_FOUND,
+  PROFILE_FIELDS_EMPTY,
 } from "../../../constants/messages";
 import IAuthService from "../../../services/auth/interface/IAuthService";
 import dotenv from "dotenv";
@@ -228,14 +230,11 @@ export class Authcontroller implements IAuthController {
       const userId = req.user?.id;
 
       if (!userId) {
-        throw new AppError(HttpStatus.BAD_REQUEST, "User id requires");
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
 
       if (!image && !name && !mobileNumber) {
-        throw new AppError(
-          HttpStatus.BAD_REQUEST,
-          "Update request need any fields to be updated"
-        );
+        throw new AppError(HttpStatus.BAD_REQUEST, PROFILE_FIELDS_EMPTY);
       }
 
       const response = await this._authService.updateProfileData({
@@ -244,6 +243,31 @@ export class Authcontroller implements IAuthController {
         mobileNumber,
         image,
       });
+
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  changePassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.user?.id;
+      const { oldPassword, newPassword } = req.body;
+
+      if (!userId) {
+        throw new AppError(HttpStatus.BAD_REQUEST, AUTHENTICATION_FAILED);
+      }
+
+      if (!oldPassword || !newPassword) {
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
+      }
+
+      const response = await this._authService.changePassword(
+        userId,
+        oldPassword,
+        newPassword
+      );
 
       res.status(HttpStatus.OK).json(response);
     } catch (error) {

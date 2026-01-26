@@ -13,6 +13,8 @@ import {
   OTP_RESENT_SUCCESSFULLY,
   OTP_SENT_SUCCESSFULLY,
   OTP_VERIFIED_SUCCESSFULLY,
+  PASSWORD_CHANGED_SUCCESS,
+  PASSWORD_NOT_SET,
   PASSWORD_RESET_SUCCESSFULLY,
   REGISTRATION_ALREADY_INITATED,
   SIGNUP_SESSION_EXPIRED,
@@ -93,7 +95,7 @@ export class AuthService implements IAuthService {
     }
 
     if (!user.password) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "User has no password set");
+      throw new AppError(HttpStatus.BAD_REQUEST, PASSWORD_NOT_SET);
     }
     const isMatch = await bcrypt.compare(password, user.password);
 
@@ -294,5 +296,33 @@ export class AuthService implements IAuthService {
     }
 
     return await this._authRepository.findByIdAndUpdate(data.userId, update);
+  }
+
+  async changePassword(
+    userId: string,
+    oldPassword: string,
+    newPassword: string
+  ): Promise<string> {
+    const user = await this._authRepository.findById(userId);
+    if (!user) {
+      throw new AppError(HttpStatus.BAD_REQUEST, USER_NOT_FOUND);
+    }
+
+    if (!user.password) {
+      throw new AppError(HttpStatus.BAD_REQUEST, PASSWORD_NOT_SET);
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if(!isMatch){
+      throw new AppError(HttpStatus.BAD_REQUEST, INVALID_CREDENTIALS)
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds)
+
+    user.password = hashedPassword;
+    user.save()
+
+    return PASSWORD_CHANGED_SUCCESS
   }
 }

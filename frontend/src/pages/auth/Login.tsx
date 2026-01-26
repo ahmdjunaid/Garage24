@@ -88,7 +88,6 @@ useEffect(() => {
         }
         setLoading(false);
       } catch (error) {
-        console.log(error,'+-999999999999999999999999')
         if(error instanceof Error)
           errorToast(error.message)
         setLoading(false);

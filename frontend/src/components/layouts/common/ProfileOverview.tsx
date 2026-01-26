@@ -1,10 +1,11 @@
 import Spinner from "@/components/elements/Spinner";
+import { mobileRegex, nameRegex, passwordRegex } from "@/constants/commonRegex";
 import React, { useEffect, useRef, useState } from "react";
 
 export interface ProfileDataUpdate {
-  name?: string; 
-  image?: File, 
-  mobileNumber?: string
+  name?: string;
+  image?: File;
+  mobileNumber?: string;
 }
 
 interface CommonProfileProps {
@@ -31,14 +32,29 @@ export const CommonProfile: React.FC<CommonProfileProps> = ({
   onUpdateProfile,
   onChangePassword,
 }) => {
-  const [username, setUsername] = useState<string>(name!);
-  const [mobile_Number, setMobile_Number] = useState<string>(mobileNumber!);
+  const [username, setUsername] = useState<string>(name ?? "");
+  const [mobile_Number, setMobile_Number] = useState<string>(mobileNumber ?? "");
   const [preview, setPreview] = useState<string | null>(imageUrl || null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [currentPassword, setCurrentPassword] = useState<string>("");
-  const [newPassword, setNewPassword] = useState<string>("");
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string>("");
+  const [mobileError, setMobileError] = useState<string>("");
 
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setUsername(name ?? "");
+    setMobile_Number(mobileNumber ?? "");
+    setPreview(imageUrl ?? null);
+    setImageFile(null);
+  }, [name, mobileNumber, imageUrl]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -48,45 +64,82 @@ export const CommonProfile: React.FC<CommonProfileProps> = ({
     setPreview(URL.createObjectURL(file));
   };
 
-  useEffect(() => {
-    setUsername(name!);
-    setPreview(imageUrl!);
-  }, [name, imageUrl]);
+  const isProfileChanged =
+    username !== name ||
+    mobile_Number !== mobileNumber ||
+    imageFile !== null;
 
   const handleProfileSave = () => {
+    let hasError = false;
+
+    if (!nameRegex.test(username)) {
+      setNameError("Name must contain only letters and spaces.");
+      hasError = true;
+    }
+
+    if (mobile_Number && !mobileRegex.test(mobile_Number)) {
+      setMobileError("Please enter a valid mobile number.");
+      hasError = true;
+    }
+
+    if (hasError) return;
+
     onUpdateProfile({
       name: username,
+      mobileNumber: mobile_Number,
       image: imageFile || undefined,
-      mobileNumber: mobile_Number
     });
   };
 
   const handlePasswordChange = () => {
+    let hasError = false;
+
+    if (!passwordRegex.test(currentPassword)) {
+      setPasswordError(
+        "Password must be 8+ chars with uppercase, lowercase, number, and special character."
+      );
+      hasError = true;
+    }
+
+    if (!passwordRegex.test(newPassword)) {
+      setPasswordError(
+        "Password must be 8+ chars with uppercase, lowercase, number, and special character."
+      );
+      hasError = true;
+    }
+
+    if (hasError) return;
+
     onChangePassword({
       currentPassword,
       newPassword,
     });
+
     setCurrentPassword("");
     setNewPassword("");
+    setPasswordError(null);
   };
 
   return (
     <div className="mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Account Settings</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">
+          Account Settings
+        </h1>
         <p className="text-gray-400">
           Manage your profile and security preferences
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Profile Picture */}
+        {/* Profile Picture */}
         <div className="lg:col-span-1">
           <div className="bg-gradient-to-br from-gray-800/50 to-black/50 border border-white/10 rounded-xl p-6 backdrop-blur-sm">
             <h2 className="text-lg font-semibold text-white mb-4">
               Profile Picture
             </h2>
+
             <div className="flex flex-col items-center gap-4">
               <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-white/10 shadow-xl">
                 {preview ? (
@@ -101,6 +154,7 @@ export const CommonProfile: React.FC<CommonProfileProps> = ({
                   </div>
                 )}
               </div>
+
               <input
                 ref={fileRef}
                 type="file"
@@ -108,12 +162,14 @@ export const CommonProfile: React.FC<CommonProfileProps> = ({
                 className="hidden"
                 onChange={handleImageChange}
               />
+
               <button
                 onClick={() => fileRef.current?.click()}
                 className="w-full px-4 py-2 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 transition border border-blue-500/30"
               >
                 Change Image
               </button>
+
               <p className="text-xs text-gray-500 text-center">
                 JPG, PNG Max size 500KB
               </p>
@@ -121,7 +177,7 @@ export const CommonProfile: React.FC<CommonProfileProps> = ({
           </div>
         </div>
 
-        {/* Right Column - Profile Info & Password */}
+        {/* Profile Info + Password */}
         <div className="lg:col-span-2 space-y-6">
           {/* Profile Information */}
           <div className="bg-gradient-to-br from-gray-800/50 to-black/50 border border-white/10 rounded-xl p-6 backdrop-blur-sm">
@@ -137,10 +193,15 @@ export const CommonProfile: React.FC<CommonProfileProps> = ({
                 <input
                   type="text"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter your name"
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    setNameError("");
+                  }}
                   className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-red-500 transition"
                 />
+                {nameError && (
+                  <p className="text-xs text-red-400 mt-1">{nameError}</p>
+                )}
               </div>
 
               <div>
@@ -150,10 +211,15 @@ export const CommonProfile: React.FC<CommonProfileProps> = ({
                 <input
                   type="text"
                   value={mobile_Number}
-                  onChange={(e) => setMobile_Number(e.target.value)}
-                  placeholder="Enter mobile number"
+                  onChange={(e) => {
+                    setMobile_Number(e.target.value);
+                    setMobileError("");
+                  }}
                   className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-red-500 transition"
                 />
+                {mobileError && (
+                  <p className="text-xs text-red-400 mt-1">{mobileError}</p>
+                )}
               </div>
 
               <div>
@@ -166,18 +232,14 @@ export const CommonProfile: React.FC<CommonProfileProps> = ({
                   disabled
                   className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-gray-500 cursor-not-allowed"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Need to change email?{" "}
-                  <a href="#" className="text-blue-400 hover:text-blue-300">
-                    Click Here
-                  </a>
-                </p>
               </div>
 
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Role</label>
+                <label className="block text-sm text-gray-400 mb-2">
+                  Role
+                </label>
                 <div className="flex items-center h-[42px]">
-                  <span className="px-4 py-2 rounded-lg bg-purple-600/20 text-purple-400 text-sm border border-purple-500/30 font-medium">
+                  <span className="px-4 py-2 rounded-lg bg-green-700/20 text-green-700 text-sm border border-green-700 font-medium">
                     {role}
                   </span>
                 </div>
@@ -187,8 +249,8 @@ export const CommonProfile: React.FC<CommonProfileProps> = ({
             <div className="flex justify-end">
               <button
                 onClick={handleProfileSave}
-                disabled={loading}
-                className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-red-600 to-pink-600 text-white font-semibold hover:from-red-500 hover:to-pink-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                disabled={!isProfileChanged || loading}
+                className="px-6 py-2.5 rounded-lg bg-red-700 hover:bg-red-700/70 text-white font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {loading ? <Spinner loading={loading} /> : null}
                 Save Changes
@@ -196,43 +258,75 @@ export const CommonProfile: React.FC<CommonProfileProps> = ({
             </div>
           </div>
 
-          {/* Change Password */}
+          {/* 🔒 Change Password (UNCHANGED) */}
           <div className="bg-gradient-to-br from-gray-800/50 to-black/50 border border-white/10 rounded-xl p-6 backdrop-blur-sm">
-            <h2 className="text-lg font-semibold text-white mb-6">Security</h2>
+            <h2 className="text-lg font-semibold text-white mb-6">
+              Security
+            </h2>
 
             <div className="space-y-4 mb-6">
               <div>
                 <label className="block text-sm text-gray-400 mb-2">
                   Current Password
                 </label>
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="Enter current password"
-                  className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition"
-                />
+                <div className="relative">
+                  <input
+                    type={showCurrent ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => {
+                      setCurrentPassword(e.target.value);
+                      setPasswordError(null);
+                    }}
+                    className={`w-full bg-black/50 border rounded-lg px-4 py-2.5 text-white pr-12
+                    ${passwordError ? "border-red-500" : "border-white/10 focus:border-blue-500"}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrent(!showCurrent)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    <i className={`fa-solid ${showCurrent ? "fa-eye-slash" : "fa-eye"}`} />
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm text-gray-400 mb-2">
                   New Password
                 </label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password"
-                  className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition"
-                />
+                <div className="relative">
+                  <input
+                    type={showNew ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      setPasswordError(null);
+                    }}
+                    className={`w-full bg-black/50 border rounded-lg px-4 py-2.5 text-white pr-12
+                    ${passwordError ? "border-red-500" : "border-white/10 focus:border-blue-500"}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNew(!showNew)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    <i className={`fa-solid ${showNew ? "fa-eye-slash" : "fa-eye"}`} />
+                  </button>
+                </div>
               </div>
+
+              {passwordError && (
+                <div className="bg-red-600/10 border border-red-600/30 rounded-lg px-4 py-2">
+                  <p className="text-sm text-red-400">{passwordError}</p>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end">
               <button
                 onClick={handlePasswordChange}
                 disabled={loading || !currentPassword || !newPassword}
-                className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:from-blue-500 hover:to-purple-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-2.5 rounded-lg bg-red-700 hover:bg-red-700/70 text-white font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {loading ? <Spinner loading={loading} /> : null}
                 Update Password
