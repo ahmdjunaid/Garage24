@@ -68,7 +68,6 @@ export class ServiceRepository
     garageId: string,
     categoryId: string
   ): Promise<HydratedDocument<IService>[]> {
-    console.log(garageId);
     return await this.getAll({
       garageId,
       categoryId,

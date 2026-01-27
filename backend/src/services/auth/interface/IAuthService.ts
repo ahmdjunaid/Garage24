@@ -1,4 +1,5 @@
 import { UserDocument } from "../../../models/user";
+import { IUsersMappedData } from "../../../types/admin";
 import { ProfileDataUpdate } from "../../../types/common";
 import { IUser } from "../../../types/user";
 
@@ -13,7 +14,7 @@ export default interface IAuthService {
   login(
     email: string,
     password: string
-  ): Promise<{ user: IUser; token: string; refreshToken: string }>;
+  ): Promise<{ user: IUsersMappedData; token: string; refreshToken: string }>;
 
   verifyOtp(
     email: string,

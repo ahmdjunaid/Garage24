@@ -84,6 +84,7 @@ export const createSlotsForDay = ({
       date: slotDate,
       startTime: toTimeString(current),
       endTime: toTimeString(current + slotDuration),
+      durationInMinutes: slotDuration,
       capacity,
       bookedCount: 0,
       isReleased: true,

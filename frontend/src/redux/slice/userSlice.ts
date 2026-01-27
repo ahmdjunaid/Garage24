@@ -34,7 +34,8 @@ const authSlice = createSlice({
         isBlocked: user.isBlocked,
         isDeleted: user.isDeleted,
         imageUrl: user.imageUrl,
-        isOnboardingRequired: user.isOnboardingRequired
+        isOnboardingRequired: user.isOnboardingRequired,
+        mobileNumber: user.mobileNumber
       };
       state.token = token;
       state.isAuthenticated = true;

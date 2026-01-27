@@ -22,10 +22,6 @@ export const VehicleListing: React.FC = () => {
     setVehicles(res);
   };
 
-  const handleBook = (id: string) => {
-    console.log("Book appointment", id);
-  };
-
   const handleRemove = (id: string) => {
     console.log("Remove vehicle", id);
   };

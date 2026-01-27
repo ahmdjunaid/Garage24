@@ -42,7 +42,6 @@ const OtpModalLight: React.FC<ModalProps> = ({
       setTimeout(() => {
         onClose();
         setOtp("");
-        console.log(res?.token,'toeknnnnnn')
         onVerified(res?.token)
       }, 2000);
     } catch (error) {

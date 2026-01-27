@@ -8,6 +8,8 @@ import { IMechanicRepository } from "../../../repositories/mechanic/interface/IM
 import { createSlotsForDay } from "../../../utils/slotCreateForTheDay";
 import { IGarageRepository } from "../../../repositories/garage/interface/IGarageRepository";
 import { AppError } from "../../../middleware/errorHandler";
+import redisClient from "../../../config/redisClient";
+import { ClientSession } from "mongoose";
 
 @injectable()
 export class SlotService implements ISlotService {
@@ -34,7 +36,7 @@ export class SlotService implements ISlotService {
 
     const garage = await this._garageRepository.findOne({ userId: garageId });
     if (!garage) {
-      throw new AppError(HttpStatus.NOT_FOUND, "Garage not found.")
+      throw new AppError(HttpStatus.NOT_FOUND, "Garage not found.");
     }
 
     const numberOfMechanics =
@@ -42,7 +44,10 @@ export class SlotService implements ISlotService {
 
     const capacity = Math.min(numberOfMechanics, garage.numOfServiceBays);
     if (capacity < 1) {
-      throw new AppError(HttpStatus.NOT_FOUND, "Garage doesnt have capcity to issue slots.")
+      throw new AppError(
+        HttpStatus.NOT_FOUND,
+        "Garage doesnt have capcity to issue slots."
+      );
     }
 
     const slotsToCreate = createSlotsForDay({
@@ -55,5 +60,57 @@ export class SlotService implements ISlotService {
     });
 
     return await this._slotRepository.createSlots(slotsToCreate);
+  }
+
+  async lockSlots(slotIds: string[]): Promise<void> {
+    const lockedKeys: string[] = [];
+
+    try {
+      for (const slotId of slotIds) {
+        const slot = await this._slotRepository.findSlotById(slotId);
+
+        if (!slot) {
+          throw new AppError(HttpStatus.NOT_FOUND, "Slot not found");
+        }
+
+        const key = `slot:${slotId}`;
+
+        const currentLocked = await redisClient.incr(key);
+
+        if (currentLocked === 1) {
+          await redisClient.expire(key, 300);
+        }
+
+        if (slot.bookedCount + currentLocked > slot.capacity) {
+          throw new Error("Slot capacity exceeded");
+        }
+
+        lockedKeys.push(key);
+      }
+    } catch (err) {
+      console.error(err);
+      for (const key of lockedKeys) {
+        await redisClient.decr(key);
+      }
+
+      throw new AppError(
+        HttpStatus.CONFLICT,
+        "Selected time is not fully available"
+      );
+    }
+  }
+
+  async releaseSlots(slotIds: string[]): Promise<void> {
+    for (const slotId of slotIds) {
+      const key = `slot:${slotId}`;
+      await redisClient.decr(key);
+    }
+  }
+
+  async incrementBookedCount(
+    slotIds: string[],
+    session?: ClientSession
+  ): Promise<void> {
+    await this._slotRepository.incrementBookedCount(slotIds, session);
   }
 }

@@ -42,6 +42,7 @@ import { ProfileDataUpdate } from "../../../types/common";
 import { deleteFromS3, uploadFile } from "../../../config/s3Service";
 import { deleteLocalFile } from "../../../helper/helper";
 import { extractS3KeyFromUrl } from "../../../utils/extractS3KeyFromUrl";
+import { usersDataMapping } from "../../../utils/dto/usersDto";
 
 const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
 
@@ -107,7 +108,9 @@ export class AuthService implements IAuthService {
     const token = generateToken(user._id.toString(), user.role);
     const refreshToken = generateRefreshToken(user._id.toString(), user.role);
 
-    return { user, token, refreshToken };
+    const mappedUser = usersDataMapping(user);
+
+    return { user: mappedUser, token, refreshToken };
   }
 
   async verifyOtp(email: string, otp: string, context: "register" | "other") {
@@ -315,21 +318,21 @@ export class AuthService implements IAuthService {
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
 
-    if(!isMatch){
-      throw new AppError(HttpStatus.BAD_REQUEST, INVALID_CREDENTIALS)
+    if (!isMatch) {
+      throw new AppError(HttpStatus.BAD_REQUEST, INVALID_CREDENTIALS);
     }
 
-    const isSamePrevPass = await bcrypt.compare(newPassword, user.password)
+    const isSamePrevPass = await bcrypt.compare(newPassword, user.password);
 
-    if(isSamePrevPass){
-      throw new AppError(HttpStatus.BAD_REQUEST, NEW_PASSWORD_CANNOT_BE_SAME)
+    if (isSamePrevPass) {
+      throw new AppError(HttpStatus.BAD_REQUEST, NEW_PASSWORD_CANNOT_BE_SAME);
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, saltRounds)
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
     user.password = hashedPassword;
-    user.save()
+    user.save();
 
-    return PASSWORD_CHANGED_SUCCESS
+    return PASSWORD_CHANGED_SUCCESS;
   }
 }

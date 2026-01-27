@@ -114,7 +114,6 @@ export class MechanicController implements IMechanicController {
   deleteMechanic = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.params.userId;
-      console.log(userId);
 
       if (!userId) {
         throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);

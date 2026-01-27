@@ -12,6 +12,7 @@ const slotSchema = new Schema<ISlot>(
     startTime: String,
     endTime: String,
 
+    durationInMinutes: {type:Number},
     capacity: Number,
     bookedCount: { type: Number, default: 0 },
 

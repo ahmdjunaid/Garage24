@@ -79,7 +79,6 @@ const Registration: React.FC<formProps> = ({ handleSubmit }) => {
       if (!user) return;
       const response: IMappedGarageData = await getGarageDetailsApi(user?._id);
       if (response) {
-        console.log(response,'garageResponseOnBoarding')
         setLocation({
           lat: response.location?.coordinates[0] ?? 0,
           lng: response.location?.coordinates[1] ?? 0,

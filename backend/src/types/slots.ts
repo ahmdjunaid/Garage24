@@ -6,6 +6,7 @@ export interface ISlot {
   startTime: string;
   endTime: string;
 
+  durationInMinutes: number;
   capacity: number;
   bookedCount: number;
 

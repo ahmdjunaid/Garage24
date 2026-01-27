@@ -40,7 +40,7 @@ const MapSection: React.FC<Props> = ({ setLocation, location }) => {
         (error) => {
           console.error(error);
           setLoading(false);
-        }
+        },
       );
     } else {
       errorToast("Geolocation is not supported by this browser");
@@ -71,10 +71,10 @@ const MapSection: React.FC<Props> = ({ setLocation, location }) => {
       try {
         const res = await fetchAddressForAppointmentApi(
           location.lat,
-          location.lng
+          location.lng,
         );
         setLocationName(
-          `${res.city}, ${res.district}, ${res.state}, ${res.pincode}`
+          `${res.city}, ${res.district}, ${res.state}, ${res.pincode}`,
         );
       } catch (err) {
         console.error(err);
@@ -98,7 +98,7 @@ const MapSection: React.FC<Props> = ({ setLocation, location }) => {
   };
 
   return (
-    <section className="mb-12">
+    <section className="relative mb-12">
       <div className="bg-[#2a2a2a] rounded-2xl p-8 shadow-xl">
         <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
           <MapPin className="h-8 w-8 text-gray-400" />
@@ -132,7 +132,7 @@ const MapSection: React.FC<Props> = ({ setLocation, location }) => {
 
         {/* OpenStreetMap */}
         {location && (
-          <div className="rounded-xl overflow-hidden border border-gray-700">
+          <div className="relative z-0 rounded-xl overflow-hidden border border-gray-700">
             <MapContainer
               center={[location.lat, location.lng]}
               zoom={14}

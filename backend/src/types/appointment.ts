@@ -29,7 +29,6 @@ export interface IAppointmentVehicleSnapshot {
   imageUrl?: string;
 }
 
-
 export interface IAppointment {
   userId: Types.ObjectId;
   garageId: Types.ObjectId;
@@ -58,51 +57,59 @@ export interface IAppointment {
   mechanicNote?: string;
 }
 
-export interface CreateAppointmentDTO {
-  userId: string;
-
-  mobileNumber: string;
-
-  garageId: string;
-
-  vehicleData: {
-    _id?: string;
-    licensePlate?: string;
-    registrationYear?: number | string;
-    fuelType?: string;
-    variant?: string;
-    color?: string;
-    imageUrl?: string;
-
-    make: {
-      _id: string;
-      name: string;
-    };
-
-    model: {
-      _id: string;
-      name: string;
-    };
-  };
-
-  slotIds: string[];
-  appointmentDate: string;
-  startTime: string;
-  endTime?: string;
-
-  services: {
-    _id: string;
-    durationMinutes: number;
-    price: number;
-  }[];
-  
-
-  customerNote?: string;
-}
-
-
 export interface GetMappedAppointmentResponse {
   appointments: AppointmentDocument[];
   totalAppointments: number;
   totalPages: number;
+}
+
+export interface CreateAppointmentRequest {
+  userData: {
+    name: string;
+    email: string;
+    mobileNumber: string;
+  };
+
+  vehicleData: {
+    _id?: string;
+    userId: string;
+    licensePlate: string;
+    make: {
+      _id: string;
+      name: string;
+    };
+    model: {
+      _id: string;
+      name: string;
+    };
+    registrationYear?: number;
+    fuelType?: string;
+    variant?: string;
+    color?: string;
+    imageUrl?: string;
+  };
+
+  category?: string;
+
+  services: {
+    _id: string;
+    garageId: string;
+    categoryId: string;
+    name: string;
+    price: number;
+    durationMinutes: number;
+  }[];
+
+  garage: string;
+
+  date: string;
+
+  time: {
+    slotId: string;
+    startTime: string;
+  };
+
+  slotIds: string[];
+
+  totalDuration: number;
 }

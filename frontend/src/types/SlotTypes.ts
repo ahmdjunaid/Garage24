@@ -4,6 +4,7 @@ export interface ISlots {
   date: string;
   startTime: string;
   endTime: string;
+  durationInMinutes: number;
   capacity: number;
   bookedCount: number;
   isReleased: boolean;

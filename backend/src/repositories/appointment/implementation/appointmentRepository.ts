@@ -1,3 +1,4 @@
+import { ClientSession } from "mongoose";
 import { Appointment, AppointmentDocument } from "../../../models/appointment";
 import {
   GetMappedAppointmentResponse,
@@ -16,9 +17,12 @@ export class AppointmentRepository
   }
 
   async createAppointment(
-    data: Partial<IAppointment>
+    data: Partial<IAppointment>,
+    session: ClientSession
   ): Promise<AppointmentDocument> {
-    return await this.model.create(data);
+    const doc = new this.model(data);
+    await doc.save({ session });
+    return doc;
   }
 
   async getActiveAppointments(

@@ -4,73 +4,84 @@ import { AppointmentDocument } from "../../../models/appointment";
 import { TYPES } from "../../../DI/types";
 import { IAppointmentRepository } from "../../../repositories/appointment/interface/IAppointmentRepository";
 import {
-  CreateAppointmentDTO,
+  CreateAppointmentRequest,
   GetMappedAppointmentResponse,
 } from "../../../types/appointment";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { GetPaginationQuery } from "../../../types/common";
+import HttpStatus from "../../../constants/httpStatusCodes";
+import { AppError } from "../../../middleware/errorHandler";
+import { ISlotService } from "../../slot/interface/ISlotService";
+import { calculateEndTime } from "../../../utils/calculateEndTime";
+import { normalizePlate } from "../../../utils/normalizeLicencePlate";
 
 @injectable()
 export class AppointmentService implements IAppointmentService {
   constructor(
     @inject(TYPES.AppointmentRepository)
-    private _appointmentRepository: IAppointmentRepository
+    private _appointmentRepository: IAppointmentRepository,
+    @inject(TYPES.SlotService) private _slotService: ISlotService
   ) {}
 
   async createAppointment(
-    payload: CreateAppointmentDTO
+    userId: string,
+    payload: CreateAppointmentRequest
   ): Promise<AppointmentDocument> {
-    const totalDuration = payload.services.reduce(
-      (sum, s) => sum + s.durationMinutes,
-      0
-    );
+    await this._slotService.lockSlots(payload.slotIds);
 
-    const serviceIds = payload.services.map((s) => new Types.ObjectId(s._id));
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    function addMinutes(time: string, minutes: number): string {
-      const [h, m] = time.split(":").map(Number);
-      const date = new Date();
-      date.setHours(h!, m! + minutes);
-      return date.toTimeString().slice(0, 5);
+    try {     
+      const serviceIds = payload.services.map((s) => new Types.ObjectId(s._id));
+      const endTime = calculateEndTime(payload.time.startTime, payload.totalDuration);
+      const normalizedPlate = normalizePlate(payload.vehicleData.licensePlate)
+
+      const appointment = await this._appointmentRepository.createAppointment({
+        userId: new Types.ObjectId(userId),
+        garageId: new Types.ObjectId(payload.garage),
+  
+        vehicle: {
+          vehicleId: payload.vehicleData._id
+            ? new Types.ObjectId(payload.vehicleData._id)
+            : undefined,
+          licensePlate: normalizedPlate,
+          registrationYear: Number(payload.vehicleData.registrationYear),
+          fuelType: payload.vehicleData.fuelType,
+          variant: payload.vehicleData.variant,
+          color: payload.vehicleData.color,
+          imageUrl: payload.vehicleData.imageUrl,
+          make: {
+            _id: new Types.ObjectId(payload.vehicleData.make._id),
+            name: payload.vehicleData.make.name,
+          },
+          model: {
+            _id: new Types.ObjectId(payload.vehicleData.model._id),
+            name: payload.vehicleData.model.name,
+          },
+        },
+  
+        slotIds: payload.slotIds.map((id) => new Types.ObjectId(id)),
+        appointmentDate: new Date(payload.date),
+        startTime: payload.time.startTime,
+        endTime,
+        serviceIds,
+        totalDuration:payload.totalDuration,
+        status: "pending",
+        paymentStatus: "pending",
+      }, session);
+
+      await this._slotService.incrementBookedCount(payload.slotIds, session)
+
+      await session.commitTransaction();
+
+      return appointment
+
+    } catch (error) {
+      console.error(error)
     }
 
-    const endTime = addMinutes(payload.startTime, totalDuration);
 
-    return await this._appointmentRepository.createAppointment({
-      userId: new Types.ObjectId(payload.userId),
-      garageId: new Types.ObjectId(payload.garageId),
-
-      vehicle: {
-        vehicleId: payload.vehicleData._id
-          ? new Types.ObjectId(payload.vehicleData._id)
-          : undefined,
-        licensePlate: payload.vehicleData.licensePlate,
-        registrationYear: Number(payload.vehicleData.registrationYear),
-        fuelType: payload.vehicleData.fuelType,
-        variant: payload.vehicleData.variant,
-        color: payload.vehicleData.color,
-        imageUrl: payload.vehicleData.imageUrl,
-        make: {
-          _id: new Types.ObjectId(payload.vehicleData.make._id),
-          name: payload.vehicleData.make.name,
-        },
-        model: {
-          _id: new Types.ObjectId(payload.vehicleData.model._id),
-          name: payload.vehicleData.model.name,
-        },
-      },
-
-      slotIds: payload.slotIds.map((id) => new Types.ObjectId(id)),
-      appointmentDate: new Date(payload.appointmentDate),
-      startTime: payload.startTime,
-      endTime,
-
-      serviceIds,
-      totalDuration,
-
-      status: "pending",
-      paymentStatus: "pending",
-    });
   }
 
   async getActiveAppointments(

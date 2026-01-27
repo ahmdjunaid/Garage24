@@ -93,7 +93,7 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
     if (!formData.registrationYear)
       newErrors.registrationYear = "Registration year is required";
     else if (
-      Number(formData.registrationYear) < 1990 ||
+      Number(formData.registrationYear) < 1950 ||
       Number(formData.registrationYear) > new Date().getFullYear()
     )
       newErrors.registrationYear = "Invalid year";

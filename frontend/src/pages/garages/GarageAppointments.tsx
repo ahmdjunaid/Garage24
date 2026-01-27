@@ -29,7 +29,6 @@ const GarageAppointments = () => {
           servicesPerPage,
           searchQuery
         );
-        console.log(response,'aaaaa')
         setAppointments(response.appointments);
         setTotalPages(response.totalPages);
       } catch (error) {

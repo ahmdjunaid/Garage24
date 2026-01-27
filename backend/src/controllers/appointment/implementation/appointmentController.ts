@@ -6,9 +6,9 @@ import { IServiceCategoryService } from "../../../services/serviceCategory/inter
 import { IBrandService } from "../../../services/brand/interface/IBrandService";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { IAppointmentService } from "../../../services/appointment/interface/IAppointmentService";
-import { ALL_FIELDS_REQUIRED } from "../../../constants/messages";
 import { GetPaginationQuery } from "../../../types/common";
 import { AppError } from "../../../middleware/errorHandler";
+import { validateCreateAppointment } from "../../../utils/validateAppointmentData";
 
 @injectable()
 export class AppointmentController implements IAppointmentController {
@@ -43,30 +43,35 @@ export class AppointmentController implements IAppointmentController {
     next: NextFunction
   ) => {
     try {
-      const userId = req.user?.id;
-      const { userData, vehicleData, services, garage, date, time } = req.body;
+      validateCreateAppointment(req.body);
 
-      if (
-        !userData ||
-        !vehicleData ||
-        !services ||
-        !garage ||
-        !date ||
-        !time ||
-        !userId
-      ) {
-        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED)
+      const userId = req.user?.id;
+      const {
+        userData,
+        vehicleData,
+        category,
+        services,
+        garage,
+        date,
+        time,
+        slotIds,
+        totalDuration,
+      } = req.body;
+
+      if (!userId) {
+        throw new AppError(HttpStatus.UNAUTHORIZED, "User not authenticated");
       }
 
-      const response = await this._appointmentService.createAppointment({
-        userId,
+      const response = await this._appointmentService.createAppointment(userId, {
+        userData,
         vehicleData,
+        category,
         services,
-        garageId: garage,
-        slotIds: [time.slotId],
-        appointmentDate: date,
-        startTime: time.startTime,
-        mobileNumber: userData.mobileNumber,
+        garage,
+        date,
+        time,
+        slotIds,
+        totalDuration
       });
 
       res.status(HttpStatus.OK).json(response);
