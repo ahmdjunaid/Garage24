@@ -51,6 +51,19 @@ export class SlotRepository
     await query.exec();
   }
 
+    async decrementBookedCount(slotIds: string[], session?: ClientSession) {
+    const query = this.model.updateMany(
+      { _id: { $in: slotIds } },
+      { $inc: { bookedCount: -1 } }
+    );
+
+    if (session) {
+      query.session(session);
+    }
+
+    await query.exec();
+  }
+
   async findSlotsByIds(
     slotIds: string[],
     session?: ClientSession

@@ -1,4 +1,4 @@
-import { ClientSession } from "mongoose";
+import { ClientSession, UpdateQuery } from "mongoose";
 import { Appointment, AppointmentDocument } from "../../../models/appointment";
 import {
   GetMappedAppointmentResponse,
@@ -118,5 +118,19 @@ export class AppointmentRepository
       totalAppointments,
       totalPages,
     };
+  }
+
+  async findByIdAndUpdate(
+    id: string,
+    update: UpdateQuery<IAppointment>,
+    options?: {
+      session?: ClientSession;
+      new?: boolean;
+    }
+  ): Promise<AppointmentDocument | null> {
+    return this.model.findByIdAndUpdate(id, update, {
+      session: options?.session,
+      new: options?.new ?? true,
+    });
   }
 }

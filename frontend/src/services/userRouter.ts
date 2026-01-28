@@ -98,3 +98,9 @@ export const getAllAppointmentByUserIdApi = (
     )
     .then((res) => res.data);
 };
+
+export const cancelAppointmentApi = (appointmentId: string) => {
+  return api
+    .patch(`/${USER_BASE_ROUTE}/appointment/cancel/${appointmentId}`)
+    .then((res) => res.data);
+};

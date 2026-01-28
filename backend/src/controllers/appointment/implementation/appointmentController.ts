@@ -139,4 +139,28 @@ export class AppointmentController implements IAppointmentController {
       next(error);
     }
   };
+
+  cancelAppointment = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const appointmentId = req.params.appointmentId;
+
+      if (!appointmentId) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          "Appointment id is required."
+        );
+      }
+
+      const response =
+        await this._appointmentService.cancelAppointment(appointmentId);
+
+      res.status(HttpStatus.ACCEPTED).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
 }

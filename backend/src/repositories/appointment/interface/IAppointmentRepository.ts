@@ -1,4 +1,4 @@
-import { ClientSession } from "mongoose";
+import { ClientSession, UpdateQuery } from "mongoose";
 import { AppointmentDocument } from "../../../models/appointment";
 import {
   GetMappedAppointmentResponse,
@@ -17,5 +17,15 @@ export interface IAppointmentRepository {
     query: GetPaginationQuery
   ): Promise<GetMappedAppointmentResponse>;
   getAppointmentById(id: string): Promise<PopulatedAppointmentData | null>;
-  getAllAppointmentByUserId(query:GetPaginationQuery): Promise<GetMappedPopulatedAppointmentResponse>;
+  getAllAppointmentByUserId(
+    query: GetPaginationQuery
+  ): Promise<GetMappedPopulatedAppointmentResponse>;
+  findByIdAndUpdate(
+    id: string,
+    update: UpdateQuery<IAppointment>,
+    options?: {
+      session?: ClientSession;
+      new?: boolean;
+    }
+  ): Promise<AppointmentDocument | null>;
 }

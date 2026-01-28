@@ -7,5 +7,6 @@ export interface ISlotRepository {
     getSlotsByGarageIdAndDate(garageId:string, date:Date):Promise<SlotDocument[]>;
     findSlotById(id:string):Promise<SlotDocument|null>;
     incrementBookedCount( slotIds: string[], session?: ClientSession):Promise<void>;
-    findSlotsByIds( slotIds: string[], session?: ClientSession): Promise<SlotDocument[]>
+    findSlotsByIds( slotIds: string[], session?: ClientSession): Promise<SlotDocument[]>;
+    decrementBookedCount( slotIds: string[], session?: ClientSession):Promise<void>;
 }

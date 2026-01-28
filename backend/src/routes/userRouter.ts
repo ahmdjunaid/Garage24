@@ -38,5 +38,6 @@ router.route('/slots/available').get(verifyJWT, authorizeRoles("user"), slotCont
 router.route('/appointment/book').post(verifyJWT, authorizeRoles("user"), appointmentController.createAppointment)
 router.route('/appointment/success/:appointmentId').get(verifyJWT, authorizeRoles("user"), appointmentController.getAppointmentDetails)
 router.route('/appointment').get(verifyJWT, authorizeRoles("user"), appointmentController.getAllAppointmentsByUserId)
+router.route('/appointment/cancel/:appointmentId').patch(verifyJWT, authorizeRoles("user"), appointmentController.cancelAppointment)
 
 export default router;

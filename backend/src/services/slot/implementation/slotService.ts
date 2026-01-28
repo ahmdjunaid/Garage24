@@ -131,4 +131,8 @@ export class SlotService implements ISlotService {
       }
     }
   }
+
+  async decrementBookedCount(slotIds: string[], session?: ClientSession): Promise<void> {
+    await this._slotRepository.decrementBookedCount(slotIds, session);
+  }
 }

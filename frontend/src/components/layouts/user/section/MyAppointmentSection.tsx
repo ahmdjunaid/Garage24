@@ -1,7 +1,7 @@
 import AppointmentCard from "@/components/cards/AppointmentCard";
-import { getAllAppointmentByUserIdApi } from "@/services/userRouter";
+import { cancelAppointmentApi, getAllAppointmentByUserIdApi } from "@/services/userRouter";
 import type { PopulatedAppointmentData } from "@/types/AppointmentTypes";
-import { errorToast } from "@/utils/notificationAudio";
+import { errorToast, successToast } from "@/utils/notificationAudio";
 import _ from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Pagination from "../../admin/Pagination";
@@ -58,7 +58,15 @@ const MyAppointmentsSection = () => {
     };
   }, [currentPage, searchQuery, fetchAppointments, debouncedFetch]);
 
-  const handleCancel = (id: string): void => {};
+  const handleCancel = async (id: string) => {
+    try {
+        await cancelAppointmentApi(id)
+        successToast("Appointment Cancelled.")
+    } catch (error) {
+        if(error instanceof Error)
+            errorToast(error.message)
+    }
+  };
 
   const handleReschedule = (id: string): void => {};
 
