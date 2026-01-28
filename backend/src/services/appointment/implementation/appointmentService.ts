@@ -6,6 +6,7 @@ import { IAppointmentRepository } from "../../../repositories/appointment/interf
 import {
   CreateAppointmentRequest,
   GetMappedAppointmentResponse,
+  GetMappedPopulatedAppointmentResponse,
   PopulatedAppointmentData,
 } from "../../../types/appointment";
 import mongoose, { Types } from "mongoose";
@@ -102,5 +103,9 @@ export class AppointmentService implements IAppointmentService {
 
   async getAppointmentDetails(appointmentId: string): Promise<PopulatedAppointmentData | null> {
     return await this._appointmentRepository.getAppointmentById(appointmentId)
+  }
+
+  async getAllAppointmentsByUserId(query: GetPaginationQuery): Promise<GetMappedPopulatedAppointmentResponse> {
+    return await this._appointmentRepository.getAllAppointmentByUserId(query)
   }
 }

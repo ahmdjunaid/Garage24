@@ -5,4 +5,5 @@ export interface IAppointmentController {
     createAppointment(req:Request, res:Response, next: NextFunction):Promise<void>;
     getActiveAppointments(req:Request, res:Response, next: NextFunction):Promise<void>;
     getAppointmentDetails(req:Request, res:Response, next: NextFunction):Promise<void>;
+    getAllAppointmentsByUserId(req:Request, res:Response, next: NextFunction):Promise<void>;
 }

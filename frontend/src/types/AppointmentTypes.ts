@@ -119,10 +119,10 @@ export interface PopulatedService {
   duration: number;
 }
 
-export interface PopulatedAppointmentData extends Omit<IAppointment, "garageId" | "services">{
+export interface PopulatedAppointmentData extends Omit<IAppointment, "garageId" | "services" | "serviceIds">{
   _id: string;
   garageId: PopulatedGarage;
-  services: PopulatedService[];
+  serviceIds: PopulatedService[];
   createdAt: string;
   updatedAt: string;
 }

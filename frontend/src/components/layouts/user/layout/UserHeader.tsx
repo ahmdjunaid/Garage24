@@ -85,11 +85,11 @@ const UserHeader = ({
                       Profile
                     </Link>
                     <Link
-                      to="/appointment"
+                      to="/my-appointments"
                       className="block px-4 py-2 hover:bg-gray-100"
                       onClick={() => setShowMoreMenu(false)}
                     >
-                      Appointments
+                      My Appointments
                     </Link>
                     <a
                       href="#services"
@@ -167,7 +167,7 @@ const UserHeader = ({
             <Link to="/my-garage" className="block hover:text-gray-300" onClick={() => setShowMobileMenu(false)}>
               My Garage
             </Link>
-            <Link to="/appointment" className="block hover:text-gray-300" onClick={() => setShowMobileMenu(false)}>
+            <Link to="/my-appointments" className="block hover:text-gray-300" onClick={() => setShowMobileMenu(false)}>
               My Appointments
             </Link>
             <a href="#services" className="block hover:text-gray-300" onClick={() => setShowMobileMenu(false)}>
@@ -233,11 +233,11 @@ const UserHeader = ({
                         Profile
                       </Link>
                       <Link
-                        to="/appointment"
+                        to="/my-appointments"
                         className="block px-4 py-2 hover:bg-gray-100"
                         onClick={() => setShowMoreMenu(false)}
                       >
-                        Appointments
+                        My Appointments
                       </Link>
                       <a
                         href="#services"

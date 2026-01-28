@@ -24,7 +24,6 @@ import OtpModalLight from "@components/modal/OtpModalLight";
 import {
   emailRegex,
   garageNameRegex,
-  nameRegex,
   passwordRegex,
 } from "@/constants/commonRegex";
 

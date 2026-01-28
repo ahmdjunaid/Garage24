@@ -58,29 +58,43 @@ export const fetchNearByGaragesApi = (lat: number, lng: number) => {
 
 export const fetchServicesByGarageIdApi = (
   garageId: string,
-  category: string
+  category: string,
 ) => {
   return api
     .get(
-      `/${USER_BASE_ROUTE}/services/available?garageId=${garageId}&categoryId=${category}`
+      `/${USER_BASE_ROUTE}/services/available?garageId=${garageId}&categoryId=${category}`,
     )
     .then((res) => res.data);
 };
 
 export const getAvailableSlotsByGarageId = (garageId: string, date: string) => {
   return api
-    .get(`/${USER_BASE_ROUTE}/slots/available?garageId=${garageId}&date=${date}`)
+    .get(
+      `/${USER_BASE_ROUTE}/slots/available?garageId=${garageId}&date=${date}`,
+    )
     .then((res) => res.data);
 };
 
 export const bookAppointmentApi = (data: CreateAppointmentRequest) => {
   return api
-    .post(`/${USER_BASE_ROUTE}/appointment/book`,data)
+    .post(`/${USER_BASE_ROUTE}/appointment/book`, data)
     .then((res) => res.data);
 };
 
 export const getAppointmentDetails = (appointmentId: string) => {
   return api
     .get(`/${USER_BASE_ROUTE}/appointment/success/${appointmentId}`)
+    .then((res) => res.data);
+};
+
+export const getAllAppointmentByUserIdApi = (
+  page = 1,
+  limit = 5,
+  searchQuery = "",
+) => {
+  return api
+    .get(
+      `/${USER_BASE_ROUTE}/appointment?page=${page}&limit=${limit}&searchQuery=${searchQuery}`,
+    )
     .then((res) => res.data);
 };

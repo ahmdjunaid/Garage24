@@ -167,3 +167,10 @@ export interface PopulatedAppointmentData extends Omit<AppointmentDocument, "gar
   garage: PopulatedGarage;
   services: PopulatedService[];
 }
+
+
+export interface GetMappedPopulatedAppointmentResponse {
+  appointments: PopulatedAppointmentData[];
+  totalAppointments: number;
+  totalPages: number;
+}

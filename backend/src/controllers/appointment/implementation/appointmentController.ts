@@ -9,7 +9,10 @@ import { IAppointmentService } from "../../../services/appointment/interface/IAp
 import { GetPaginationQuery } from "../../../types/common";
 import { AppError } from "../../../middleware/errorHandler";
 import { validateCreateAppointment } from "../../../utils/validateAppointmentData";
-import { ALL_FIELDS_REQUIRED } from "../../../constants/messages";
+import {
+  ALL_FIELDS_REQUIRED,
+  USER_ID_REQUIRED,
+} from "../../../constants/messages";
 
 @injectable()
 export class AppointmentController implements IAppointmentController {
@@ -96,15 +99,44 @@ export class AppointmentController implements IAppointmentController {
     try {
       const { appointmentId } = req.params;
 
-      if(!appointmentId)
-        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED)
+      if (!appointmentId)
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
 
-      const response = await this._appointmentService.getAppointmentDetails(appointmentId)
+      const response =
+        await this._appointmentService.getAppointmentDetails(appointmentId);
 
-      res.status(HttpStatus.OK).json(response)
-
+      res.status(HttpStatus.OK).json(response);
     } catch (error) {
       next(error);
     }
-  }
+  };
+
+  getAllAppointmentsByUserId = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { page = 1, limit = 10, searchQuery = "" } = req.query;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        throw new AppError(HttpStatus.BAD_REQUEST, USER_ID_REQUIRED);
+      }
+
+      const query: GetPaginationQuery = {
+        id: String(userId),
+        page: Number(page),
+        limit: Number(limit),
+        searchQuery: String(searchQuery),
+      };
+
+      const response =
+        await this._appointmentService.getAllAppointmentsByUserId(query);
+
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
 }

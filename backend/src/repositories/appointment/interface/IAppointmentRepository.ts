@@ -2,6 +2,7 @@ import { ClientSession } from "mongoose";
 import { AppointmentDocument } from "../../../models/appointment";
 import {
   GetMappedAppointmentResponse,
+  GetMappedPopulatedAppointmentResponse,
   IAppointment,
   PopulatedAppointmentData,
 } from "../../../types/appointment";
@@ -16,4 +17,5 @@ export interface IAppointmentRepository {
     query: GetPaginationQuery
   ): Promise<GetMappedAppointmentResponse>;
   getAppointmentById(id: string): Promise<PopulatedAppointmentData | null>;
+  getAllAppointmentByUserId(query:GetPaginationQuery): Promise<GetMappedPopulatedAppointmentResponse>;
 }
