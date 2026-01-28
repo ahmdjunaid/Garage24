@@ -1,5 +1,6 @@
 import { USER_BASE_ROUTE } from "@/constants/apiRoutes";
 import api from "./api";
+import type { CreateAppointmentRequest } from "@/types/AppointmentTypes";
 
 export const registerVehicleApi = (data: FormData) => {
   return api
@@ -72,8 +73,14 @@ export const getAvailableSlotsByGarageId = (garageId: string, date: string) => {
     .then((res) => res.data);
 };
 
-export const bookAppointmentApi = (data) => {
+export const bookAppointmentApi = (data: CreateAppointmentRequest) => {
   return api
     .post(`/${USER_BASE_ROUTE}/appointment/book`,data)
+    .then((res) => res.data);
+};
+
+export const getAppointmentDetails = (appointmentId: string) => {
+  return api
+    .get(`/${USER_BASE_ROUTE}/appointment/success/${appointmentId}`)
     .then((res) => res.data);
 };

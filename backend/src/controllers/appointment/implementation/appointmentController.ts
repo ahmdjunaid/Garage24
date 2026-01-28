@@ -9,6 +9,7 @@ import { IAppointmentService } from "../../../services/appointment/interface/IAp
 import { GetPaginationQuery } from "../../../types/common";
 import { AppError } from "../../../middleware/errorHandler";
 import { validateCreateAppointment } from "../../../utils/validateAppointmentData";
+import { ALL_FIELDS_REQUIRED } from "../../../constants/messages";
 
 @injectable()
 export class AppointmentController implements IAppointmentController {
@@ -46,35 +47,17 @@ export class AppointmentController implements IAppointmentController {
       validateCreateAppointment(req.body);
 
       const userId = req.user?.id;
-      const {
-        userData,
-        vehicleData,
-        category,
-        services,
-        garage,
-        date,
-        time,
-        slotIds,
-        totalDuration,
-      } = req.body;
 
       if (!userId) {
         throw new AppError(HttpStatus.UNAUTHORIZED, "User not authenticated");
       }
 
-      const response = await this._appointmentService.createAppointment(userId, {
-        userData,
-        vehicleData,
-        category,
-        services,
-        garage,
-        date,
-        time,
-        slotIds,
-        totalDuration
-      });
+      const response = await this._appointmentService.createAppointment(
+        userId,
+        req.body
+      );
 
-      res.status(HttpStatus.OK).json(response);
+      res.status(HttpStatus.CREATED).json(response);
     } catch (error) {
       next(error);
     }
@@ -104,4 +87,24 @@ export class AppointmentController implements IAppointmentController {
       next(error);
     }
   };
+
+  getAppointmentDetails = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { appointmentId } = req.params;
+
+      if(!appointmentId)
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED)
+
+      const response = await this._appointmentService.getAppointmentDetails(appointmentId)
+
+      res.status(HttpStatus.OK).json(response)
+
+    } catch (error) {
+      next(error);
+    }
+  }
 }

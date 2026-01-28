@@ -18,8 +18,9 @@ export class ServiceRepository
     return await this.model.create(serviceData);
   }
 
-  async findByName(name: string): Promise<HydratedDocument<IService> | null> {
+  async findByName(name: string, garageId:string): Promise<HydratedDocument<IService> | null> {
     return await this.getByFilter({
+      garageId,
       name: { $regex: new RegExp(name, "i") },
     });
   }

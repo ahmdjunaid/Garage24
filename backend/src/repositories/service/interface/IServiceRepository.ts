@@ -8,7 +8,7 @@ import { GetPaginationQuery } from "../../../types/common";
 export interface IServiceRepository {
   create(serviceData: Partial<IService>): Promise<HydratedDocument<IService>>;
 
-  findByName(name: string): Promise<HydratedDocument<IService> | null>;
+  findByName(name: string, garageId:string): Promise<HydratedDocument<IService> | null>;
 
   getAllServices({
     id,

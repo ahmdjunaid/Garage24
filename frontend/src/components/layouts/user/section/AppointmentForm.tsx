@@ -21,7 +21,7 @@ import {
   getVehicleDetailsById,
   getVehicleModelsByBrandApi,
 } from "@/services/userRouter";
-import { errorToast, successToast } from "@/utils/notificationAudio";
+import { errorToast } from "@/utils/notificationAudio";
 import type { fuelTypeType, IPopulatedVehicle } from "@/types/VehicleTypes";
 import type { IServiceCategory } from "@/types/ServiceCategoryTypes";
 import { fuelTypes } from "@/constants/constantDatas";
@@ -34,12 +34,16 @@ import { metersToKm } from "@/utils/meterToKMs";
 import Spinner from "@/components/elements/Spinner";
 import type { ISlots } from "@/types/SlotTypes";
 
-interface timeSlot {
+export interface timeSlot {
   startTime: string;
   slotId: string;
 }
 
-const CarServiceAppointmentForm: React.FC = () => {
+interface AppointmentFormProps {
+  onSuccess: (id:string) => void;
+}
+
+const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({onSuccess}) => {
   const [userData, setUserData] = useState<Partial<IUsersMappedData>>({
     name: "",
     email: "",
@@ -407,7 +411,6 @@ const CarServiceAppointmentForm: React.FC = () => {
       const data = {
         userData,
         vehicleData,
-        category: selectedCategory,
         services: selectedServiceDetails,
         garage: selectedGarage?._id,
         date: selectedDate,
@@ -417,10 +420,11 @@ const CarServiceAppointmentForm: React.FC = () => {
       };
 
       try {
-        await bookAppointmentApi(data);
-        successToast("Appointment booked successfully!");
-
+        setLoading(true)
+        const res = await bookAppointmentApi(data);
+        onSuccess(res._id)
         // Reset form after successful booking
+        setSelectedGarage(null)
         setSelectedTime(null);
         setSelectedSlotIds([]);
         setSelectedServices([]);
@@ -428,6 +432,8 @@ const CarServiceAppointmentForm: React.FC = () => {
       } catch (error) {
         console.error(error);
         if (error instanceof Error) errorToast(error.message);
+      } finally {
+        setLoading(false)
       }
     }
   };

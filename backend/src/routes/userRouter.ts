@@ -36,5 +36,6 @@ router.route('/garages/nearby').get(verifyJWT, authorizeRoles("user"), garageCon
 router.route('/services/available').get(verifyJWT, authorizeRoles("user"), serviceController.getServicesByGarageId)
 router.route('/slots/available').get(verifyJWT, authorizeRoles("user"), slotController.getSlotsByGarageIdAndDate)
 router.route('/appointment/book').post(verifyJWT, authorizeRoles("user"), appointmentController.createAppointment)
+router.route('/appointment/success/:appointmentId').get(verifyJWT, authorizeRoles("user"), appointmentController.getAppointmentDetails)
 
 export default router;

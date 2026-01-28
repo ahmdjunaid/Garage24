@@ -11,7 +11,7 @@ export const VehicleListing: React.FC = () => {
   const [vehicleToView, setVehicleToView] = useState<IVehicleDTO | null>(null);
   const [vehicles, setVehicles] = useState<IVehicleDTO[] | []>([]);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchVehicles();
@@ -27,7 +27,7 @@ export const VehicleListing: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#1f1f1f] p-6">
+    <div className="relative bg-[#1f1f1f] p-6">
       {/* Header */}
       <div className="flex justify-end mb-6">
         <button
@@ -39,17 +39,25 @@ export const VehicleListing: React.FC = () => {
       </div>
 
       {/* Vehicle grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-        {vehicles.map((vehicle) => (
-          <VehicleCard
-            key={vehicle._id}
-            vehicle={vehicle}
-            onView={(vehicle) => setVehicleToView(vehicle)}
-            onBook={(id) => navigate(`/appointment?vehicleId=${id}`)}
-            onRemove={handleRemove}
-          />
-        ))}
-      </div>
+      {vehicles.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+          {vehicles.map((vehicle) => (
+            <VehicleCard
+              key={vehicle._id}
+              vehicle={vehicle}
+              onView={(vehicle) => setVehicleToView(vehicle)}
+              onBook={(id) => navigate(`/appointment?vehicleId=${id}`)}
+              onRemove={handleRemove}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center gap-2 text-gray-400 border border-dashed border-gray-600 rounded-xl p-5">
+          <p className="text-sm text-white">
+            Vehicle not available. Add a new vehicle to make booking easier.
+          </p>
+        </div>
+      )}
 
       <AddVehicleModal
         isOpen={showAddModal}

@@ -26,7 +26,8 @@ export class ServiceService implements IServiceService {
   ) {}
 
   async createService(data: Partial<IService>) {
-    const serviceExist = await this._serviceRepository.findByName(data.name!);
+    const garageId = data.garageId?.toString()
+    const serviceExist = await this._serviceRepository.findByName(data.name!, garageId!);
 
     if (serviceExist) {
       throw new AppError(HttpStatus.CONFLICT, SERVICE_ALREADY_EXIST)

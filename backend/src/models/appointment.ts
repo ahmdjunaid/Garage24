@@ -48,6 +48,11 @@ const appointmentSchema = new Schema<IAppointment>(
         name: { type: String, required: true },
       },
     },
+    userData: {
+      name: { type: String, required: true },
+      email: { type: String, required: true },
+      mobileNumber: { type: String, required: true },
+    },
 
     slotIds: [
       { type: Schema.Types.ObjectId, ref: "Slot", required: true },
@@ -58,7 +63,7 @@ const appointmentSchema = new Schema<IAppointment>(
     endTime: { type: String, required: true },
 
     serviceIds: [
-      { type: Schema.Types.ObjectId, ref: "Service", required: true },
+      { type: Schema.Types.ObjectId, ref: "GarageService", required: true },
     ],
 
     totalDuration: { type: Number, required: true },

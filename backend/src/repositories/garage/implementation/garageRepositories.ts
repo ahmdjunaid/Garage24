@@ -101,7 +101,7 @@ export class GarageRepository
         $geoNear: {
           near: {
             type: "Point",
-            coordinates: [lng, lat],
+            coordinates: [lat, lng],
           },
           distanceField: "distance",
           maxDistance: GARAGE_SEARCH_RADIUS,

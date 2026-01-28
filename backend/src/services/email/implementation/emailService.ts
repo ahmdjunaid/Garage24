@@ -41,7 +41,7 @@ export class EmailService implements IEmailService {
 
     try {
       await this.transporter.sendMail(mailOptions);
-      logger.info(`OTP sent to ${email}`);
+      logger.info(`OTP sent to ${email}, ${otp}`);
     } catch (error) {
       logger.error("Error while sending OTP email", error);
     }

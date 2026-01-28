@@ -12,4 +12,5 @@ export interface ISlotService {
     slotIds: string[],
     session?: ClientSession
   ): Promise<void>;
+  validateSlotCapacity(slotIds: string[], session: ClientSession):Promise<void>
 }

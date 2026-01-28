@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { AppointmentDocument } from "../models/appointment";
+import { ILocation } from "./garage";
 
 export type AppointmentStatus =
   | "pending"
@@ -29,11 +30,18 @@ export interface IAppointmentVehicleSnapshot {
   imageUrl?: string;
 }
 
+export interface IAppointmentUserData {
+  name: string,
+  email: string;
+  mobileNumber: string,
+}
+
 export interface IAppointment {
   userId: Types.ObjectId;
   garageId: Types.ObjectId;
 
   vehicle: IAppointmentVehicleSnapshot;
+  userData: IAppointmentUserData;
 
   slotIds: Types.ObjectId[];
   appointmentDate: Date;
@@ -88,9 +96,6 @@ export interface CreateAppointmentRequest {
     color?: string;
     imageUrl?: string;
   };
-
-  category?: string;
-
   services: {
     _id: string;
     garageId: string;
@@ -112,4 +117,53 @@ export interface CreateAppointmentRequest {
   slotIds: string[];
 
   totalDuration: number;
+}
+
+export interface IAppointment {
+  userId: Types.ObjectId;
+  garageId: Types.ObjectId;
+
+  vehicle: IAppointmentVehicleSnapshot;
+  userData: IAppointmentUserData;
+
+  slotIds: Types.ObjectId[];
+  appointmentDate: Date;
+  startTime: string;
+  endTime: string;
+
+  serviceIds: Types.ObjectId[];
+  totalDuration: number;
+
+  mechanicId?: Types.ObjectId;
+  mechanicAssignedAt?: Date;
+
+  paymentId?: Types.ObjectId;
+  paymentStatus?: "pending" | "paid" | "failed" | "refunded";
+  amount?: number;
+
+  status: AppointmentStatus;
+
+  cancellationReason?: string;
+  customerNote?: string;
+  mechanicNote?: string;
+}
+
+export interface PopulatedGarage {
+  _id: string;
+  name: string;
+  address: string;
+  mobileNumber: string;
+  location: ILocation;
+}
+
+export interface PopulatedService {
+  _id: string;
+  name: string;
+  price: number;
+  duration: number;
+}
+
+export interface PopulatedAppointmentData extends Omit<AppointmentDocument, "garageId" | "services">{
+  garage: PopulatedGarage;
+  services: PopulatedService[];
 }

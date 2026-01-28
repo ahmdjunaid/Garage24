@@ -3,6 +3,7 @@ import { Appointment, AppointmentDocument } from "../../../models/appointment";
 import {
   GetMappedAppointmentResponse,
   IAppointment,
+  PopulatedAppointmentData,
 } from "../../../types/appointment";
 import { GetPaginationQuery } from "../../../types/common";
 import { BaseRepository } from "../../IBaseRepository";
@@ -50,5 +51,23 @@ export class AppointmentRepository
     const totalPages = Math.ceil(totalAppointments / query.limit);
 
     return { appointments, totalAppointments, totalPages };
+  }
+
+  async getAppointmentById(id: string): Promise<PopulatedAppointmentData | null> {
+    const appointment = await this.model
+      .findById(id)
+      .populate([
+        {
+          path: "garageId",
+          select: "name address mobileNumber location",
+        },
+        {
+          path: "serviceIds",
+          select: "name price duration",
+        },
+      ])
+      .lean();
+
+      return appointment as unknown as PopulatedAppointmentData;
   }
 }

@@ -41,3 +41,24 @@ export interface IPopulatedVehicle extends Omit<VehicleDocument, "make" | "model
     name: string;
   }
 }
+
+export interface VehiclePayload {
+  _id?: string;
+
+  licensePlate: string;
+  registrationYear?: number;
+  fuelType?: string;
+  variant?: string;
+  color?: string;
+  imageUrl?: string;
+
+  make: {
+    _id: string;
+    name: string;
+  };
+
+  model: {
+    _id: string;
+    name: string;
+  };
+}

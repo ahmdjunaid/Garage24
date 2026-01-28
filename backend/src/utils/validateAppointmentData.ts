@@ -2,7 +2,6 @@ import { isValidIndianPlate } from "../constants/commonRegex";
 import HttpStatus from "../constants/httpStatusCodes";
 import { AppError } from "../middleware/errorHandler";
 import { CreateAppointmentRequest } from "../types/appointment";
-import { normalizePlate } from "./normalizeLicencePlate";
 
 export const validateCreateAppointment = (body: CreateAppointmentRequest) => {
   const {

@@ -6,14 +6,13 @@ import { IAppointmentRepository } from "../../../repositories/appointment/interf
 import {
   CreateAppointmentRequest,
   GetMappedAppointmentResponse,
+  PopulatedAppointmentData,
 } from "../../../types/appointment";
 import mongoose, { Types } from "mongoose";
 import { GetPaginationQuery } from "../../../types/common";
-import HttpStatus from "../../../constants/httpStatusCodes";
-import { AppError } from "../../../middleware/errorHandler";
 import { ISlotService } from "../../slot/interface/ISlotService";
 import { calculateEndTime } from "../../../utils/calculateEndTime";
-import { normalizePlate } from "../../../utils/normalizeLicencePlate";
+import { buildVehicleSnapshot } from "../../../utils/buildVehicleSnapshot";
 
 @injectable()
 export class AppointmentService implements IAppointmentService {
@@ -24,65 +23,67 @@ export class AppointmentService implements IAppointmentService {
   ) {}
 
   async createAppointment(
-    userId: string,
-    payload: CreateAppointmentRequest
-  ): Promise<AppointmentDocument> {
-    await this._slotService.lockSlots(payload.slotIds);
+  userId: string,
+  payload: CreateAppointmentRequest
+): Promise<AppointmentDocument> {
 
-    const session = await mongoose.startSession();
-    session.startTransaction();
+  await this._slotService.lockSlots(payload.slotIds);
 
-    try {     
-      const serviceIds = payload.services.map((s) => new Types.ObjectId(s._id));
-      const endTime = calculateEndTime(payload.time.startTime, payload.totalDuration);
-      const normalizedPlate = normalizePlate(payload.vehicleData.licensePlate)
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-      const appointment = await this._appointmentRepository.createAppointment({
+  try {
+    await this._slotService.validateSlotCapacity(
+      payload.slotIds,
+      session
+    );
+
+    const endTime = calculateEndTime(
+      payload.time.startTime,
+      payload.totalDuration
+    );
+
+    const appointment = await this._appointmentRepository.createAppointment(
+      {
         userId: new Types.ObjectId(userId),
         garageId: new Types.ObjectId(payload.garage),
-  
-        vehicle: {
-          vehicleId: payload.vehicleData._id
-            ? new Types.ObjectId(payload.vehicleData._id)
-            : undefined,
-          licensePlate: normalizedPlate,
-          registrationYear: Number(payload.vehicleData.registrationYear),
-          fuelType: payload.vehicleData.fuelType,
-          variant: payload.vehicleData.variant,
-          color: payload.vehicleData.color,
-          imageUrl: payload.vehicleData.imageUrl,
-          make: {
-            _id: new Types.ObjectId(payload.vehicleData.make._id),
-            name: payload.vehicleData.make.name,
-          },
-          model: {
-            _id: new Types.ObjectId(payload.vehicleData.model._id),
-            name: payload.vehicleData.model.name,
-          },
-        },
-  
-        slotIds: payload.slotIds.map((id) => new Types.ObjectId(id)),
+        slotIds: payload.slotIds.map(id => new Types.ObjectId(id)),
         appointmentDate: new Date(payload.date),
         startTime: payload.time.startTime,
         endTime,
-        serviceIds,
-        totalDuration:payload.totalDuration,
+        serviceIds: payload.services.map(
+          s => new Types.ObjectId(s._id)
+        ),
+        totalDuration: payload.totalDuration,
         status: "pending",
         paymentStatus: "pending",
-      }, session);
+        vehicle: buildVehicleSnapshot(payload.vehicleData),
+        userData: payload.userData
+      },
+      session
+    );
 
-      await this._slotService.incrementBookedCount(payload.slotIds, session)
+    await this._slotService.incrementBookedCount(
+      payload.slotIds,
+      session
+    );
 
-      await session.commitTransaction();
+    await session.commitTransaction();
+    session.endSession();
 
-      return appointment
+    await this._slotService.releaseSlots(payload.slotIds);
 
-    } catch (error) {
-      console.error(error)
-    }
+    return appointment;
 
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
 
+    await this._slotService.releaseSlots(payload.slotIds);
+
+    throw error;
   }
+}
 
   async getActiveAppointments(
     query: GetPaginationQuery
@@ -97,5 +98,9 @@ export class AppointmentService implements IAppointmentService {
     };
 
     return mappedResponse;
+  }
+
+  async getAppointmentDetails(appointmentId: string): Promise<PopulatedAppointmentData | null> {
+    return await this._appointmentRepository.getAppointmentById(appointmentId)
   }
 }

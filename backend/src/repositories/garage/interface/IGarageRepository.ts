@@ -1,7 +1,6 @@
 import { FilterQuery, HydratedDocument, Types, UpdateQuery } from "mongoose";
 import {
   GarageNearbyDto,
-  GetMappedGarageResponse,
   IAddress,
   IGarage,
   IPopulatedGarage,

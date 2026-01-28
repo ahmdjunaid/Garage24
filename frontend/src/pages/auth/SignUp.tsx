@@ -8,7 +8,11 @@ import passwordIcon from "@assets/icons/password.svg";
 import emailIcon from "@assets/icons/email.svg";
 import userIcon from "@assets/icons/user.svg";
 import companyIcon from "@assets/icons/company.svg";
-import { googleLoginApi, signUpApi, type TokenResponse } from "@/services/authServices";
+import {
+  googleLoginApi,
+  signUpApi,
+  type TokenResponse,
+} from "@/services/authServices";
 import Spinner from "@components/elements/Spinner";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/redux/store/store";
@@ -17,7 +21,12 @@ import { errorToast, successToast } from "@/utils/notificationAudio";
 import { useGoogleLogin } from "@react-oauth/google";
 import { login } from "@/redux/slice/userSlice";
 import OtpModalLight from "@components/modal/OtpModalLight";
-import { emailRegex, nameRegex, passwordRegex } from "@/constants/commonRegex";
+import {
+  emailRegex,
+  garageNameRegex,
+  nameRegex,
+  passwordRegex,
+} from "@/constants/commonRegex";
 
 type SignUpProps = {
   role: Role;
@@ -38,7 +47,7 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
   const dispatch = useDispatch();
 
   const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
 
   useEffect(() => {
@@ -75,8 +84,15 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
       return;
     }
 
-    if (!name.trim() || !nameRegex.test(name.trim())) {
-      setNameError("Name must have at least 3 - 25 characters and only letters");
+    const trimmedName = name.trim();
+
+    if (!trimmedName) {
+      setNameError("Name is required");
+      hasError = true;
+    } else if (!garageNameRegex.test(trimmedName)) {
+      setNameError(
+        "Name must be 3–50 characters and can contain letters, numbers, spaces, or hyphens",
+      );
       hasError = true;
     }
 
@@ -87,7 +103,7 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
 
     if (!passwordRegex.test(password)) {
       setPasswordError(
-        "Password must be 8+ chars with uppercase, lowercase, number, and special character."
+        "Password must be 8+ chars with uppercase, lowercase, number, and special character.",
       );
       hasError = true;
     }
@@ -103,9 +119,9 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
         errorToast("Signup Failed, Please try again.");
       }
     } catch (err) {
-      if(err instanceof Error){
+      if (err instanceof Error) {
         errorToast(err.message);
-      }else{
+      } else {
         errorToast("Signup Failed.");
       }
     } finally {
@@ -133,9 +149,9 @@ const SignUp: React.FC<SignUpProps> = ({ role }) => {
           navigate(`/${user?.role}`);
         }
       } catch (error) {
-        if(error instanceof Error){
-          errorToast(error.message)
-        }else{
+        if (error instanceof Error) {
+          errorToast(error.message);
+        } else {
           errorToast("Google login failed");
         }
       }

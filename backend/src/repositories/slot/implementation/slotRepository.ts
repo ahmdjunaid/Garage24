@@ -4,7 +4,7 @@ import { ISlot } from "../../../types/slots";
 import { BaseRepository } from "../../IBaseRepository";
 import { ISlotRepository } from "../interface/ISlotRepository";
 import { getUTCDayRange } from "../../../utils/dateToIST";
-import { ClientSession } from "mongoose";
+import { ClientSession, Types } from "mongoose";
 
 @injectable()
 export class SlotRepository
@@ -49,5 +49,21 @@ export class SlotRepository
     }
 
     await query.exec();
+  }
+
+  async findSlotsByIds(
+    slotIds: string[],
+    session?: ClientSession
+  ): Promise<SlotDocument[]> {
+    return this.model.find(
+      {
+        _id: { $in: slotIds.map(id => new Types.ObjectId(id)) },
+      },
+      {
+        capacity: 1,
+        bookedCount: 1,
+      },
+      { session }
+    );
   }
 }

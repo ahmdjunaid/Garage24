@@ -5,7 +5,7 @@ export const registerSchema = z.object({
   name: z
     .string()
     .regex(
-      /^[A-Za-z]{3,}(?: [A-Za-z]+)*$/,
+      /^(?=.{3,50}$)[A-Za-z0-9]+(?:[ -][A-Za-z0-9]+)*$/,
       "Name must have at least 3 characters and only letters"
     ),
   email: z.string().email("Invalid email"),

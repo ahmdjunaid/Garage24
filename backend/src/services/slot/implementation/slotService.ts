@@ -82,7 +82,7 @@ export class SlotService implements ISlotService {
         }
 
         if (slot.bookedCount + currentLocked > slot.capacity) {
-          throw new Error("Slot capacity exceeded");
+          throw new AppError(HttpStatus.CONFLICT, "Slot capacity exceeded");
         }
 
         lockedKeys.push(key);
@@ -103,7 +103,15 @@ export class SlotService implements ISlotService {
   async releaseSlots(slotIds: string[]): Promise<void> {
     for (const slotId of slotIds) {
       const key = `slot:${slotId}`;
-      await redisClient.decr(key);
+
+      const value = await redisClient.get(key);
+      if (!value) continue;
+
+      const newVal = await redisClient.decr(key);
+
+      if (newVal <= 0) {
+        await redisClient.del(key);
+      }
     }
   }
 
@@ -112,5 +120,15 @@ export class SlotService implements ISlotService {
     session?: ClientSession
   ): Promise<void> {
     await this._slotRepository.incrementBookedCount(slotIds, session);
+  }
+
+  async validateSlotCapacity(slotIds: string[], session: ClientSession) {
+    const slots = await this._slotRepository.findSlotsByIds(slotIds, session);
+
+    for (const slot of slots) {
+      if (slot.bookedCount >= slot.capacity) {
+        throw new AppError(HttpStatus.CONFLICT, "Slot capacity exceeded");
+      }
+    }
   }
 }

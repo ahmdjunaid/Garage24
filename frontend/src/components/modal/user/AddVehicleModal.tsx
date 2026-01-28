@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DarkModal from "../../layouts/DarkModal";
-import { Upload, Calendar } from "lucide-react";
+import { Upload } from "lucide-react";
 import {
   getAllBrandsApi,
   getVehicleModelsByBrandApi,
@@ -307,7 +307,16 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
   );
 };
 
-const Input = ({ name, value, onChange, placeholder, error, span }: any) => (
+interface InputProps {
+  name: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
+  placeholder:string;
+  error?: string;
+  span?:boolean;
+}
+
+const Input = ({ name, value, onChange, placeholder, error, span }: InputProps) => (
   <div className={span ? "col-span-2" : ""}>
     <input
       name={name}
@@ -320,7 +329,7 @@ const Input = ({ name, value, onChange, placeholder, error, span }: any) => (
   </div>
 );
 
-const DateInput = ({ name, value, onChange, error, placeholder }: any) => (
+const DateInput = ({ name, value, onChange, error, placeholder }: InputProps) => (
   <div className="relative">
     <label className="text-sm text-white">{placeholder} :</label>
     <input

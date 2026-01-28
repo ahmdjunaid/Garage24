@@ -1,3 +1,6 @@
+import type { timeSlot } from "@/components/layouts/user/section/AppointmentForm";
+import type { IAddress, ILocation } from "./GarageTypes";
+
 export type AppointmentStatus =
   | "pending"
   | "confirmed"
@@ -34,7 +37,7 @@ export interface IAppointment {
   vehicle: IAppointmentVehicleSnapshot;
 
   slotIds: string[];
-  appointmentDate: Date;
+  appointmentDate: string;
   startTime: string;
   endTime: string;
 
@@ -53,4 +56,73 @@ export interface IAppointment {
   cancellationReason?: string;
   customerNote?: string;
   mechanicNote?: string;
+}
+
+export interface CreateAppointmentRequest {
+  userData: {
+    name?: string;
+    email?: string;
+    mobileNumber?: string;
+  };
+
+  vehicleData: {
+    _id?: string;
+    userId?: string;
+    licensePlate?: string;
+    make?: {
+      _id: string;
+      name: string;
+    };
+    model?: {
+      _id: string;
+      name: string;
+    };
+    registrationYear?: string;
+    fuelType?: string;
+    variant?: string;
+    color?: string;
+    imageUrl?: string;
+  };
+  services: {
+    _id: string;
+    garageId: string;
+    categoryId: string;
+    name: string;
+    price: number;
+    durationMinutes: number;
+  }[];
+
+  garage?: string;
+
+  date: string | null;
+
+  time: timeSlot | null;
+
+  slotIds: string[];
+
+  totalDuration: number;
+}
+
+
+export interface PopulatedGarage {
+  _id: string;
+  name: string;
+  address: IAddress;
+  mobileNumber: string;
+  location: ILocation;
+}
+
+export interface PopulatedService {
+  _id: string;
+  name: string;
+  price: number;
+  duration: number;
+}
+
+export interface PopulatedAppointmentData extends Omit<IAppointment, "garageId" | "services">{
+  _id: string;
+  garageId: PopulatedGarage;
+  services: PopulatedService[];
+  createdAt: string;
+  updatedAt: string;
 }
