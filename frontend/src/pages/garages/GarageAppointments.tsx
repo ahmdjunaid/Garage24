@@ -3,39 +3,46 @@ import AdminSidebar from "@components/layouts/admin/AdminSidebar";
 import AdminTable, {
   type TableColumn,
 } from "@components/layouts/admin/AdminTable";
-import {
-  getActiveAppointmentsApi,
-} from "@/services/garageServices";
+import { getActiveAppointmentsApi } from "@/services/garageServices";
 import AdminHeader from "@components/layouts/admin/AdminHeader";
 import _ from "lodash";
 import Spinner from "@components/elements/Spinner";
 import Pagination from "@components/layouts/admin/Pagination";
-import type { IAppointment } from "@/types/AppointmentTypes";
-
+import type {
+  PopulatedAppointmentData,
+} from "@/types/AppointmentTypes";
+import AppointmentDetailsModal from "@/components/modal/user/AppointmentDetailsModal";
 
 const GarageAppointments = () => {
-  const [appointments, setAppointments] = useState<IAppointment>([]);
+  const [appointments, setAppointments] = useState<PopulatedAppointmentData[]>(
+    [],
+  );
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [totalPages, setTotalPages] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
+  const [viewAppointment, setViewAppointment] = useState<PopulatedAppointmentData | null>(null)
   const servicesPerPage = 5;
 
   const fetchServices = useCallback(
     async (currentPage: number, searchQuery: string) => {
       try {
+        setLoading(true)
         const response = await getActiveAppointmentsApi(
           currentPage,
           servicesPerPage,
-          searchQuery
+          searchQuery,
         );
+        console.log(response.appointments, "appointments");
         setAppointments(response.appointments);
         setTotalPages(response.totalPages);
       } catch (error) {
         console.error("Error from page:", error);
+      } finally {
+        setLoading(false)
       }
     },
-    [servicesPerPage]
+    [servicesPerPage],
   );
 
   const debouncedFetch = useMemo(
@@ -43,7 +50,7 @@ const GarageAppointments = () => {
       _.debounce((page: number, query: string) => {
         fetchServices(page, query);
       }, 300),
-    [fetchServices]
+    [fetchServices],
   );
 
   useEffect(() => {
@@ -58,27 +65,22 @@ const GarageAppointments = () => {
     };
   }, [currentPage, searchQuery, fetchServices, debouncedFetch]);
 
-  const columns: TableColumn<IAppointment>[] = [
+  const columns: TableColumn<PopulatedAppointmentData>[] = [
     { key: "_id", label: "ID" },
     { key: "vehicle.make.name", label: "Brand" },
     { key: "vehicle.model.name", label: "Model" },
-    { key: "vehicle.licencePlate", label: "Number" },
-    { key: "appointmentDate", label: "Date" },
-    // {
-    //   key: "isBlocked",
-    //   label: "Status",
-    //   render: (m) => (
-    //     <span
-    //       className={`px-3 py-1 rounded-full text-xs font-medium ${
-    //         m.isBlocked
-    //           ? "bg-red-900 text-red-300"
-    //           : "bg-green-900 text-green-300"
-    //       }`}
-    //     >
-    //       {m.isBlocked ? "Inactive" : "Active"}
-    //     </span>
-    //   ),
-    // },
+    { key: "vehicle.licensePlate", label: "Number" },
+    { key: "status", label: "Status" },
+    {
+      key: "appointmentDate",
+      label: "Date",
+      render: (item) =>
+        new Date(item.appointmentDate).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }),
+    },
   ];
 
   return (
@@ -97,37 +99,20 @@ const GarageAppointments = () => {
           <AdminTable
             data={appointments}
             columns={columns}
-            // renderActions={(m) => {
-            //   return (
-            //     <div className="flex gap-3">
-            //           <button
-            //             className="text-blue-400 hover:text-blue-300"
-            //             onClick={() =>
-            //               setAction({
-            //                 id: m._id,
-            //                 name: m.name,
-            //                 action: m.isBlocked ? "unblock" : "block",
-            //               })
-            //             }
-            //           >
-            //             {m.isBlocked ? "Unblock" : "Block"}
-            //           </button>
-
-            //           <button
-            //             className="text-red-400 hover:text-red-300"
-            //             onClick={() =>
-            //               setAction({
-            //                 id: m._id,
-            //                 name: m.name,
-            //                 action: "delete",
-            //               })
-            //             }
-            //           >
-            //             Delete
-            //           </button>
-            //     </div>
-            //   );
-            // }}
+            renderActions={(m) => {
+              return (
+                <div className="flex gap-3">
+                  <button
+                    className="text-red-400 hover:text-red-300"
+                    onClick={() =>
+                      setViewAppointment(m)
+                    }
+                  >
+                    View
+                  </button>
+                </div>
+              );
+            }}
           />
 
           {/* <ConfirmModal
@@ -146,6 +131,14 @@ const GarageAppointments = () => {
             totalPages={totalPages}
             setCurrentPage={setCurrentPage}
           />
+
+          {viewAppointment && (
+            <AppointmentDetailsModal
+              appointment={viewAppointment}
+              isOpen={!!viewAppointment}
+              onClose={() => setViewAppointment(null)}
+            />
+          )}
         </div>
       </div>
     </div>

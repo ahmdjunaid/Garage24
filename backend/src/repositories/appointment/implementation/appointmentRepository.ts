@@ -33,17 +33,26 @@ export class AppointmentRepository
     const skip = (query.page - 1) * query.limit;
     const searchFilter = query.searchQuery
       ? {
-          name: { $regex: query.searchQuery, $options: "i" },
-          userId: query.id,
+          garageUID: query.id,
           status: { $in: ["pending", "confirmed", "in_progress"] },
         }
       : {
-          userId: query.id,
+          garageUID: query.id,
           status: { $in: ["pending", "confirmed", "in_progress"] },
         };
 
     const appointments = await this.model
       .find(searchFilter)
+      .populate([
+        {
+          path: "garageId",
+          select: "name address mobileNumber location",
+        },
+        {
+          path: "serviceIds",
+          select: "name price duration",
+        },
+      ])
       .skip(skip)
       .limit(query.limit)
       .sort({ createdAt: -1 });

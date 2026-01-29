@@ -15,13 +15,17 @@ interface AdminTableProps<T> {
   onSortChange?: (sortBy: string) => void;
 }
 
-const AdminTable = <T extends { id?: string; name?: string }>({
+const AdminTable = <T,>({
   data = [],
   columns = [],
   renderActions,
   // sortBy = "A-Z",
   // onSortChange,
 }: AdminTableProps<T>) => {
+  const getValueByPath = (obj: any, path: string) => {
+    return path.split(".").reduce((acc, key) => acc?.[key], obj);
+  };
+
   return (
     <div>
       {data.length === 0 ? (
@@ -62,9 +66,17 @@ const AdminTable = <T extends { id?: string; name?: string }>({
                   <div
                     key={j}
                     className="text-gray-300 truncate max-w-[180px]"
-                    title={(item as any)[col.key]}
+                    title={
+                      typeof col.key === "string"
+                        ? String(getValueByPath(item, col.key) ?? "")
+                        : String((item as any)[col.key] ?? "")
+                    }
                   >
-                    {col.render ? col.render(item) : (item as any)[col.key]}
+                    {col.render
+                      ? col.render(item)
+                      : typeof col.key === "string"
+                        ? getValueByPath(item, col.key)
+                        : (item as any)[col.key]}
                   </div>
                 ))}
                 {renderActions && <div>{renderActions(item)}</div>}
