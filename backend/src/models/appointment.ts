@@ -15,6 +15,11 @@ const appointmentSchema = new Schema<IAppointment>(
       ref: "Garage",
       required: true,
     },
+    garageUID: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
     vehicle: {
       vehicleId: {

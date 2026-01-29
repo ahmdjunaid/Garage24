@@ -28,4 +28,5 @@ export interface IAppointmentRepository {
       new?: boolean;
     }
   ): Promise<AppointmentDocument | null>;
+  getAppointmentForReschedule(id:string):Promise<PopulatedAppointmentData | null>
 }

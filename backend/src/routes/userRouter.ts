@@ -39,5 +39,8 @@ router.route('/appointment/book').post(verifyJWT, authorizeRoles("user"), appoin
 router.route('/appointment/success/:appointmentId').get(verifyJWT, authorizeRoles("user"), appointmentController.getAppointmentDetails)
 router.route('/appointment').get(verifyJWT, authorizeRoles("user"), appointmentController.getAllAppointmentsByUserId)
 router.route('/appointment/cancel/:appointmentId').patch(verifyJWT, authorizeRoles("user"), appointmentController.cancelAppointment)
+router.route('/appointment/reschedule/:appointmentId')
+    .get(verifyJWT, authorizeRoles("user"), appointmentController.getAppointmentForReschedule)
+    .post(verifyJWT, authorizeRoles("user"), appointmentController.rescheduleAppointment)
 
 export default router;

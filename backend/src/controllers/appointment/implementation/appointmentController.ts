@@ -163,4 +163,59 @@ export class AppointmentController implements IAppointmentController {
       next(error);
     }
   };
+
+  getAppointmentForReschedule = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const appointmentId = req.params.appointmentId;
+      if (!appointmentId) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          "Appointment id is required."
+        );
+      }
+
+      const response =
+        await this._appointmentService.getAppointmentForReschedule(
+          appointmentId
+        );
+
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  rescheduleAppointment = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const appointmentId = req.params.appointmentId;
+      if (!appointmentId) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          "Appointment id is required."
+        );
+      }
+
+      const { date, releasableSlotIds, slotIds, startTime, duration } = req.body;
+      if (!date || !slotIds || !startTime || !duration || !releasableSlotIds) {
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
+      }
+
+      const response = await this._appointmentService.rescheduleAppointment(
+        appointmentId,
+        req.body
+      );
+
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
 }

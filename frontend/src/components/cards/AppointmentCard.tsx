@@ -2,17 +2,19 @@ import type { PopulatedAppointmentData } from "@/types/AppointmentTypes";
 import React from "react";
 
 interface CardProps {
-    appointments: PopulatedAppointmentData[],
-    handleCancel : (id:string) => void;
-    handleReschedule : (id:string) => void;
-    handleViewDetails : (id:string) => void;
+  appointments: PopulatedAppointmentData[];
+  handleCancel: (id: string) => void;
+  handleReschedule: (id: string) => void;
+  handleViewDetails: (data: PopulatedAppointmentData) => void;
 }
 
-const AppointmentCard:React.FC<CardProps> = ({
-    appointments,
-    handleCancel,
-    handleReschedule,
-    handleViewDetails
+const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress"];
+
+const AppointmentCard: React.FC<CardProps> = ({
+  appointments,
+  handleCancel,
+  handleReschedule,
+  handleViewDetails,
 }) => {
   return (
     <div>
@@ -46,31 +48,43 @@ const AppointmentCard:React.FC<CardProps> = ({
 
                 <div>
                   <h3 className="text-white text-lg font-semibold">
-                    {appointment.vehicle.make.name + appointment.vehicle.model.name}
+                    {appointment.vehicle.make.name +
+                      appointment.vehicle.model.name}
                     <span className="text-[#888] font-normal">
                       ({appointment.vehicle.licensePlate})
                     </span>
                   </h3>
-                  <p className="text-[#999] text-sm">{appointment.serviceIds.map(service => service.name).join(", ")}</p>
+                  <p className="text-[#999] text-sm">
+                    {appointment.serviceIds
+                      .map((service) => service.name)
+                      .join(", ")}
+                  </p>
+                  <span className="inline-block px-3 py-1 rounded-lg text-xs font-semibold bg-gray-600 text-white capitalize">
+                    {appointment.status}
+                  </span>
                 </div>
               </div>
 
               {/* Actions */}
               <div className="flex gap-3">
+                {ACTIVE_STATUSES.includes(appointment.status) && (
+                  <>
+                    <button
+                      onClick={() => handleCancel(appointment._id)}
+                      className="px-5 py-2 bg-[#2a2a2a] hover:bg-[#333] text-[#ddd] rounded-lg text-sm border border-[#3a3a3a]"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleReschedule(appointment._id)}
+                      className="px-5 py-2 bg-[#2a2a2a] hover:bg-[#333] text-[#ddd] rounded-lg text-sm border border-[#3a3a3a]"
+                    >
+                      Reschedule
+                    </button>
+                  </>
+                )}
                 <button
-                  onClick={() => handleCancel(appointment._id)}
-                  className="px-5 py-2 bg-[#2a2a2a] hover:bg-[#333] text-[#ddd] rounded-lg text-sm border border-[#3a3a3a]"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleReschedule(appointment._id)}
-                  className="px-5 py-2 bg-[#2a2a2a] hover:bg-[#333] text-[#ddd] rounded-lg text-sm border border-[#3a3a3a]"
-                >
-                  Reschedule
-                </button>
-                <button
-                  onClick={() => handleViewDetails(appointment._id)}
+                  onClick={() => handleViewDetails(appointment)}
                   className="px-5 py-2 bg-[#ef4444] hover:bg-[#dc2626] text-white rounded-lg text-sm"
                 >
                   View Details

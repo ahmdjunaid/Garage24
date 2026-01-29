@@ -1,33 +1,52 @@
 import AppointmentCard from "@/components/cards/AppointmentCard";
-import { cancelAppointmentApi, getAllAppointmentByUserIdApi } from "@/services/userRouter";
+import {
+  cancelAppointmentApi,
+  getAllAppointmentByUserIdApi,
+} from "@/services/userRouter";
 import type { PopulatedAppointmentData } from "@/types/AppointmentTypes";
 import { errorToast, successToast } from "@/utils/notificationAudio";
-import _ from "lodash";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Pagination from "../../admin/Pagination";
 import Spinner from "@/components/elements/Spinner";
+import { ConfirmModal } from "@/components/modal/ConfirmModal";
+import AppointmentDetailsModal from "@/components/modal/user/AppointmentDetailsModal";
+import { useNavigate } from "react-router-dom";
 
 const MyAppointmentsSection = () => {
   const [appointments, setAppointments] = useState<PopulatedAppointmentData[]>(
     [],
   );
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [tab, setTab] = useState<"current" | "previous">("current");
   const [totalPages, setTotalPages] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isCancelling, setIsCancelling] = useState<boolean>(false);
+  const [idForCancel, setIdForCancel] = useState<string>("");
+  const [viewAppointment, setViewAppointment] =
+    useState<PopulatedAppointmentData | null>(null);
+
   const appointmentsPerPage = 6;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.body.style.overflow = "auto";
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
 
   const fetchAppointments = useCallback(
-    async (currentPage: number, searchQuery: string) => {
+    async (page: number, activeTab: "current" | "previous") => {
       try {
         setLoading(true);
         const response = await getAllAppointmentByUserIdApi(
-          currentPage,
+          page,
           appointmentsPerPage,
-          searchQuery,
+          activeTab,
         );
         setAppointments(response.appointments);
-        console.log(response.appointments);
         setTotalPages(response.totalPages);
       } catch (error) {
         if (error instanceof Error) errorToast(error.message);
@@ -38,56 +57,59 @@ const MyAppointmentsSection = () => {
     [appointmentsPerPage],
   );
 
-  const debouncedFetch = useMemo(
-    () =>
-      _.debounce((page: number, query: string) => {
-        fetchAppointments(page, query);
-      }, 300),
-    [fetchAppointments],
-  );
-
   useEffect(() => {
-    if (!searchQuery) {
-      fetchAppointments(currentPage, "");
-    } else {
-      debouncedFetch(currentPage, searchQuery);
-    }
+    fetchAppointments(currentPage, tab);
+  }, [currentPage, tab, fetchAppointments]);
 
-    return () => {
-      debouncedFetch.cancel();
-    };
-  }, [currentPage, searchQuery, fetchAppointments, debouncedFetch]);
+  const handleCancel = async () => {
+    if (!idForCancel || isCancelling) return;
 
-  const handleCancel = async (id: string) => {
+    const page = currentPage;
+    const activeTab = tab;
+
     try {
-        await cancelAppointmentApi(id)
-        successToast("Appointment Cancelled.")
+      setIsCancelling(true);
+      await cancelAppointmentApi(idForCancel);
+      await fetchAppointments(page, activeTab);
+      successToast("Appointment cancelled.");
     } catch (error) {
-        if(error instanceof Error)
-            errorToast(error.message)
+      if (error instanceof Error) errorToast(error.message);
+    } finally {
+      setIsCancelling(false);
+      setIdForCancel("");
     }
   };
 
-  const handleReschedule = (id: string): void => {};
+  const handleReschedule = useCallback(
+    (id: string) => {
+      navigate(`/appointment/${id}/reschedule`);
+    },
+    [navigate],
+  );
 
-  const handleViewDetails = (id: string): void => {};
+  const handleTabChange = (nextTab: "current" | "previous") => {
+    if (nextTab === tab) return;
+    setCurrentPage(1);
+    setTab(nextTab);
+  };
 
   return (
     <div className="min-h-screen bg-[#1a1a1a] py-8 px-6">
-      <div className="max-w-5xl mx-auto">
-        {/* Header Tabs */}
+      <div className="max-w-5xl mx-auto relative">
         <div className="flex gap-3 mb-10">
-          {["current", "previous"].map((tab) => (
+          {(["current", "previous"] as const).map((t) => (
             <button
-              key={tab}
-              onClick={() => setSearchQuery(tab as "current" | "previous")}
-              className={`px-7 py-3 rounded-full font-semibold text-sm transition-colors ${
-                searchQuery === tab
+              key={t}
+              onClick={() => handleTabChange(t)}
+              className={`px-7 py-3 rounded-lg font-semibold text-sm transition-colors ${
+                tab === t
                   ? "bg-[#ef4444] text-white"
                   : "bg-[#2a2a2a] text-[#999] hover:bg-[#333] hover:text-white border border-[#3a3a3a]"
               }`}
             >
-              {tab === "current" ? "Current Appointments" : "Previous"}
+              {t === "current"
+                ? "Current Appointments"
+                : "Previous Appointments"}
             </button>
           ))}
         </div>
@@ -95,19 +117,19 @@ const MyAppointmentsSection = () => {
         {/* Appointment Cards */}
         <AppointmentCard
           appointments={appointments}
-          handleCancel={(id) => handleCancel(id)}
-          handleReschedule={(id) => handleReschedule(id)}
-          handleViewDetails={(id) => handleViewDetails(id)}
+          handleCancel={(id) => setIdForCancel(id)}
+          handleReschedule={handleReschedule}
+          handleViewDetails={(data) => setViewAppointment(data)}
         />
 
         {/* Empty State */}
-        {appointments.length === 0 && (
+        {!loading && appointments.length === 0 && (
           <div className="text-center py-20">
             <div className="text-[#666] text-lg font-semibold mb-2">
               No appointments found
             </div>
             <p className="text-[#555] text-sm">
-              {searchQuery === "current"
+              {tab === "current"
                 ? "You don't have any current appointments"
                 : "You don't have any previous appointments"}
             </p>
@@ -115,13 +137,29 @@ const MyAppointmentsSection = () => {
         )}
       </div>
 
-      <Spinner loading={loading} />
+      <Spinner loading={loading && appointments.length === 0} />
 
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
         setCurrentPage={setCurrentPage}
       />
+
+      <ConfirmModal
+        isOpen={!!idForCancel}
+        message="Are you sure you want to cancel this appointment?"
+        onClose={() => setIdForCancel("")}
+        onConfirm={handleCancel}
+        onCancel={() => setIdForCancel("")}
+      />
+
+      {viewAppointment && (
+        <AppointmentDetailsModal
+          appointment={viewAppointment}
+          isOpen={!!viewAppointment}
+          onClose={() => setViewAppointment(null)}
+        />
+      )}
     </div>
   );
 };

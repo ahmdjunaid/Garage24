@@ -29,12 +29,18 @@ export interface IAppointmentVehicleSnapshot {
   imageUrl?: string;
 }
 
-
 export interface IAppointment {
   userId: string;
   garageId: string;
+  garageUID: string;
 
   vehicle: IAppointmentVehicleSnapshot;
+
+  userData?: {
+    name?: string;
+    email?: string;
+    mobileNumber?: string;
+  };
 
   slotIds: string[];
   appointmentDate: string;
@@ -93,6 +99,7 @@ export interface CreateAppointmentRequest {
   }[];
 
   garage?: string;
+  garageUID?: string;
 
   date: string | null;
 
@@ -102,7 +109,6 @@ export interface CreateAppointmentRequest {
 
   totalDuration: number;
 }
-
 
 export interface PopulatedGarage {
   _id: string;
@@ -119,10 +125,19 @@ export interface PopulatedService {
   duration: number;
 }
 
-export interface PopulatedAppointmentData extends Omit<IAppointment, "garageId" | "services" | "serviceIds">{
+export interface PopulatedAppointmentData
+  extends Omit<IAppointment, "garageId" | "services" | "serviceIds"> {
   _id: string;
   garageId: PopulatedGarage;
   serviceIds: PopulatedService[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ReschedulePayload {
+  date: string;
+  releasableSlotIds?: string[]
+  slotIds: string[];
+  startTime?: string;
+  duration?: number;
 }

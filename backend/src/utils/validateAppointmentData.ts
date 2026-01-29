@@ -9,6 +9,7 @@ export const validateCreateAppointment = (body: CreateAppointmentRequest) => {
     vehicleData,
     services,
     garage,
+    garageUID,
     date,
     time,
     slotIds,
@@ -60,7 +61,7 @@ export const validateCreateAppointment = (body: CreateAppointmentRequest) => {
       "Select a valid fuel-type of your vehicle."
     );
 
-  if (!garage)
+  if (!garage || !garageUID)
     throw new AppError(HttpStatus.BAD_REQUEST, "Garage selection is required");
 
   if (!date || isNaN(Date.parse(date)))

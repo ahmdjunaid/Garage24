@@ -258,20 +258,17 @@ const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({onSuccess}) 
     );
   };
 
-  // Helper function to calculate total service duration
   const getTotalServiceDuration = (): number => {
     return services
       .filter((s) => selectedServices.includes(s._id))
       .reduce((sum, s) => sum + s.durationMinutes, 0);
   };
 
-  // Helper function to parse time string to minutes
   const timeToMinutes = (time: string): number => {
     const [hours, minutes] = time.split(":").map(Number);
     return hours * 60 + minutes;
   };
 
-  // Helper function to get required consecutive slots
   const getRequiredSlots = (
     startSlotIndex: number,
     totalDuration: number,
@@ -290,12 +287,10 @@ const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({onSuccess}) 
     return requiredSlots;
   };
 
-  // Helper function to check if slots are available
   const areSlotsAvailable = (slots: ISlots[]): boolean => {
     return slots.every((slot) => slot.capacity > 0);
   };
 
-  // Helper function to check if slots are consecutive
   const areSlotsConsecutive = (slots: ISlots[]): boolean => {
     for (let i = 0; i < slots.length - 1; i++) {
       const currentSlotEndTime =
@@ -317,11 +312,8 @@ const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({onSuccess}) 
       errorToast("Please select at least one service first");
       return;
     }
-
-    // Get required consecutive slots based on service duration
     const requiredSlots = getRequiredSlots(slotIndex, totalDuration);
 
-    // Check if we have enough slots
     if (requiredSlots.length * 30 < totalDuration) {
       errorToast(
         `Not enough consecutive time slots available for ${totalDuration} minutes of service. Please select an earlier time or a different date.`,
@@ -329,7 +321,6 @@ const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({onSuccess}) 
       return;
     }
 
-    // Check if slots are consecutive
     if (!areSlotsConsecutive(requiredSlots)) {
       errorToast(
         "Required time slots are not consecutive. Please select a different time.",
@@ -337,7 +328,6 @@ const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({onSuccess}) 
       return;
     }
 
-    // Check if all required slots have capacity
     if (!areSlotsAvailable(requiredSlots)) {
       errorToast(
         `Some of the required time slots are fully booked. Please select a different time.`,
@@ -345,7 +335,6 @@ const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({onSuccess}) 
       return;
     }
 
-    // All checks passed - set the selected slots
     const slotIds = requiredSlots.map((slot) => slot._id);
     setSelectedSlotIds(slotIds);
     setSelectedTime({
@@ -413,6 +402,7 @@ const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({onSuccess}) 
         vehicleData,
         services: selectedServiceDetails,
         garage: selectedGarage?._id,
+        garageUID: selectedGarage?.userId,
         date: selectedDate,
         time: selectedTime,
         slotIds: selectedSlotIds,
@@ -423,7 +413,6 @@ const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({onSuccess}) 
         setLoading(true)
         const res = await bookAppointmentApi(data);
         onSuccess(res._id)
-        // Reset form after successful booking
         setSelectedGarage(null)
         setSelectedTime(null);
         setSelectedSlotIds([]);

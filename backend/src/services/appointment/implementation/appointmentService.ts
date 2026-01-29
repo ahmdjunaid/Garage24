@@ -8,6 +8,7 @@ import {
   GetMappedAppointmentResponse,
   GetMappedPopulatedAppointmentResponse,
   PopulatedAppointmentData,
+  ReschedulePayload,
 } from "../../../types/appointment";
 import mongoose, { Types } from "mongoose";
 import { GetPaginationQuery } from "../../../types/common";
@@ -46,13 +47,14 @@ export class AppointmentService implements IAppointmentService {
         {
           userId: new Types.ObjectId(userId),
           garageId: new Types.ObjectId(payload.garage),
+          garageUID: new Types.ObjectId(payload.garageUID),
           slotIds: payload.slotIds.map((id) => new Types.ObjectId(id)),
           appointmentDate: new Date(payload.date),
           startTime: payload.time.startTime,
           endTime,
           serviceIds: payload.services.map((s) => new Types.ObjectId(s._id)),
           totalDuration: payload.totalDuration,
-          status: "pending",
+          status: "confirmed",
           paymentStatus: "pending",
           vehicle: buildVehicleSnapshot(payload.vehicleData),
           userData: payload.userData,
@@ -106,11 +108,17 @@ export class AppointmentService implements IAppointmentService {
   }
 
   async cancelAppointment(id: string): Promise<AppointmentDocument> {
+    const appointment =
+      await this._appointmentRepository.getAppointmentById(id);
 
-    const appointment = await this._appointmentRepository.getAppointmentById(id)
-
-    if(appointment?.status !== "pending" && appointment?.status !== "confirmed"){
-      throw new AppError(HttpStatus.BAD_REQUEST, "Cannot be cancelled at this stage.")
+    if (
+      appointment?.status !== "pending" &&
+      appointment?.status !== "confirmed"
+    ) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        "Cannot be cancelled at this stage."
+      );
     }
 
     const session = await mongoose.startSession();
@@ -148,6 +156,59 @@ export class AppointmentService implements IAppointmentService {
       throw error;
     } finally {
       session.endSession();
+    }
+  }
+
+  async getAppointmentForReschedule(
+    id: string
+  ): Promise<PopulatedAppointmentData | null> {
+    const appointment =
+      await this._appointmentRepository.getAppointmentForReschedule(id);
+    if (!appointment) {
+      throw new AppError(
+        HttpStatus.NOT_FOUND,
+        "This appointment cannot be rescheduled at this stage."
+      );
+    }
+
+    return appointment;
+  }
+
+  async rescheduleAppointment(id: string, payload: ReschedulePayload) {
+    await this._slotService.lockSlots(payload.slotIds);
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      await this._slotService.validateSlotCapacity(payload.slotIds, session);
+      const endTime = calculateEndTime(payload.startTime, payload.duration);
+      const appointment = await this._appointmentRepository.findByIdAndUpdate(
+        id,
+        {
+          slotIds: payload.slotIds,
+          startTime: payload.startTime,
+          appointmentDate: new Date(payload.date),
+          endTime,
+        },
+        { session, new: true }
+      );
+
+      await this._slotService.incrementBookedCount(payload.slotIds, session);
+      await this._slotService.decrementBookedCount(payload.releasableSlotIds, session)
+      await session.commitTransaction();
+      session.endSession();
+
+      await this._slotService.releaseSlots(payload.slotIds);
+
+      return appointment;
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+
+      await this._slotService.releaseSlots(payload.slotIds);
+
+      throw error;
     }
   }
 }

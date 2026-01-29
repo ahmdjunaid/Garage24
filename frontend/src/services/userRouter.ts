@@ -1,6 +1,6 @@
 import { USER_BASE_ROUTE } from "@/constants/apiRoutes";
 import api from "./api";
-import type { CreateAppointmentRequest } from "@/types/AppointmentTypes";
+import type { CreateAppointmentRequest, ReschedulePayload } from "@/types/AppointmentTypes";
 
 export const registerVehicleApi = (data: FormData) => {
   return api
@@ -102,5 +102,20 @@ export const getAllAppointmentByUserIdApi = (
 export const cancelAppointmentApi = (appointmentId: string) => {
   return api
     .patch(`/${USER_BASE_ROUTE}/appointment/cancel/${appointmentId}`)
+    .then((res) => res.data);
+};
+
+export const getAppointmentForRescheduleApi = (appointmentId: string) => {
+  return api
+    .get(`/${USER_BASE_ROUTE}/appointment/reschedule/${appointmentId}`)
+    .then((res) => res.data);
+};
+
+export const rescheduleAppointmentApi = (
+  appointmentId: string,
+  data: ReschedulePayload,
+) => {
+  return api
+    .post(`/${USER_BASE_ROUTE}/appointment/reschedule/${appointmentId}`, data)
     .then((res) => res.data);
 };

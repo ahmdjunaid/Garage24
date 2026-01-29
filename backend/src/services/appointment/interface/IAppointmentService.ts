@@ -4,6 +4,7 @@ import {
   GetMappedAppointmentResponse,
   GetMappedPopulatedAppointmentResponse,
   PopulatedAppointmentData,
+  ReschedulePayload,
 } from "../../../types/appointment";
 import { GetPaginationQuery } from "../../../types/common";
 
@@ -22,4 +23,6 @@ export interface IAppointmentService {
     query: GetPaginationQuery
   ): Promise<GetMappedPopulatedAppointmentResponse>;
   cancelAppointment(id: string): Promise<AppointmentDocument | null>;
+  getAppointmentForReschedule(id:string): Promise<PopulatedAppointmentData | null>;
+  rescheduleAppointment(id: string, payload: ReschedulePayload): Promise<AppointmentDocument | null>;
 }

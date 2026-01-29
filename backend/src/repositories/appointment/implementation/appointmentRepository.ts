@@ -87,7 +87,7 @@ export class AppointmentRepository
         ? { status: { $in: ACTIVE_STATUSES } }
         : query.searchQuery === "previous"
           ? { status: { $in: PREVIOUS_STATUSES } }
-          : {};
+          : { status: { $in: ACTIVE_STATUSES } };
 
     const filter = {
       userId: query.id,
@@ -132,5 +132,27 @@ export class AppointmentRepository
       session: options?.session,
       new: options?.new ?? true,
     });
+  }
+
+  async getAppointmentForReschedule(
+    id: string
+  ): Promise<PopulatedAppointmentData | null> {
+    const appointment = await this.model
+      .findOne({
+        _id: id,
+        status: "confirmed",
+      })
+      .populate([
+        {
+          path: "garageId",
+          select: "name address mobileNumber location",
+        },
+        {
+          path: "serviceIds",
+          select: "name price duration",
+        },
+      ]);
+
+    return appointment as unknown as PopulatedAppointmentData;
   }
 }

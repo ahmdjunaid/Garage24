@@ -39,6 +39,7 @@ export interface IAppointmentUserData {
 export interface IAppointment {
   userId: Types.ObjectId;
   garageId: Types.ObjectId;
+  garageUID: Types.ObjectId;
 
   vehicle: IAppointmentVehicleSnapshot;
   userData: IAppointmentUserData;
@@ -106,6 +107,7 @@ export interface CreateAppointmentRequest {
   }[];
 
   garage: string;
+  garageUID: string;
 
   date: string;
 
@@ -117,35 +119,6 @@ export interface CreateAppointmentRequest {
   slotIds: string[];
 
   totalDuration: number;
-}
-
-export interface IAppointment {
-  userId: Types.ObjectId;
-  garageId: Types.ObjectId;
-
-  vehicle: IAppointmentVehicleSnapshot;
-  userData: IAppointmentUserData;
-
-  slotIds: Types.ObjectId[];
-  appointmentDate: Date;
-  startTime: string;
-  endTime: string;
-
-  serviceIds: Types.ObjectId[];
-  totalDuration: number;
-
-  mechanicId?: Types.ObjectId;
-  mechanicAssignedAt?: Date;
-
-  paymentId?: Types.ObjectId;
-  paymentStatus?: "pending" | "paid" | "failed" | "refunded";
-  amount?: number;
-
-  status: AppointmentStatus;
-
-  cancellationReason?: string;
-  customerNote?: string;
-  mechanicNote?: string;
 }
 
 export interface PopulatedGarage {
@@ -173,4 +146,12 @@ export interface GetMappedPopulatedAppointmentResponse {
   appointments: PopulatedAppointmentData[];
   totalAppointments: number;
   totalPages: number;
+}
+
+export interface ReschedulePayload {
+  date: string;
+  releasableSlotIds: string[]
+  slotIds: string[];
+  startTime: string;
+  duration: number;
 }
