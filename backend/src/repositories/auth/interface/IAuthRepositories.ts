@@ -18,6 +18,5 @@ export interface IAuthRepository {
   findByEmail(email: string): Promise<UserDocument | null>;
   findById(id: string): Promise<UserDocument | null>;
   findOneAndUpdate( userId: string, data: Partial<IUser>): Promise<UserDocument | null>;
-  findByIdAndDelete( userId:string ): Promise< UserDocument | null >;
   findByIdAndUpdate( userId: string, data: Partial<IUser>): Promise<UserDocument | null>;
 }

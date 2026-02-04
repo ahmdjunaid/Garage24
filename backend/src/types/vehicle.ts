@@ -21,7 +21,9 @@ export interface IVehicleDTO {
   _id: Types.ObjectId;
   licensePlate: string;
   makeName: string;
+  makeId: Types.ObjectId;
   model: string;
+  modelId: Types.ObjectId;
   registrationYear: number;
   fuelType: string;
   variant?: string;

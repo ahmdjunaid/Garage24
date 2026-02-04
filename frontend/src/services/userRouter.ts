@@ -119,3 +119,19 @@ export const rescheduleAppointmentApi = (
     .post(`/${USER_BASE_ROUTE}/appointment/reschedule/${appointmentId}`, data)
     .then((res) => res.data);
 };
+
+export const deleteVehicleApi = (vehicleId:string) => {
+  return api
+    .delete(`${USER_BASE_ROUTE}/vehicle/${vehicleId}`)
+    .then(res => res.data)
+}
+
+export const updateVehicleApi = (vehicleId:string, data: FormData) => {
+  return api
+    .patch(`${USER_BASE_ROUTE}/vehicle/${vehicleId}`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res.data);
+};

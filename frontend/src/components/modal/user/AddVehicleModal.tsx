@@ -5,10 +5,12 @@ import {
   getAllBrandsApi,
   getVehicleModelsByBrandApi,
   registerVehicleApi,
+  updateVehicleApi,
 } from "@/services/userRouter";
 import { errorToast, successToast } from "@/utils/notificationAudio";
 import type { IBrand } from "@/types/BrandTypes";
 import type { IVehicleModel } from "@/types/VehicleModelTypes";
+import type { IVehicleDTO } from "@/types/VehicleTypes";
 import { isValidIndianPlate } from "@/utils/validateLicencePlate";
 import { fuelTypes } from "@/constants/constantDatas";
 
@@ -16,57 +18,90 @@ interface AddVehicleModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreated: () => void;
+  vehicle: IVehicleDTO | null;
 }
 
 interface Errors {
   [key: string]: string;
 }
 
-const intialFormData = { 
-    licensePlate: "",
-    make: "",
-    model: "",
-    registrationYear: "",
-    fuelType: "",
-    variant: "",
-    color: "",
-    insuranceValidity: "",
-    puccValidity: "",
-}
+const initialFormData = {
+  licensePlate: "",
+  make: "",
+  model: "",
+  registrationYear: "",
+  fuelType: "",
+  variant: "",
+  color: "",
+  insuranceValidity: "",
+  puccValidity: "",
+};
 
 const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
   isOpen,
   onClose,
-  onCreated
+  onCreated,
+  vehicle,
 }) => {
+  const isEditMode = Boolean(vehicle);
+
   const [preview, setPreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
-  const [brands, setBrands] = useState<IBrand[] | []>([]);
-  const [vehicleModels, setVehicleModels] = useState<IVehicleModel[] | []>([]);
-  const [formData, setFormData] = useState(intialFormData);
+  const [brands, setBrands] = useState<IBrand[]>([]);
+  const [vehicleModels, setVehicleModels] = useState<IVehicleModel[]>([]);
+  const [formData, setFormData] = useState(initialFormData);
 
   useEffect(() => {
     const fetchBrands = async () => {
       const res = await getAllBrandsApi();
       setBrands(res);
     };
-
     fetchBrands();
   }, []);
 
   useEffect(() => {
     const fetchVehicleModels = async () => {
-      if(!formData.make) return;
+      if (!formData.make) return;
       const res = await getVehicleModelsByBrandApi(formData.make);
       setVehicleModels(res);
     };
     fetchVehicleModels();
   }, [formData.make]);
 
+  useEffect(() => {
+    if (vehicle && isOpen) {
+      setFormData({
+        licensePlate: vehicle.licensePlate || "",
+        make: vehicle.makeId || "",
+        model: vehicle.modelId || "",
+        registrationYear: String(vehicle.registrationYear || ""),
+        fuelType: vehicle.fuelType || "",
+        variant: vehicle.variant || "",
+        color: vehicle.color || "",
+        insuranceValidity: vehicle.insuranceValidity
+          ? vehicle.insuranceValidity.toString().slice(0, 10)
+          : "",
+        puccValidity: vehicle.puccValidity
+          ? vehicle.puccValidity.toString().slice(0, 10)
+          : "",
+      });
+
+      setPreview(vehicle.imageUrl || null);
+      setImageFile(null);
+    }
+
+    if (!vehicle && isOpen) {
+      setFormData(initialFormData);
+      setPreview(null);
+      setImageFile(null);
+      setErrors({});
+    }
+  }, [vehicle, isOpen]);
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -100,13 +135,12 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
 
     if (!formData.fuelType) newErrors.fuelType = "Fuel type is required";
     if (!formData.color) newErrors.color = "Color is required";
-
     if (!formData.insuranceValidity)
       newErrors.insuranceValidity = "Insurance date required";
-
     if (!formData.puccValidity) newErrors.puccValidity = "PUCC date required";
 
-    if (!imageFile) newErrors.image = "Vehicle image is required";
+    if (!imageFile && !isEditMode)
+      newErrors.image = "Vehicle image is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -119,27 +153,24 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
       setLoading(true);
 
       const payload = new FormData();
-
       Object.entries(formData).forEach(([key, value]) => {
         payload.append(key, value);
       });
 
-      if (imageFile) {
-        payload.append("vehicleImage", imageFile);
-      }
+      if (imageFile) payload.append("vehicleImage", imageFile);
 
-      const res = await registerVehicleApi(payload);
-      successToast(res.message || "Vehicle added to Garage.");
+      if (isEditMode && vehicle?._id) {
+        await updateVehicleApi(vehicle._id, payload);
+        successToast("Vehicle updated successfully");
+      } else {
+        await registerVehicleApi(payload);
+        successToast("Vehicle added successfully");
+      }
+      setFormData(initialFormData);
       onCreated();
       onClose();
-      setFormData(intialFormData)
-      setImageFile(null)
-      setPreview(null)
     } catch (err) {
-      console.error(err);
-      if (err instanceof Error) {
-        errorToast(err.message);
-      }
+      if (err instanceof Error) errorToast(err.message);
     } finally {
       setLoading(false);
     }
@@ -148,12 +179,15 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
   return (
     <DarkModal isOpen={isOpen} onClose={onClose}>
       <h2 className="text-white text-xl font-semibold mb-1 mt-5">
-        Add Your Vehicle
+        {isEditMode ? "Update Vehicle" : "Add Your Vehicle"}
       </h2>
       <p className="text-sm text-gray-400 mb-6">
-        Save your vehicle details for quick bookings
+        {isEditMode
+          ? "Update your vehicle details"
+          : "Save your vehicle details for quick bookings"}
       </p>
 
+      {/* IMAGE */}
       <div className="mb-6">
         <label className="text-sm text-gray-400 mb-2 block">
           Vehicle Image
@@ -191,47 +225,33 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
           value={formData.licensePlate}
           onChange={handleChange}
           error={errors.licensePlate}
-          placeholder="License Plate (KL-01-AA-0000)"
+          placeholder="License Plate"
+          disabled={isEditMode}
           span
         />
-        <div>
-          <select
-            name="make"
-            id=""
-            onChange={handleChange}
-            value={formData.make}
-            className="w-full bg-white rounded-lg px-4 py-3 text-sm text-gray-800 focus:ring-2 focus:ring-red-500 outline-none"
-          >
-            <option value="" selected disabled>
-              Select a brand
-            </option>
-            {brands.map((brand) => {
-              return <option value={brand._id}>{brand.name}</option>;
-            })}
-          </select>
-          {errors.make && (
-            <p className="text-red-500 text-xs mt-1">{errors.make}</p>
-          )}
-        </div>
-        <div>
-          <select
-            name="model"
-            id=""
-            onChange={handleChange}
-            value={formData.model}
-            className="w-full bg-white rounded-lg px-4 py-3 text-sm text-gray-800 focus:ring-2 focus:ring-red-500 outline-none"
-          >
-            <option value="" selected disabled>
-              Select a model
-            </option>
-            {vehicleModels.map((model) => {
-              return <option value={model._id}>{model.name}</option>;
-            })}
-          </select>
-          {errors.model && (
-            <p className="text-red-500 text-xs mt-1">{errors.model}</p>
-          )}
-        </div>
+
+        <Select
+          name="make"
+          value={formData.make}
+          onChange={handleChange}
+          error={errors.make}
+          options={brands.map((b) => ({ value: b._id, label: b.name }))}
+          disabled={isEditMode}
+          placeholder="Select brand"
+        />
+
+        <Select
+          name="model"
+          value={formData.model}
+          onChange={handleChange}
+          error={errors.model}
+          options={vehicleModels.map((m) => ({
+            value: m._id,
+            label: m.name,
+          }))}
+          disabled={isEditMode}
+          placeholder="Select model"
+        />
 
         <Input
           name="registrationYear"
@@ -239,33 +259,25 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
           onChange={handleChange}
           error={errors.registrationYear}
           placeholder="Registration Year"
+          disabled={isEditMode}
         />
 
-        <div>
-          <select
-            name="fuelType"
-            id=""
-            onChange={handleChange}
-            value={formData.fuelType}
-            className="w-full bg-white rounded-lg px-4 py-3 text-sm text-gray-800 focus:ring-2 focus:ring-red-500 outline-none"
-          >
-            <option value="" selected disabled>
-              Select a fuel-type
-            </option>
-            {fuelTypes.map((fuel) => {
-              return <option value={fuel}>{fuel}</option>;
-            })}
-          </select>
-          {errors.fuelType && (
-            <p className="text-red-500 text-xs mt-1">{errors.fuelType}</p>
-          )}
-        </div>
+        <Select
+          name="fuelType"
+          value={formData.fuelType}
+          onChange={handleChange}
+          error={errors.fuelType}
+          options={fuelTypes.map((f) => ({ value: f, label: f }))}
+          placeholder="Select fuel type"
+          disabled={isEditMode}
+        />
 
         <Input
           name="variant"
           value={formData.variant}
           onChange={handleChange}
           placeholder="Variant"
+          disabled={isEditMode}
         />
 
         <Input
@@ -300,7 +312,7 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
           onClick={handleSubmit}
           className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-6 py-2 rounded-lg transition"
         >
-          {loading ? "Saving..." : "Add Now"}
+          {loading ? "Saving..." : isEditMode ? "Update Vehicle" : "Add Now"}
         </button>
       </div>
     </DarkModal>
@@ -310,28 +322,52 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
 interface InputProps {
   name: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
-  placeholder:string;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => void;
+  placeholder: string;
   error?: string;
-  span?:boolean;
+  disabled?: boolean;
+  span?: boolean;
 }
 
-const Input = ({ name, value, onChange, placeholder, error, span }: InputProps) => (
+const Input = ({
+  name,
+  value,
+  onChange,
+  placeholder,
+  error,
+  disabled,
+  span,
+}: InputProps) => (
   <div className={span ? "col-span-2" : ""}>
     <input
       name={name}
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className="w-full bg-white rounded-lg px-4 py-3 text-sm text-gray-800 focus:ring-2 focus:ring-red-500 outline-none"
+      disabled={disabled}
+      className={`w-full rounded-lg px-4 py-3 text-sm text-gray-800 focus:ring-2 focus:ring-red-500 outline-none
+        ${
+          disabled
+            ? "bg-white/70 cursor-not-allowed opacity-70"
+            : "bg-white hover:bg-white/90"
+        }
+      `}
     />
     {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
   </div>
 );
 
-const DateInput = ({ name, value, onChange, error, placeholder }: InputProps) => (
-  <div className="relative">
-    <label className="text-sm text-white">{placeholder} :</label>
+const DateInput = ({
+  name,
+  value,
+  onChange,
+  error,
+  placeholder,
+}: InputProps) => (
+  <div>
+    <label className="text-sm text-white">{placeholder}</label>
     <input
       type="date"
       name={name}
@@ -339,6 +375,53 @@ const DateInput = ({ name, value, onChange, error, placeholder }: InputProps) =>
       onChange={onChange}
       className="w-full bg-white rounded-lg px-4 py-3 text-sm text-gray-800 focus:ring-2 focus:ring-red-500 outline-none"
     />
+    {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+  </div>
+);
+
+interface SelectProps {
+  name: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  error?: string;
+  options: { value: string; label: string }[];
+  disabled?: boolean;
+  placeholder: string;
+}
+
+const Select = ({
+  name,
+  value,
+  onChange,
+  error,
+  options,
+  disabled,
+  placeholder,
+}: SelectProps) => (
+  <div>
+    <select
+      name={name}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      className={`w-full rounded-lg px-4 py-3 text-sm text-gray-800 focus:ring-2 focus:ring-red-500 outline-none
+        ${
+          disabled
+            ? "bg-white/70 cursor-not-allowed opacity-70"
+            : "bg-white hover:bg-white/90"
+        }
+        
+        `}
+    >
+      <option value="" disabled>
+        {placeholder}
+      </option>
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
     {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
   </div>
 );

@@ -29,11 +29,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
       {/* Icon */}
       <div className="flex justify-center mb-4">
         <div className="w-36 h-24 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
-          <img
-            src={vehicle.imageUrl}
-            alt="car"
-            className="h-full"
-          />
+          <img src={vehicle.imageUrl} alt="car" className="h-full" />
         </div>
       </div>
 

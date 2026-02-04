@@ -38,6 +38,7 @@ export interface IAppointmentUserData {
 
 export interface IAppointment {
   userId: Types.ObjectId;
+  appId: string;
   garageId: Types.ObjectId;
   garageUID: Types.ObjectId;
 

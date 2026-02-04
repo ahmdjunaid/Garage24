@@ -1,7 +1,7 @@
 import { BaseRepository } from "../../IBaseRepository";
 import { IVehicleRepository } from "../interface/IVehicleRepository";
 import { IPopulatedVehicle, IVehicle } from "../../../types/vehicle";
-import { Vehicle } from "../../../models/vehicle";
+import { Vehicle, VehicleDocument } from "../../../models/vehicle";
 import { injectable } from "inversify";
 
 @injectable()
@@ -36,5 +36,13 @@ export class VehicleRepository
       .populate([{path:"make", select:"name"},{path:"model", select:"name"}])
 
     return vehicle as unknown as IPopulatedVehicle;
+  }
+
+  async deleteVehicleById(vid: string): Promise<VehicleDocument | null> {
+    return await this.deleteById(vid)
+  }
+
+  async updateVehicleData(vid: string, data: Partial<IVehicle>): Promise<VehicleDocument|null> {
+    return await this.updateById(vid, data)
   }
 }

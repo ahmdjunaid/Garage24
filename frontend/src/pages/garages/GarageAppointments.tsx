@@ -66,7 +66,7 @@ const GarageAppointments = () => {
   }, [currentPage, searchQuery, fetchServices, debouncedFetch]);
 
   const columns: TableColumn<PopulatedAppointmentData>[] = [
-    { key: "_id", label: "ID" },
+    { key: "appId", label: "ID" },
     { key: "vehicle.make.name", label: "Brand" },
     { key: "vehicle.model.name", label: "Model" },
     { key: "vehicle.licensePlate", label: "Number" },
@@ -114,14 +114,6 @@ const GarageAppointments = () => {
               );
             }}
           />
-
-          {/* <ConfirmModal
-            isOpen={!!action}
-            message={`Are you sure want ${action?.action} ${action?.name} service?`}
-            onClose={() => setAction(null)}
-            onConfirm={() => handleConfirm()}
-            onCancel={() => setAction(null)}
-          /> */}
 
           <Spinner loading={loading} />
 

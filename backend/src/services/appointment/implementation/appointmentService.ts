@@ -17,6 +17,7 @@ import { calculateEndTime } from "../../../utils/calculateEndTime";
 import { buildVehicleSnapshot } from "../../../utils/buildVehicleSnapshot";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { AppError } from "../../../middleware/errorHandler";
+import { generateCustomId } from "../../../utils/generateUniqueIds";
 
 @injectable()
 export class AppointmentService implements IAppointmentService {
@@ -41,11 +42,14 @@ export class AppointmentService implements IAppointmentService {
       const endTime = calculateEndTime(
         payload.time.startTime,
         payload.totalDuration
-      );
+      );    
+      
+      const APP_ID = generateCustomId("appointment")
 
       const appointment = await this._appointmentRepository.createAppointment(
         {
           userId: new Types.ObjectId(userId),
+          appId: APP_ID,
           garageId: new Types.ObjectId(payload.garage),
           garageUID: new Types.ObjectId(payload.garageUID),
           slotIds: payload.slotIds.map((id) => new Types.ObjectId(id)),

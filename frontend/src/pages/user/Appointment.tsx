@@ -66,7 +66,7 @@ const Appointment = () => {
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <AppointmentSuccess
-            bookingNumber={appointment?._id}
+            bookingNumber={appointment?.appId}
             date={appointment?.appointmentDate}
             garageName={appointment?.garageId.name}
             time={appointment?.startTime}

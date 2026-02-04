@@ -31,6 +31,7 @@ export interface IAppointmentVehicleSnapshot {
 
 export interface IAppointment {
   userId: string;
+  appId: string;
   garageId: string;
   garageUID: string;
 

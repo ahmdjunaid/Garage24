@@ -53,10 +53,6 @@ export class AuthRepository
     return await this.getById(id);
   }
 
-  async findByIdAndDelete(userId: string) {
-    return await this.deleteById(userId);
-  }
-
   async findByIdAndUpdate(userId: string, data: Partial<IUser>) {
     return await this.updateById(userId, data);
   }

@@ -1,8 +1,13 @@
 import { VehicleCard } from "@/components/cards/VehicleCard";
+import { ConfirmModal } from "@/components/modal/ConfirmModal";
 import AddVehicleModal from "@/components/modal/user/AddVehicleModal";
 import VehicleDetailsModal from "@/components/modal/user/VehicleDetailsModal";
-import { getVehiclesByUserIdApi } from "@/services/userRouter";
+import {
+  deleteVehicleApi,
+  getVehiclesByUserIdApi,
+} from "@/services/userRouter";
 import type { IVehicleDTO } from "@/types/VehicleTypes";
+import { errorToast, successToast } from "@/utils/notificationAudio";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -10,6 +15,10 @@ export const VehicleListing: React.FC = () => {
   const [showAddModal, setShowModal] = useState<boolean>(false);
   const [vehicleToView, setVehicleToView] = useState<IVehicleDTO | null>(null);
   const [vehicles, setVehicles] = useState<IVehicleDTO[] | []>([]);
+  const [vehicleToUpdate, setVehicleToUpdate] = useState<IVehicleDTO | null>(
+    null,
+  );
+  const [idToDelete, setIdToDelete] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
@@ -22,8 +31,21 @@ export const VehicleListing: React.FC = () => {
     setVehicles(res);
   };
 
-  const handleRemove = (id: string) => {
-    console.log("Remove vehicle", id);
+  const handleRemove = async (id: string | null) => {
+    if(!id) return
+    try {
+      await deleteVehicleApi(id);
+      setVehicles(prev => prev.filter(v =>v._id !== id))
+      successToast("Vehicle Deleted Successful.");
+    } catch (error) {
+      if (error instanceof Error) errorToast(error.message);
+    }
+  };
+
+  const handleUpdateClick = (vehicle: IVehicleDTO) => {
+    setVehicleToUpdate(vehicle);
+    setShowModal(true);
+    setVehicleToView(null);
   };
 
   return (
@@ -47,7 +69,7 @@ export const VehicleListing: React.FC = () => {
               vehicle={vehicle}
               onView={(vehicle) => setVehicleToView(vehicle)}
               onBook={(id) => navigate(`/appointment?vehicleId=${id}`)}
-              onRemove={handleRemove}
+              onRemove={setIdToDelete}
             />
           ))}
         </div>
@@ -61,13 +83,32 @@ export const VehicleListing: React.FC = () => {
 
       <AddVehicleModal
         isOpen={showAddModal}
-        onClose={() => setShowModal(false)}
-        onCreated={() => fetchVehicles()}
+        onClose={() => {
+          setShowModal(false)
+          setVehicleToUpdate(null)
+        }}
+        onCreated={() => {
+          fetchVehicles()
+          setVehicleToUpdate(null)
+        }}
+        vehicle={vehicleToUpdate}
       />
+
       <VehicleDetailsModal
         vehicle={vehicleToView}
         isOpen={!!vehicleToView}
         onClose={() => setVehicleToView(null)}
+        handleUpdate={handleUpdateClick}
+      />
+
+      <ConfirmModal 
+        isOpen={!!idToDelete}
+        onClose={()=>setIdToDelete(null)}
+        message={"Are you sure want to delete this vehicle from myGarage?"}
+        onConfirm={()=>{
+          setIdToDelete(null)
+          handleRemove(idToDelete)
+        }}
       />
     </div>
   );

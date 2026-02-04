@@ -22,7 +22,9 @@ export interface IVehicleDTO {
   _id: string;
   licensePlate: string;
   makeName: string;
+  makeId: string;
   model: string;
+  modelId: string;
   registrationYear: number | string;
   fuelType: string;
   variant?: string;

@@ -9,7 +9,7 @@ const appointmentSchema = new Schema<IAppointment>(
       ref: "User",
       required: true,
     },
-
+    appId: { type: String, required: true },
     garageId: {
       type: Schema.Types.ObjectId,
       ref: "Garage",

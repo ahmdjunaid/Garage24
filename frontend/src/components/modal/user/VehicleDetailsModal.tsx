@@ -6,12 +6,14 @@ interface ModalProps {
   vehicle: IVehicleDTO | null;
   isOpen: boolean;
   onClose: () => void;
+  handleUpdate: (vehicle:IVehicleDTO) => void;
 }
 
 const VehicleDetailsModal: React.FC<ModalProps> = ({
   vehicle,
   isOpen,
   onClose,
+  handleUpdate
 }) => {
   return (
     <DarkModal isOpen={isOpen} onClose={onClose}>
@@ -44,7 +46,11 @@ const VehicleDetailsModal: React.FC<ModalProps> = ({
 
             <div>
               <p className="text-gray-400">Last Service</p>
-              <p className="font-medium">{ vehicle.lastServicedKM ? `${vehicle.lastServicedKM} KM` : "Not Available"}</p>
+              <p className="font-medium">
+                {vehicle.lastServicedKM
+                  ? `${vehicle.lastServicedKM} KM`
+                  : "Not Available"}
+              </p>
             </div>
           </div>
 
@@ -56,14 +62,30 @@ const VehicleDetailsModal: React.FC<ModalProps> = ({
             <div className="flex justify-between text-sm">
               <span className="text-gray-400">Insurance</span>
               <span>
-                { new Date(vehicle.insuranceValidity) < new Date() ? `Expired on ${new Date(vehicle.insuranceValidity).toLocaleDateString("en-GB")}` : new Date(vehicle.insuranceValidity).toLocaleDateString("en-GB")}
+                {new Date(vehicle.insuranceValidity) < new Date()
+                  ? `Expired on ${new Date(vehicle.insuranceValidity).toLocaleDateString("en-GB")}`
+                  : new Date(vehicle.insuranceValidity).toLocaleDateString(
+                      "en-GB",
+                    )}
               </span>
             </div>
 
             <div className="flex justify-between text-sm mt-2">
               <span className="text-gray-400">PUCC</span>
-              <span>{new Date(vehicle.puccValidity) < new Date() ? `Expired on ${new Date(vehicle.puccValidity).toLocaleDateString("en-GB")}` : new Date(vehicle.puccValidity).toLocaleDateString("en-GB")}</span>
+              <span>
+                {new Date(vehicle.puccValidity) < new Date()
+                  ? `Expired on ${new Date(vehicle.puccValidity).toLocaleDateString("en-GB")}`
+                  : new Date(vehicle.puccValidity).toLocaleDateString("en-GB")}
+              </span>
             </div>
+          </div>
+          <div className="flex justify-end mt-8">
+            <button
+              onClick={()=>handleUpdate(vehicle)}
+              className="bg-red-700 hover:bg-red-600 disabled:opacity-50 text-white px-6 py-2 rounded-lg transition"
+            >
+              Update Details
+            </button>
           </div>
         </section>
       )}

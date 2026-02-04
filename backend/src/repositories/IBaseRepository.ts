@@ -40,12 +40,12 @@ export class BaseRepository<T> {
   }
 
   async deleteById(id: string): Promise<HydratedDocument<T> | null> {
-    return await this.model.findByIdAndDelete(id);
+    return await this.model.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
   }
 
   async deleteByFilter(
     filter: FilterQuery<T>
   ): Promise<HydratedDocument<T> | null> {
-    return await this.model.findOneAndDelete(filter);
+    return await this.model.findByIdAndUpdate(filter, { isDeleted: true }, { new: true });
   }
 }

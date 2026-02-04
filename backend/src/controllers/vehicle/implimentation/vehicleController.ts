@@ -46,10 +46,10 @@ export class VehicleController implements IVehicleController {
         !puccValidity ||
         !image
       ) {
-        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED)
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
 
-      const message = await this._vehicleService.createVehicle(
+      const message = await this._vehicleService.createVehicle({
         userId,
         licensePlate,
         make,
@@ -61,26 +61,30 @@ export class VehicleController implements IVehicleController {
         puccValidity,
         image,
         variant
-      );
+      });
 
       res.status(HttpStatus.OK).json(message);
     } catch (error) {
-    next(error)
+      next(error);
     }
   };
 
-  getAllVehicleByUserId = async (req: Request, res: Response, next: NextFunction) => {
+  getAllVehicleByUserId = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
-        throw new AppError(HttpStatus.BAD_REQUEST, ERROR_WHILE_FETCH_DATA)
+        throw new AppError(HttpStatus.BAD_REQUEST, ERROR_WHILE_FETCH_DATA);
       }
 
       const vehicles = await this._vehicleService.getAllVehicleByUserId(userId);
 
       res.status(HttpStatus.OK).json(vehicles);
     } catch (error) {
-      next(error)
+      next(error);
     }
   };
 
@@ -88,13 +92,70 @@ export class VehicleController implements IVehicleController {
     try {
       const vehicleId = req.query.vehicleId as string;
       if (!vehicleId) {
-        throw new AppError(HttpStatus.BAD_REQUEST, ERROR_WHILE_FETCH_DATA)
+        throw new AppError(HttpStatus.BAD_REQUEST, ERROR_WHILE_FETCH_DATA);
       }
 
       const vehicle = await this._vehicleService.getVehicleById(vehicleId);
       res.status(HttpStatus.OK).json(vehicle);
     } catch (error) {
-      next(error)
+      next(error);
     }
-  }
+  };
+
+  deleteVehicleById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const vehicleId = req.params.vehicleId;
+      if (!vehicleId) {
+        throw new AppError(HttpStatus.BAD_REQUEST, "Vehicle ID Required");
+      }
+
+      const response = await this._vehicleService.deleteVehicleById(vehicleId);
+
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateVehicleData = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const vehicleId = req.params.vehicleId;
+      if (!vehicleId) {
+        throw new AppError(HttpStatus.BAD_REQUEST, "Vehicle ID Required");
+      }
+      const {
+        color,
+        insuranceValidity,
+        puccValidity,
+      } = req.body;
+      const image = req.file as Express.Multer.File;
+
+      if (
+        !color ||
+        !insuranceValidity ||
+        !puccValidity
+      ) {
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
+      }
+
+      const response = await this._vehicleService.updateVehicleData(vehicleId, {
+        color,
+        insuranceValidity,
+        puccValidity,
+        image,
+      })
+
+      res.status(HttpStatus.OK).json(response)
+    } catch (error) {
+      next(error);
+    }
+  };
 }
