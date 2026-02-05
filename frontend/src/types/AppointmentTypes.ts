@@ -29,9 +29,34 @@ export interface IAppointmentVehicleSnapshot {
   imageUrl?: string;
 }
 
+export type AppointmentServiceStatus =
+  | "pending"
+  | "started"
+  | "completed"
+  | "skipped";
+
+export interface IAppointmentServiceData {
+  serviceId: string;
+  name: string;
+  price: number;
+  durationMinutes: number;
+  status: AppointmentServiceStatus;
+
+  startedAt?: Date;
+  completedAt?: Date;
+}
+
+export interface IAppointmentEvents {
+  message: string;
+  doneBy: string;
+  actorName: string;
+  actorRole: string;
+  createdAt: Date;
+}
+
 export interface IAppointment {
-  userId: string;
   appId: string;
+  userId: string;
   garageId: string;
   garageUID: string;
 
@@ -44,23 +69,27 @@ export interface IAppointment {
   };
 
   slotIds: string[];
+
   appointmentDate: string;
   startTime: string;
   endTime: string;
-
-  serviceIds: string[];
   totalDuration: number;
+
+  services: IAppointmentServiceData[];
 
   mechanicId?: string;
   mechanicAssignedAt?: Date;
 
+  amount?: number;
   paymentId?: string;
   paymentStatus?: "pending" | "paid" | "failed" | "refunded";
-  amount?: number;
+  stripePaymentIntentId: string;
 
   status: AppointmentStatus;
+  events: IAppointmentEvents[];
 
   cancellationReason?: string;
+
   customerNote?: string;
   mechanicNote?: string;
 }
@@ -119,18 +148,10 @@ export interface PopulatedGarage {
   location: ILocation;
 }
 
-export interface PopulatedService {
-  _id: string;
-  name: string;
-  price: number;
-  duration: number;
-}
-
 export interface PopulatedAppointmentData
-  extends Omit<IAppointment, "garageId" | "services" | "serviceIds"> {
+  extends Omit<IAppointment, "garageId"> {
   _id: string;
   garageId: PopulatedGarage;
-  serviceIds: PopulatedService[];
   createdAt: string;
   updatedAt: string;
 }

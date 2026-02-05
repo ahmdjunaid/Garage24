@@ -48,10 +48,6 @@ export class AppointmentRepository
           path: "garageId",
           select: "name address mobileNumber location",
         },
-        {
-          path: "serviceIds",
-          select: "name price duration",
-        },
       ])
       .skip(skip)
       .limit(query.limit)
@@ -72,10 +68,6 @@ export class AppointmentRepository
         {
           path: "garageId",
           select: "name address mobileNumber location",
-        },
-        {
-          path: "serviceIds",
-          select: "name price duration",
         },
       ])
       .lean();
@@ -109,10 +101,6 @@ export class AppointmentRepository
         {
           path: "garageId",
           select: "name address mobileNumber location",
-        },
-        {
-          path: "serviceIds",
-          select: "name price duration",
         },
       ])
       .skip(skip)
@@ -156,12 +144,24 @@ export class AppointmentRepository
           path: "garageId",
           select: "name address mobileNumber location",
         },
-        {
-          path: "serviceIds",
-          select: "name price duration",
-        },
       ]);
 
     return appointment as unknown as PopulatedAppointmentData;
+  }
+
+  async pushToArray<T>(
+    appointmentId: string,
+    field: "services" | "events",
+    data: T,
+    options?: {
+      session?: ClientSession;
+      new?: boolean;
+    }
+  ): Promise<AppointmentDocument | null> {
+    return await this.model.findOneAndUpdate(
+      { _id: appointmentId },
+      { $push: { [field]: data } },
+      { session: options?.session, new: options?.new ?? true }
+    );
   }
 }

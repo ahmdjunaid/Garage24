@@ -48,7 +48,7 @@ export class AppointmentController implements IAppointmentController {
   ) => {
     try {
       validateCreateAppointment(req.body);
-
+      console.log(req.body)
       const userId = req.user?.id;
 
       if (!userId) {

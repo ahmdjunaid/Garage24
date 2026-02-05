@@ -158,6 +158,7 @@ const MyAppointmentsSection = () => {
           appointment={viewAppointment}
           isOpen={!!viewAppointment}
           onClose={() => setViewAppointment(null)}
+          isUserView={true}
         />
       )}
     </div>

@@ -129,6 +129,7 @@ const GarageAppointments = () => {
               appointment={viewAppointment}
               isOpen={!!viewAppointment}
               onClose={() => setViewAppointment(null)}
+              isUserView={false}
             />
           )}
         </div>

@@ -7,12 +7,14 @@ interface AppointmentDetailsProps {
   appointment: PopulatedAppointmentData;
   isOpen: boolean;
   onClose: () => void;
+  isUserView: boolean;
 }
 
 const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
   appointment,
   isOpen,
   onClose,
+  isUserView
 }) => {
   const {
     status,
@@ -21,7 +23,7 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
     endTime,
     totalDuration,
     paymentStatus,
-    serviceIds,
+    services,
     vehicle,
     userData,
     garageId,
@@ -60,9 +62,9 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
         <div>
           <h3 className="text-sm font-semibold mb-2 text-[#aaa]">Services</h3>
           <ul className="space-y-2">
-            {serviceIds.map((service) => (
+            {services.map((service) => (
               <li
-                key={service._id}
+                key={service.serviceId}
                 className="flex justify-between bg-[#222] px-4 py-2 rounded-lg text-sm"
               >
                 <span>{service.name}</span>
@@ -86,20 +88,22 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
         </div>
 
         {/* Garage */}
-        <div>
-          <h3 className="text-sm font-semibold mb-2 text-[#aaa]">Garage</h3>
-          <div className="bg-[#222] p-4 rounded-lg text-sm space-y-1">
-            <p className="font-medium">{garageId.name}</p>
-            <p className="text-[#aaa]">{garageId.address.displayName}</p>
-            <p className="flex items-center gap-2 text-[#aaa]">
-              <Phone size={16} />
-              <span>{garageId.mobileNumber}</span>
-            </p>{" "}
+        {isUserView && (
+          <div>
+            <h3 className="text-sm font-semibold mb-2 text-[#aaa]">Garage</h3>
+            <div className="bg-[#222] p-4 rounded-lg text-sm space-y-1">
+              <p className="font-medium">{garageId.name}</p>
+              <p className="text-[#aaa]">{garageId.address.displayName}</p>
+              <p className="flex items-center gap-2 text-[#aaa]">
+                <Phone size={16} />
+                <span>{garageId.mobileNumber}</span>
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Customer */}
-        {userData && (
+        {userData && !isUserView && (
           <div>
             <h3 className="text-sm font-semibold mb-2 text-[#aaa]">Customer</h3>
             <div className="bg-[#222] p-4 rounded-lg text-sm space-y-1">
@@ -112,6 +116,7 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
             </div>
           </div>
         )}
+        
       </div>
     </DarkModal>
   );

@@ -185,9 +185,9 @@ const RescheduleAppointmentForm = () => {
                 <div className="flex items-start gap-3">
                   <Settings size={16} />
                   <div className="flex flex-wrap gap-2">
-                    {appointment.serviceIds.map((service) => (
+                    {appointment.services.map((service) => (
                       <span
-                        key={service._id}
+                        key={service.serviceId}
                         className="px-3 py-1 rounded-full text-xs bg-[#1f1f1f]"
                       >
                         {service.name}

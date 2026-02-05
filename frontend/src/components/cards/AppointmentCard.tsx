@@ -1,5 +1,6 @@
 import type { PopulatedAppointmentData } from "@/types/AppointmentTypes";
 import React from "react";
+import { Car } from "lucide-react";
 
 interface CardProps {
   appointments: PopulatedAppointmentData[];
@@ -27,23 +28,20 @@ const AppointmentCard: React.FC<CardProps> = ({
             <div className="flex items-center justify-between gap-6">
               {/* Left */}
               <div className="flex items-center gap-5">
-                <div className="w-[70px] h-[70px] rounded-xl flex items-center justify-center border border-[#ef4444]/30 bg-[#2a2a2a]">
-                  <svg
-                    className="w-9 h-9 text-[#ef4444]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                  >
-                    <rect x="4" y="11" width="16" height="8" rx="1.5" />
-                    <circle cx="7" cy="16" r="1.5" />
-                    <circle cx="17" cy="16" r="1.5" />
-                    <path
-                      d="M4 11V9.5C4 8.67 4.67 8 5.5 8h13C19.33 8 20 8.67 20 9.5V11"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                <div className="w-[70px] h-[70px] rounded-xl flex items-center justify-center border border-[#ef4444]/30 bg-[#2a2a2a] overflow-hidden">
+                  {appointment.vehicle.imageUrl ? (
+                    <img
+                      src={appointment.vehicle.imageUrl}
+                      alt="Vehicle"
+                      className="w-full h-full object-cover"
                     />
-                  </svg>
+                  ) : (
+                    <Car
+                      size={36}
+                      className="text-[#ef4444]"
+                      strokeWidth={1.5}
+                    />
+                  )}
                 </div>
 
                 <div>
@@ -55,11 +53,15 @@ const AppointmentCard: React.FC<CardProps> = ({
                     </span>
                   </h3>
                   <p className="text-[#999] text-sm">
-                    {appointment.serviceIds
+                    {appointment.services
                       .map((service) => service.name)
                       .join(", ")}
                   </p>
                   <span className="inline-block px-3 py-1 rounded-lg text-xs font-semibold bg-gray-600 text-white capitalize">
+                    {new Date(appointment.appointmentDate).toDateString()}
+                    {" • "}
+                    {appointment.startTime}
+                    {" • "}
                     {appointment.status}
                   </span>
                 </div>

@@ -28,5 +28,16 @@ export interface IAppointmentRepository {
       new?: boolean;
     }
   ): Promise<AppointmentDocument | null>;
-  getAppointmentForReschedule(id:string):Promise<PopulatedAppointmentData | null>;
+  getAppointmentForReschedule(
+    id: string
+  ): Promise<PopulatedAppointmentData | null>;
+  pushToArray<T>(
+    appointmentId: string,
+    field: "services" | "events",
+    data: T,
+    options?: {
+      session?: ClientSession;
+      new?: boolean;
+    }
+  ): Promise<AppointmentDocument | null>;
 }

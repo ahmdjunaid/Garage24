@@ -36,33 +36,63 @@ export interface IAppointmentUserData {
   mobileNumber: string,
 }
 
+export type AppointmentServiceStatus =
+  | "pending"
+  | "started"
+  | "completed"
+  | "skipped";
+
+export interface IAppointmentServiceData {
+  serviceId: Types.ObjectId;
+  name: string;
+  price: number;
+  durationMinutes: number;
+  status: AppointmentServiceStatus;
+
+  startedAt?: Date;
+  completedAt?: Date;
+}
+
+export interface IAppointmentEvents {
+  message: string;
+  doneBy: Types.ObjectId;
+  actorName: string;
+  actorRole: string;
+  createdAt?: Date;
+}
+
 export interface IAppointment {
-  userId: Types.ObjectId;
   appId: string;
+  userId: Types.ObjectId;
   garageId: Types.ObjectId;
   garageUID: Types.ObjectId;
 
   vehicle: IAppointmentVehicleSnapshot;
+
   userData: IAppointmentUserData;
 
   slotIds: Types.ObjectId[];
+
   appointmentDate: Date;
   startTime: string;
   endTime: string;
-
-  serviceIds: Types.ObjectId[];
   totalDuration: number;
+
+  services: IAppointmentServiceData[];
 
   mechanicId?: Types.ObjectId;
   mechanicAssignedAt?: Date;
 
+  amount?: number;
   paymentId?: Types.ObjectId;
   paymentStatus?: "pending" | "paid" | "failed" | "refunded";
-  amount?: number;
+  stripePaymentIntentId: string;
 
   status: AppointmentStatus;
+  events: IAppointmentEvents[];
 
   cancellationReason?: string;
+
   customerNote?: string;
   mechanicNote?: string;
 }
@@ -130,16 +160,8 @@ export interface PopulatedGarage {
   location: ILocation;
 }
 
-export interface PopulatedService {
-  _id: string;
-  name: string;
-  price: number;
-  duration: number;
-}
-
-export interface PopulatedAppointmentData extends Omit<AppointmentDocument, "garageId" | "services">{
+export interface PopulatedAppointmentData extends Omit<AppointmentDocument, "garageId">{
   garage: PopulatedGarage;
-  services: PopulatedService[];
 }
 
 

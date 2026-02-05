@@ -7,6 +7,8 @@ import {
   CreateAppointmentRequest,
   GetMappedAppointmentResponse,
   GetMappedPopulatedAppointmentResponse,
+  IAppointmentEvents,
+  IAppointmentServiceData,
   PopulatedAppointmentData,
   ReschedulePayload,
 } from "../../../types/appointment";
@@ -18,13 +20,16 @@ import { buildVehicleSnapshot } from "../../../utils/buildVehicleSnapshot";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { AppError } from "../../../middleware/errorHandler";
 import { generateCustomId } from "../../../utils/generateUniqueIds";
+import { IAuthRepository } from "../../../repositories/auth/interface/IAuthRepositories";
+import { USER_NOT_FOUND } from "../../../constants/messages";
 
 @injectable()
 export class AppointmentService implements IAppointmentService {
   constructor(
     @inject(TYPES.AppointmentRepository)
     private _appointmentRepository: IAppointmentRepository,
-    @inject(TYPES.SlotService) private _slotService: ISlotService
+    @inject(TYPES.SlotService) private _slotService: ISlotService,
+    @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository
   ) {}
 
   async createAppointment(
@@ -38,13 +43,28 @@ export class AppointmentService implements IAppointmentService {
 
     try {
       await this._slotService.validateSlotCapacity(payload.slotIds, session);
+      const user = await this._authRepository.findById(userId);
+      if (!user) {
+        throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND);
+      }
 
       const endTime = calculateEndTime(
         payload.time.startTime,
         payload.totalDuration
-      );    
-      
-      const APP_ID = generateCustomId("appointment")
+      );
+
+      const APP_ID = generateCustomId("appointment");
+      const serviceData: IAppointmentServiceData[] = payload.services.map(
+        (service) => {
+          return {
+            serviceId: new Types.ObjectId(service._id),
+            name: service.name,
+            durationMinutes: service.durationMinutes,
+            price: service.price,
+            status: "pending",
+          };
+        }
+      );
 
       const appointment = await this._appointmentRepository.createAppointment(
         {
@@ -56,9 +76,17 @@ export class AppointmentService implements IAppointmentService {
           appointmentDate: new Date(payload.date),
           startTime: payload.time.startTime,
           endTime,
-          serviceIds: payload.services.map((s) => new Types.ObjectId(s._id)),
+          services: serviceData,
           totalDuration: payload.totalDuration,
           status: "confirmed",
+          events: [
+            {
+              message: "Your appointment has been successfully created",
+              actorName: user.name,
+              actorRole: "Customer",
+              doneBy: new Types.ObjectId(userId),
+            },
+          ],
           paymentStatus: "pending",
           vehicle: buildVehicleSnapshot(payload.vehicleData),
           userData: payload.userData,
@@ -198,8 +226,37 @@ export class AppointmentService implements IAppointmentService {
         { session, new: true }
       );
 
+      if (!appointment) {
+        throw new AppError(HttpStatus.BAD_REQUEST, "Appointment is not found.");
+      }
+
+      const user = await this._authRepository.findById(
+        String(appointment.userId)
+      );
+
+      if (!user) {
+        throw new AppError(HttpStatus.BAD_REQUEST, USER_NOT_FOUND);
+      }
+
+      await this._appointmentRepository.pushToArray<IAppointmentEvents>(
+        id,
+        "events",
+        {
+          message: `Your appointment has been rescheduled to ${new Date(
+            appointment.appointmentDate
+          ).toDateString()} - ${appointment.startTime}.`,
+          doneBy: user._id,
+          actorName: user.name,
+          actorRole: user.role,
+        },
+        { session, new: true }
+      );
+
       await this._slotService.incrementBookedCount(payload.slotIds, session);
-      await this._slotService.decrementBookedCount(payload.releasableSlotIds, session)
+      await this._slotService.decrementBookedCount(
+        payload.releasableSlotIds,
+        session
+      );
       await session.commitTransaction();
       session.endSession();
 
