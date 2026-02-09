@@ -22,3 +22,10 @@ export interface IBaseMechanic {
   isDeleted: boolean;
   isBlocked: boolean;
 }
+
+export interface AssignableMechanic {
+  _id: string;
+  name: string;
+  userId: string;
+  skills: string[]
+}

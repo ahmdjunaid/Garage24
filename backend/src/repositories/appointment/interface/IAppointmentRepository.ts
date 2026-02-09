@@ -40,4 +40,7 @@ export interface IAppointmentRepository {
       new?: boolean;
     }
   ): Promise<AppointmentDocument | null>;
+  assignMechanic(appointmentId:string, mechanicId:string): Promise<AppointmentDocument | null>;
+  updateServiceStatus(appointmentId:string, serviceId:string, status:string): Promise<AppointmentDocument | null>;
+  getAllAppointmentByMechId(query: GetPaginationQuery): Promise<GetMappedPopulatedAppointmentResponse>
 }

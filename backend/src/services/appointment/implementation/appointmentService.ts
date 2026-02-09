@@ -22,6 +22,7 @@ import { AppError } from "../../../middleware/errorHandler";
 import { generateCustomId } from "../../../utils/generateUniqueIds";
 import { IAuthRepository } from "../../../repositories/auth/interface/IAuthRepositories";
 import { USER_NOT_FOUND } from "../../../constants/messages";
+import { IMechanicRepository } from "../../../repositories/mechanic/interface/IMechanicRepository";
 
 @injectable()
 export class AppointmentService implements IAppointmentService {
@@ -29,7 +30,9 @@ export class AppointmentService implements IAppointmentService {
     @inject(TYPES.AppointmentRepository)
     private _appointmentRepository: IAppointmentRepository,
     @inject(TYPES.SlotService) private _slotService: ISlotService,
-    @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository
+    @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository,
+    @inject(TYPES.MechanicRepository)
+    private _mechanicRepository: IMechanicRepository
   ) {}
 
   async createAppointment(
@@ -242,12 +245,12 @@ export class AppointmentService implements IAppointmentService {
         id,
         "events",
         {
-          message: `Your appointment has been rescheduled to ${new Date(
+          message: `Appointment has been rescheduled to ${new Date(
             appointment.appointmentDate
           ).toDateString()} - ${appointment.startTime}.`,
           doneBy: user._id,
           actorName: user.name,
-          actorRole: user.role,
+          actorRole: "Customer",
         },
         { session, new: true }
       );
@@ -271,5 +274,66 @@ export class AppointmentService implements IAppointmentService {
 
       throw error;
     }
+  }
+
+  async assignMechanic(
+    appointmentId: string,
+    mechanicId: string
+  ): Promise<AppointmentDocument | null> {
+    const mechanic = await this._mechanicRepository.findById(mechanicId);
+    if (!mechanic) {
+      throw new AppError(HttpStatus.BAD_REQUEST, USER_NOT_FOUND);
+    }
+
+    return await this._appointmentRepository.assignMechanic(
+      appointmentId,
+      mechanicId
+    );
+  }
+
+  async updateServiceStatus(
+    appointmentId: string,
+    serviceId: string,
+    status: string
+  ): Promise<AppointmentDocument | null> {
+    const updatedAppointment =
+      await this._appointmentRepository.updateServiceStatus(
+        appointmentId,
+        serviceId,
+        status
+      );
+
+    if (!updatedAppointment) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Appointment Not found");
+    }
+
+    if (updatedAppointment.status === "confirmed" && status === "started") {
+      await this._appointmentRepository.findByIdAndUpdate(appointmentId, {
+        status: "in_progress",
+      });
+    }
+
+    const isCompleted = updatedAppointment.services.every(
+      (appoint) =>
+        appoint.status === "completed" || appoint.status === "skipped"
+    );
+
+
+    if(isCompleted){
+      await this._appointmentRepository.findByIdAndUpdate(appointmentId, {
+        status: "completed"
+      })
+    }
+
+    return updatedAppointment;
+  }
+
+  async getAllAppointmentByMechId(query: GetPaginationQuery): Promise<GetMappedPopulatedAppointmentResponse> {
+    const mechanic = await this._mechanicRepository.findOneByUserId(query.id!)
+    if(!mechanic){
+      throw new AppError(HttpStatus.BAD_REQUEST, USER_NOT_FOUND)
+    }
+    query.id = String(mechanic._id);
+    return await this._appointmentRepository.getAllAppointmentByMechId(query)
   }
 }

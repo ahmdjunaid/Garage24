@@ -8,7 +8,7 @@ import {
   getAppointmentForRescheduleApi,
   getAvailableSlotsByGarageId,
     rescheduleAppointmentApi,
-} from "@/services/userRouter";
+} from "@/services/userServices";
 import { errorToast, successToast } from "@/utils/notificationAudio";
 
 import type { ISlots } from "@/types/SlotTypes";

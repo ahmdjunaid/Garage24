@@ -20,7 +20,7 @@ import {
   getAvailableSlotsByGarageId,
   getVehicleDetailsById,
   getVehicleModelsByBrandApi,
-} from "@/services/userRouter";
+} from "@/services/userServices";
 import { errorToast } from "@/utils/notificationAudio";
 import type { fuelTypeType, IPopulatedVehicle } from "@/types/VehicleTypes";
 import type { IServiceCategory } from "@/types/ServiceCategoryTypes";

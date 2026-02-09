@@ -145,4 +145,19 @@ export class MechanicController implements IMechanicController {
       next(error);
     }
   };
+
+  getAssignableMechanics = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const garageId = req.params.garageId
+      if(!garageId){
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED)
+      }
+
+      const response = await this._mechanicService.getAssignableMechanics(garageId)
+      res.status(HttpStatus.OK).json(response)
+
+    } catch (error) {
+      next(error)
+    }
+  }
 }

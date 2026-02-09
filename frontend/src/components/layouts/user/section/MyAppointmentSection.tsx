@@ -2,14 +2,13 @@ import AppointmentCard from "@/components/cards/AppointmentCard";
 import {
   cancelAppointmentApi,
   getAllAppointmentByUserIdApi,
-} from "@/services/userRouter";
+} from "@/services/userServices";
 import type { PopulatedAppointmentData } from "@/types/AppointmentTypes";
 import { errorToast, successToast } from "@/utils/notificationAudio";
 import { useCallback, useEffect, useState } from "react";
 import Pagination from "../../admin/Pagination";
 import Spinner from "@/components/elements/Spinner";
 import { ConfirmModal } from "@/components/modal/ConfirmModal";
-import AppointmentDetailsModal from "@/components/modal/user/AppointmentDetailsModal";
 import { useNavigate } from "react-router-dom";
 
 const MyAppointmentsSection = () => {
@@ -22,8 +21,6 @@ const MyAppointmentsSection = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [isCancelling, setIsCancelling] = useState<boolean>(false);
   const [idForCancel, setIdForCancel] = useState<string>("");
-  const [viewAppointment, setViewAppointment] =
-    useState<PopulatedAppointmentData | null>(null);
 
   const appointmentsPerPage = 6;
   const navigate = useNavigate();
@@ -119,7 +116,7 @@ const MyAppointmentsSection = () => {
           appointments={appointments}
           handleCancel={(id) => setIdForCancel(id)}
           handleReschedule={handleReschedule}
-          handleViewDetails={(data) => setViewAppointment(data)}
+          handleViewDetails={(id) => navigate(`/appointment/${id}`)}
         />
 
         {/* Empty State */}
@@ -152,15 +149,6 @@ const MyAppointmentsSection = () => {
         onConfirm={handleCancel}
         onCancel={() => setIdForCancel("")}
       />
-
-      {viewAppointment && (
-        <AppointmentDetailsModal
-          appointment={viewAppointment}
-          isOpen={!!viewAppointment}
-          onClose={() => setViewAppointment(null)}
-          isUserView={true}
-        />
-      )}
     </div>
   );
 };

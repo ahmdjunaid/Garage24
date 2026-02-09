@@ -1,6 +1,6 @@
 import { BaseRepository } from "../../IBaseRepository";
 import { IMechanicRepository } from "../interface/IMechanicRepository";
-import { IMechanic } from "../../../types/mechanic";
+import { AssignableMechanic, IMechanic } from "../../../types/mechanic";
 import { Mechanic, MechanicDocument } from "../../../models/mechanic";
 import { GetPaginationQuery } from "../../../types/common";
 import { FilterQuery, Types } from "mongoose";
@@ -63,8 +63,8 @@ export class MechanicRepository
     return await this.model.findOneAndDelete(filter);
   }
 
-  async findById(id: string): Promise<IMechanic | null> {
-    return await this.findById(id);
+  async findById(id: string): Promise<MechanicDocument | null> {
+    return await this.model.findById(id);
   }
 
   async countDocuments(garageId: string) {
@@ -77,5 +77,15 @@ export class MechanicRepository
 
   async getMechnaicsByGarageId(garageId: string): Promise<MechanicDocument[] | null> {
     return await this.getAll({ garageId });
+  }
+
+  async getAssignableMechanics(garageId: string): Promise<AssignableMechanic[]> {
+    return this.model.find({garageId, isBlocked:false, isDeleted:false})
+      .select("_id name skills userId" )
+      .sort({name: 1})
+  }
+
+  async findOneByUserId(mechanicId: string): Promise<MechanicDocument | null> {
+    return this.getByFilter({userId: mechanicId})
   }
 }

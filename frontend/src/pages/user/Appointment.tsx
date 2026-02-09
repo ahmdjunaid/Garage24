@@ -5,7 +5,7 @@ import AboutJourney from "@/components/layouts/user/section/AboutJourney";
 import CarServiceAppointmentForm from "@/components/layouts/user/section/AppointmentForm";
 import { useEffect, useState } from "react";
 import { errorToast } from "@/utils/notificationAudio";
-import { getAppointmentDetails } from "@/services/userRouter";
+import { getAppointmentDetails } from "@/services/userServices";
 import AppointmentSuccess from "@/components/layouts/user/section/AppointmentSuccess";
 import type { PopulatedAppointmentData } from "@/types/AppointmentTypes";
 import { useSearchParams } from "react-router-dom";
@@ -33,7 +33,6 @@ const Appointment = () => {
     if (!appointmentId) return;
     try {
       const res = await getAppointmentDetails(appointmentId);
-      console.log(res);
       setAppointment(res);
     } catch (error) {
       if (error instanceof Error) errorToast(error.message);

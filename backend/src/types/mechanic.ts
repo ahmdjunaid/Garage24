@@ -36,3 +36,10 @@ export interface GetMappedMechanicResponse{
   totalMechanics: number,
   totalPages: number
 }
+
+export interface AssignableMechanic {
+  _id: ObjectId;
+  name: string;
+  userId: ObjectId;
+  skills: string[]
+}

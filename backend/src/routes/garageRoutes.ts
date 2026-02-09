@@ -45,5 +45,7 @@ router.route('/services/:serviceId').delete(verifyJWT,authorizeRoles("garage"),s
 router.route('/get-garage').get(verifyJWT,authorizeRoles("garage"),garageController.getGarageById)
 router.route('/service-categories').get(verifyJWT, authorizeRoles("garage"), serviceCategoryController.getAllServiceCategories)
 router.route('/appointments').get(verifyJWT, authorizeRoles("garage"), appointmentController.getActiveAppointments)
+router.route('/mechanics/assignable/:garageId').get(verifyJWT, authorizeRoles("garage"), mechanicController.getAssignableMechanics)
+router.route('/appointment/assign-mechanic').post(verifyJWT, authorizeRoles("garage"), appointmentController.assignMechanic)
 
 export default router;

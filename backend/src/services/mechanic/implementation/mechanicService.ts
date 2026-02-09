@@ -11,7 +11,7 @@ import bcrypt from "bcrypt";
 import { uploadFile } from "../../../config/s3Service";
 import { deleteLocalFile } from "../../../helper/helper";
 import { GetPaginationQuery } from "../../../types/common";
-import { GetMappedMechanicResponse } from "../../../types/mechanic";
+import { AssignableMechanic, GetMappedMechanicResponse } from "../../../types/mechanic";
 import { mechanicDataMapping } from "../../../utils/dto/mechanicDto";
 import { generateCustomId } from "../../../utils/generateUniqueIds";
 import { generatePassword } from "../../../utils/generatePassword";
@@ -190,5 +190,9 @@ export class MechanicService implements IMechanicService {
     await this.__emailService.sendMechanicInvitation(mechanic.email, password, mechanic.name);
 
     return { message: "Invitation resend successfull" };
+  }
+
+  async getAssignableMechanics(garageId: string): Promise<AssignableMechanic[]> {
+    return await this._mechanicRepository.getAssignableMechanics(garageId)
   }
 }

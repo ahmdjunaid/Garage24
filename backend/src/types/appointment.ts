@@ -153,15 +153,23 @@ export interface CreateAppointmentRequest {
 }
 
 export interface PopulatedGarage {
-  _id: string;
+  _id: Types.ObjectId;
   name: string;
   address: string;
   mobileNumber: string;
   location: ILocation;
 }
 
-export interface PopulatedAppointmentData extends Omit<AppointmentDocument, "garageId">{
+export interface PopulatedMechanic {
+  _id: Types.ObjectId;
+  name: string;
+  mobileNumber: string;
+  skills: string[];
+}
+
+export interface PopulatedAppointmentData extends Omit<AppointmentDocument, "garageId" | "mechanicId">{
   garage: PopulatedGarage;
+  mechanicId: PopulatedMechanic;
 }
 
 

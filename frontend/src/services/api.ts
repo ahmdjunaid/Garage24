@@ -73,9 +73,6 @@ api.interceptors.response.use(
     if (axios.isAxiosError(error)) {
       const message =
         error.response?.data?.message || "Something went wrong";
-
-        console.log(message)
-
       return Promise.reject(new Error(message));
     }
   }

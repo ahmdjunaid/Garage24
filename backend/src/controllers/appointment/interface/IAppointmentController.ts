@@ -9,4 +9,7 @@ export interface IAppointmentController {
     cancelAppointment(req:Request, res:Response, next: NextFunction):Promise<void>;
     getAppointmentForReschedule(req:Request, res:Response, next: NextFunction):Promise<void>;
     rescheduleAppointment(req:Request, res:Response, next: NextFunction):Promise<void>;
+    assignMechanic(req:Request, res:Response, next: NextFunction):Promise<void>;
+    updateServiceStatus(req:Request, res:Response, next: NextFunction):Promise<void>;
+    getAllAppointmentByMechId(req:Request, res:Response, next: NextFunction):Promise<void>;
 }

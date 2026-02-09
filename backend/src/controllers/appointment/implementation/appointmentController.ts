@@ -48,7 +48,6 @@ export class AppointmentController implements IAppointmentController {
   ) => {
     try {
       validateCreateAppointment(req.body);
-      console.log(req.body)
       const userId = req.user?.id;
 
       if (!userId) {
@@ -203,7 +202,8 @@ export class AppointmentController implements IAppointmentController {
         );
       }
 
-      const { date, releasableSlotIds, slotIds, startTime, duration } = req.body;
+      const { date, releasableSlotIds, slotIds, startTime, duration } =
+        req.body;
       if (!date || !slotIds || !startTime || !duration || !releasableSlotIds) {
         throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
@@ -218,4 +218,69 @@ export class AppointmentController implements IAppointmentController {
       next(error);
     }
   };
+
+  assignMechanic = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { appointmentId, mechanicId } = req.body;
+      if (!appointmentId || !mechanicId) {
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
+      }
+
+      const response = await this._appointmentService.assignMechanic(
+        appointmentId,
+        mechanicId
+      );
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateServiceStatus = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { appointmentId, serviceId, status } = req.body;
+      if (!appointmentId || !serviceId || !status) {
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
+      }
+
+      const response = await this._appointmentService.updateServiceStatus(
+        appointmentId,
+        serviceId,
+        status
+      );
+
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getAllAppointmentByMechId = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { page = 1, limit = 10, searchQuery = "" } = req.query;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        throw new AppError(HttpStatus.BAD_REQUEST, USER_ID_REQUIRED);
+      }
+
+      const query: GetPaginationQuery = {
+        id: String(userId),
+        page: Number(page),
+        limit: Number(limit),
+        searchQuery: String(searchQuery),
+      };
+
+      const response =
+        await this._appointmentService.getAllAppointmentByMechId(query);
+
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error)
+    }
+  }
 }

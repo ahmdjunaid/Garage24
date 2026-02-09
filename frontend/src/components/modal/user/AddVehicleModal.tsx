@@ -6,7 +6,7 @@ import {
   getVehicleModelsByBrandApi,
   registerVehicleApi,
   updateVehicleApi,
-} from "@/services/userRouter";
+} from "@/services/userServices";
 import { errorToast, successToast } from "@/utils/notificationAudio";
 import type { IBrand } from "@/types/BrandTypes";
 import type { IVehicleModel } from "@/types/VehicleModelTypes";

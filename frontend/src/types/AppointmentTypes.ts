@@ -51,10 +51,11 @@ export interface IAppointmentEvents {
   doneBy: string;
   actorName: string;
   actorRole: string;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export interface IAppointment {
+  _id: string;
   appId: string;
   userId: string;
   garageId: string;
@@ -148,10 +149,18 @@ export interface PopulatedGarage {
   location: ILocation;
 }
 
+export interface PopulatedMechanic {
+  _id: string;
+  name: string;
+  mobileNumber: string;
+  skills: string[];
+}
+
 export interface PopulatedAppointmentData
-  extends Omit<IAppointment, "garageId"> {
+  extends Omit<IAppointment, "garageId" | "mechanicId"> {
   _id: string;
   garageId: PopulatedGarage;
+  mechanicId: PopulatedMechanic;
   createdAt: string;
   updatedAt: string;
 }

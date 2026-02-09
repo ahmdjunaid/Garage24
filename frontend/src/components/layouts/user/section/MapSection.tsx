@@ -12,7 +12,7 @@ import MapAutoCenter from "@/components/elements/MapAutoCenter";
 import {
   fetchAddressForAppointmentApi,
   fetchCoordinatedForAppointmentApi,
-} from "@/services/userRouter";
+} from "@/services/userServices";
 
 type LatLng = {
   lat: number;

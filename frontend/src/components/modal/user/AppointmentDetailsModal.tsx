@@ -1,22 +1,29 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import type { PopulatedAppointmentData } from "@/types/AppointmentTypes";
 import DarkModal from "@/components/layouts/DarkModal";
 import { Phone } from "lucide-react";
+import type { AssignableMechanic } from "@/types/MechanicTypes";
+import { errorToast, successToast } from "@/utils/notificationAudio";
+import { assignMechanicApi, getAssignableMechanics } from "@/services/garageServices";
+import { updateServiceStatusApi } from "@/services/mechanicServices";
 
 interface AppointmentDetailsProps {
   appointment: PopulatedAppointmentData;
   isOpen: boolean;
   onClose: () => void;
-  isUserView: boolean;
+  role: "GARAGE_OWNER" | "MECHANIC";
+  onUpdate: () => void;
 }
 
 const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
   appointment,
   isOpen,
   onClose,
-  isUserView
+  role,
+  onUpdate
 }) => {
   const {
+    _id,
     status,
     appointmentDate,
     startTime,
@@ -26,8 +33,58 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
     services,
     vehicle,
     userData,
-    garageId,
+    garageUID
   } = appointment;
+
+  const [selectedMechanicId, setSelectedMechanicId] = useState<string>(
+    appointment.mechanicId?._id || "",
+  );
+  const [assigning, setAssigning] = useState(false);
+  const [mechanics, setMechanics] = useState<AssignableMechanic[] | []>([]);
+
+  useEffect(() => {
+    if(role === "MECHANIC") return;
+    const fetchMechanics = async (garageId: string) => {
+      try {
+        const res = await getAssignableMechanics(garageId);
+        setMechanics(res);
+      } catch (error) {
+        if (error instanceof Error) errorToast(error.message);
+      }
+    };
+
+    fetchMechanics(garageUID);
+  }, [garageUID, role]);
+
+  const handleAssignMechanic = async () => {
+    if (!selectedMechanicId) return;
+
+    try {
+      setAssigning(true);
+      await assignMechanicApi(_id, selectedMechanicId);
+      onUpdate()
+      successToast("Mechanic assigned")
+    } catch(error){
+      if(error instanceof Error)
+        errorToast(error.message)
+    }finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleServiceStatusUpdate = async (
+    serviceId: string,
+    status: "started" | "completed" | "skipped",
+  ) => {
+    try {
+      await updateServiceStatusApi(_id, serviceId, status);
+      onUpdate()
+      successToast("Status Updated")
+    } catch (error) {
+      if(error instanceof Error)
+        errorToast(error.message)
+    }
+  };
 
   return (
     <DarkModal isOpen={isOpen} onClose={onClose}>
@@ -51,7 +108,7 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
           <Detail
             label="Payment"
             value={
-              appointment.status === "cancelled"
+              status === "cancelled"
                 ? "Cancelled"
                 : (paymentStatus ?? "Not Available")
             }
@@ -61,68 +118,146 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
         {/* Services */}
         <div>
           <h3 className="text-sm font-semibold mb-2 text-[#aaa]">Services</h3>
-          <ul className="space-y-2">
+          <div className="space-y-2">
             {services.map((service) => (
-              <li
+              <div
                 key={service.serviceId}
-                className="flex justify-between bg-[#222] px-4 py-2 rounded-lg text-sm"
+                className="flex justify-between items-center bg-[#222] px-4 py-2 rounded-lg"
               >
-                <span>{service.name}</span>
-                <span className="text-[#aaa]">₹{service.price}</span>
-              </li>
+                <div>
+                  <p className="text-sm">{service.name}</p>
+                  <p className="text-xs text-[#888] capitalize">
+                    {service.status}
+                  </p>
+                </div>
+
+                {role === "MECHANIC" && (
+                  <div className="flex gap-2">
+                    {service.status === "pending" && (
+                      <button
+                        onClick={() =>
+                          handleServiceStatusUpdate(
+                            service.serviceId,
+                            "started",
+                          )
+                        }
+                        className="px-3 py-1 text-xs bg-blue-600 rounded"
+                      >
+                        Start
+                      </button>
+                    )}
+
+                    {service.status === "started" && (
+                      <>
+                        <button
+                          onClick={() =>
+                            handleServiceStatusUpdate(
+                              service.serviceId,
+                              "completed",
+                            )
+                          }
+                          className="px-3 py-1 text-xs bg-green-600 rounded"
+                        >
+                          Complete
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleServiceStatusUpdate(
+                              service.serviceId,
+                              "skipped",
+                            )
+                          }
+                          className="px-3 py-1 text-xs bg-red-600 rounded"
+                        >
+                          Skip
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             ))}
-          </ul>
-        </div>
-
-        {/* Vehicle */}
-        <div>
-          <h3 className="text-sm font-semibold mb-2 text-[#aaa]">Vehicle</h3>
-          <div className="bg-[#222] p-4 rounded-lg text-sm space-y-1">
-            <p>
-              {vehicle.make.name} {vehicle.model.name}
-            </p>
-            <p className="text-[#aaa]">
-              {vehicle.licensePlate} · {vehicle.registrationYear}
-            </p>
           </div>
         </div>
 
-        {/* Garage */}
-        {isUserView && (
-          <div>
-            <h3 className="text-sm font-semibold mb-2 text-[#aaa]">Garage</h3>
-            <div className="bg-[#222] p-4 rounded-lg text-sm space-y-1">
-              <p className="font-medium">{garageId.name}</p>
-              <p className="text-[#aaa]">{garageId.address.displayName}</p>
-              <p className="flex items-center gap-2 text-[#aaa]">
-                <Phone size={16} />
-                <span>{garageId.mobileNumber}</span>
+        {/* appointmentAssignment */}
+        {role === "GARAGE_OWNER" && (
+          <Section title="Assign Mechanic">
+            <select
+              value={selectedMechanicId}
+              onChange={(e) => setSelectedMechanicId(e.target.value)}
+              className="w-full bg-[#111] border border-[#333] rounded-md px-3 py-2 text-sm"
+            >
+              <option value="">Select mechanic</option>
+              {mechanics.map((m) => (
+                <option key={m._id} value={m._id} selected={m._id===selectedMechanicId}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={handleAssignMechanic}
+              disabled={
+                !selectedMechanicId ||
+                selectedMechanicId === appointment.mechanicId?._id ||
+                assigning
+              }
+              className="mt-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-4 py-2 rounded-md text-sm"
+            >
+              {appointment.mechanicId ? "Reassign Mechanic" : "Assign Mechanic"}
+            </button>
+
+            {appointment.mechanicId && (
+              <p className="text-xs text-[#888] mt-1">
+                Current mechanic: {appointment.mechanicId?.name}
               </p>
-            </div>
-          </div>
+            )}
+          </Section>
         )}
 
-        {/* Customer */}
-        {userData && !isUserView && (
-          <div>
-            <h3 className="text-sm font-semibold mb-2 text-[#aaa]">Customer</h3>
-            <div className="bg-[#222] p-4 rounded-lg text-sm space-y-1">
-              <p>{userData.name}</p>
-              <p className="text-[#aaa]">{userData.email}</p>
-              <p className="flex items-center gap-2 text-[#aaa]">
-                <Phone size={16} />
-                <span>{userData.mobileNumber}</span>
-              </p>{" "}
-            </div>
-          </div>
+         {/* Vehicle */}
+        <Section title="Vehicle">
+          <p>
+            {vehicle.make.name} {vehicle.model.name}
+          </p>
+          <p className="text-[#aaa]">
+            {vehicle.licensePlate} · {vehicle.registrationYear}
+          </p>
+        </Section>
+
+        {/* Customer (Garage / Mechanic) */}
+        {userData && (
+          <Section title="Customer">
+            <p>{userData.name}</p>
+            <p className="text-[#aaa]">{userData.email}</p>
+            <p className="flex items-center gap-2 text-[#aaa]">
+              <Phone size={14} />
+              {userData.mobileNumber}
+            </p>
+          </Section>
         )}
-        
       </div>
     </DarkModal>
   );
 };
 
 export default AppointmentDetailsModal;
+
+
+const Section = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => (
+  <div>
+    <h3 className="text-sm font-semibold mb-2 text-[#aaa]">{title}</h3>
+    <div className="bg-[#222] p-4 rounded-lg text-sm space-y-1">{children}</div>
+  </div>
+);
 
 const Detail = ({ label, value }: { label: string; value: string }) => (
   <div>

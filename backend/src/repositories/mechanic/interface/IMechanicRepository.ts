@@ -1,5 +1,5 @@
 import { FilterQuery, HydratedDocument } from "mongoose";
-import { GetMechanicResponse, IMechanic } from "../../../types/mechanic";
+import { AssignableMechanic, GetMechanicResponse, IMechanic } from "../../../types/mechanic";
 import { GetPaginationQuery } from "../../../types/common";
 import { MechanicDocument } from "../../../models/mechanic";
 
@@ -19,7 +19,9 @@ export interface IMechanicRepository {
 
   getAllMechanics({ id ,page, limit, searchQuery }:GetPaginationQuery):Promise<GetMechanicResponse>;
   findOneAndDelete(filter:FilterQuery<IMechanic>):Promise<IMechanic | null>;
-  findById(id: string): Promise<IMechanic | null>;
+  findById(id: string): Promise<MechanicDocument | null>;
   countDocuments( garageId:string ): Promise<number>;
-  getMechnaicsByGarageId(garageId:string): Promise<MechanicDocument[] | null>
+  getMechnaicsByGarageId(garageId:string): Promise<MechanicDocument[] | null>;
+  getAssignableMechanics(garageId:string): Promise<AssignableMechanic[]>
+  findOneByUserId(mechanicId:string): Promise<MechanicDocument | null>;
 }

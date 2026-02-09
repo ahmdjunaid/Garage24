@@ -3,7 +3,6 @@ import AdminSidebar from "@components/layouts/admin/AdminSidebar";
 import AdminTable, {
   type TableColumn,
 } from "@components/layouts/admin/AdminTable";
-import { getActiveAppointmentsApi } from "@/services/garageServices";
 import AdminHeader from "@components/layouts/admin/AdminHeader";
 import _ from "lodash";
 import Spinner from "@components/elements/Spinner";
@@ -12,8 +11,9 @@ import type {
   PopulatedAppointmentData,
 } from "@/types/AppointmentTypes";
 import AppointmentDetailsModal from "@/components/modal/user/AppointmentDetailsModal";
+import { getAppointmentsbyMechIdApi } from "@/services/mechanicServices";
 
-const GarageAppointments = () => {
+const MechanicAppointments = () => {
   const [appointments, setAppointments] = useState<PopulatedAppointmentData[]>(
     [],
   );
@@ -33,11 +33,12 @@ const selectedAppointment = useMemo(
     async (currentPage: number, searchQuery: string) => {
       try {
         setLoading(true)
-        const response = await getActiveAppointmentsApi(
+        const response = await getAppointmentsbyMechIdApi(
           currentPage,
           servicesPerPage,
           searchQuery,
         );
+        console.log(response)
         setAppointments(response.appointments);
         setTotalPages(response.totalPages);
       } catch (error) {
@@ -89,7 +90,7 @@ const selectedAppointment = useMemo(
 
   return (
     <div className="flex h-screen bg-gray-950 text-white overflow-hidden">
-      <AdminSidebar role="garage" />
+      <AdminSidebar role="mechanic" />
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <AdminHeader
@@ -133,7 +134,7 @@ const selectedAppointment = useMemo(
               appointment={selectedAppointment}
               isOpen={!!selectedAppointmentId}
               onClose={() => setSelectedAppointmentId(null)}
-              role="GARAGE_OWNER"
+              role="MECHANIC"
               onUpdate={()=>fetchAppointments(currentPage, searchQuery)}
             />
           )}
@@ -143,4 +144,4 @@ const selectedAppointment = useMemo(
   );
 };
 
-export default GarageAppointments;
+export default MechanicAppointments;

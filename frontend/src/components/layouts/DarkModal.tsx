@@ -35,14 +35,11 @@ const DarkModal: React.FC<ModalProps> = ({
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal box */}
       <div
-        className="relative z-50 w-[480px] max-h-[90vh] overflow-y-auto rounded-lg bg-black p-6 shadow-lg"
+        className="relative z-50 w-[480px] max-h-[90vh] overflow-y-auto rounded-lg bg-black p-6 shadow-lg dark-modal-scroll"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -57,17 +54,13 @@ const DarkModal: React.FC<ModalProps> = ({
         </button>
 
         {/* Logo */}
-        <img
-          src={whiteLogo}
-          alt="GARAGE24"
-          className="mb-4 w-24"
-        />
+        <img src={whiteLogo} alt="GARAGE24" className="mb-4 w-24" />
 
         {/* Modal content */}
         {children}
       </div>
     </div>,
-    modalRoot
+    modalRoot,
   );
 };
 

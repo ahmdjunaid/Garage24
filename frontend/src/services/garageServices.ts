@@ -131,3 +131,15 @@ export const getActiveAppointmentsApi = (page = 1, limit = 5, searchQuery = "") 
     .get(`${GARAGE_BASE_ROUTE}/appointments?page=${page}&limit=${limit}&searchQuery=${searchQuery}`)
     .then(res => res.data)
 }
+
+export const getAssignableMechanics = (garageId:string) => {
+  return api
+    .get(`${GARAGE_BASE_ROUTE}/mechanics/assignable/${garageId}`)
+    .then(res => res.data)
+}
+
+export const assignMechanicApi = (appointmentId:string, mechanicId:string) => {
+  return api
+    .post(`${GARAGE_BASE_ROUTE}/appointment/assign-mechanic`, {appointmentId, mechanicId})
+    .then(res => res.data)
+}

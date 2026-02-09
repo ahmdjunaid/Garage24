@@ -1,5 +1,5 @@
 import { HydratedDocument } from "mongoose";
-import { GetMappedMechanicResponse, IMechanic } from "../../../types/mechanic";
+import { AssignableMechanic, GetMappedMechanicResponse, IMechanic } from "../../../types/mechanic";
 import { GetPaginationQuery } from "../../../types/common";
 
 export default interface IMechanicService {
@@ -25,4 +25,5 @@ export default interface IMechanicService {
   toggleStatus(userId: string, action: string): Promise<{ message: string }>;
   deleteUser(userId: string): Promise<{ message: string }>;
   resendMechanicInvite(mechanicId: string): Promise<{ message: string }>
+  getAssignableMechanics(garageId: string): Promise<AssignableMechanic[]>;
 }

@@ -6,7 +6,7 @@ interface CardProps {
   appointments: PopulatedAppointmentData[];
   handleCancel: (id: string) => void;
   handleReschedule: (id: string) => void;
-  handleViewDetails: (data: PopulatedAppointmentData) => void;
+  handleViewDetails: (id: string) => void;
 }
 
 const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress"];
@@ -86,7 +86,7 @@ const AppointmentCard: React.FC<CardProps> = ({
                   </>
                 )}
                 <button
-                  onClick={() => handleViewDetails(appointment)}
+                  onClick={() => handleViewDetails(appointment._id)}
                   className="px-5 py-2 bg-[#ef4444] hover:bg-[#dc2626] text-white rounded-lg text-sm"
                 >
                   View Details

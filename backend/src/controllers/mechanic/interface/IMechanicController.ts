@@ -7,4 +7,5 @@ export default interface IMechanicController {
     toggleStatus(req:Request, res:Response, next: NextFunction): Promise<void>;
     deleteMechanic(req:Request, res:Response, next: NextFunction): Promise<void>;
     resendMechanicInvite(req:Request, res:Response, next: NextFunction): Promise<void>;
+    getAssignableMechanics(req:Request, res:Response, next: NextFunction): Promise<void>;
 }

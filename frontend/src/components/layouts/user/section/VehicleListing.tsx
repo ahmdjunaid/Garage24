@@ -5,7 +5,7 @@ import VehicleDetailsModal from "@/components/modal/user/VehicleDetailsModal";
 import {
   deleteVehicleApi,
   getVehiclesByUserIdApi,
-} from "@/services/userRouter";
+} from "@/services/userServices";
 import type { IVehicleDTO } from "@/types/VehicleTypes";
 import { errorToast, successToast } from "@/utils/notificationAudio";
 import { useEffect, useState } from "react";
