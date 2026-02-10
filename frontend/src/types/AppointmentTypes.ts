@@ -1,4 +1,4 @@
-import type { timeSlot } from "@/components/layouts/user/section/AppointmentForm";
+import type { timeSlot } from "@/features/appointments/components/AppointmentForm";
 import type { IAddress, ILocation } from "./GarageTypes";
 
 export type AppointmentStatus =

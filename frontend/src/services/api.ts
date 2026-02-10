@@ -1,7 +1,7 @@
 import axios from "axios";
 import { logout, setAccessToken } from "../redux/slice/userSlice";
 import { store } from "../redux/store/store";
-import { logoutApi } from "./authServices";
+import { logoutApi } from "../features/auth/services/authServices";
 import { errorToast } from "../utils/notificationAudio";
 import { AUTH_BASE_ROUTE } from "../constants/apiRoutes";
 

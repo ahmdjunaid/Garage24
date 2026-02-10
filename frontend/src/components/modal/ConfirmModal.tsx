@@ -1,5 +1,5 @@
 import { useState } from "react";
-import DarkModal from "../layouts/DarkModal";
+import DarkModal from "./DarkModal";
 
 interface ConfirmModalProps {
   title?: string;

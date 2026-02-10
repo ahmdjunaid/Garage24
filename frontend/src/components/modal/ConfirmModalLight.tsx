@@ -1,4 +1,4 @@
-import Modal from "../layouts/Modal";
+import Modal from "./Modal";
 
 interface ConfirmModalProps {
   title?: string;
