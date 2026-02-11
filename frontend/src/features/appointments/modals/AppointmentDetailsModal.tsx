@@ -4,7 +4,10 @@ import DarkModal from "@/components/modal/DarkModal";
 import { Phone } from "lucide-react";
 import type { AssignableMechanic } from "@/types/MechanicTypes";
 import { errorToast, successToast } from "@/utils/notificationAudio";
-import { assignMechanicApi, getAssignableMechanics } from "@/features/management/garage/services/garageServices";
+import {
+  assignMechanicApi,
+  getAssignableMechanics,
+} from "@/features/management/garage/services/garageServices";
 import { updateServiceStatusApi } from "../services/appointmentServices";
 
 interface AppointmentDetailsProps {
@@ -20,7 +23,7 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
   isOpen,
   onClose,
   role,
-  onUpdate
+  onUpdate,
 }) => {
   const {
     _id,
@@ -33,7 +36,7 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
     services,
     vehicle,
     userData,
-    garageUID
+    garageUID,
   } = appointment;
 
   const [selectedMechanicId, setSelectedMechanicId] = useState<string>(
@@ -41,9 +44,10 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
   );
   const [assigning, setAssigning] = useState(false);
   const [mechanics, setMechanics] = useState<AssignableMechanic[] | []>([]);
+  const PREVIOUS_STATUSES = ["completed", "cancelled"];
 
   useEffect(() => {
-    if(role === "MECHANIC") return;
+    if (role === "MECHANIC") return;
     const fetchMechanics = async (garageId: string) => {
       try {
         const res = await getAssignableMechanics(garageId);
@@ -62,12 +66,11 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
     try {
       setAssigning(true);
       await assignMechanicApi(_id, selectedMechanicId);
-      onUpdate()
-      successToast("Mechanic assigned")
-    } catch(error){
-      if(error instanceof Error)
-        errorToast(error.message)
-    }finally {
+      onUpdate();
+      successToast("Mechanic assigned");
+    } catch (error) {
+      if (error instanceof Error) errorToast(error.message);
+    } finally {
       setAssigning(false);
     }
   };
@@ -78,11 +81,10 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
   ) => {
     try {
       await updateServiceStatusApi(_id, serviceId, status);
-      onUpdate()
-      successToast("Status Updated")
+      onUpdate();
+      successToast("Status Updated");
     } catch (error) {
-      if(error instanceof Error)
-        errorToast(error.message)
+      if (error instanceof Error) errorToast(error.message);
     }
   };
 
@@ -188,26 +190,35 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
               value={selectedMechanicId}
               onChange={(e) => setSelectedMechanicId(e.target.value)}
               className="w-full bg-[#111] border border-[#333] rounded-md px-3 py-2 text-sm"
+              disabled={PREVIOUS_STATUSES.includes(status)}
             >
               <option value="">Select mechanic</option>
               {mechanics.map((m) => (
-                <option key={m._id} value={m._id} selected={m._id===selectedMechanicId}>
+                <option
+                  key={m._id}
+                  value={m._id}
+                  selected={m._id === selectedMechanicId}
+                >
                   {m.name}
                 </option>
               ))}
             </select>
 
-            <button
-              onClick={handleAssignMechanic}
-              disabled={
-                !selectedMechanicId ||
-                selectedMechanicId === appointment.mechanicId?._id ||
-                assigning
-              }
-              className="mt-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-4 py-2 rounded-md text-sm"
-            >
-              {appointment.mechanicId ? "Reassign Mechanic" : "Assign Mechanic"}
-            </button>
+            { !PREVIOUS_STATUSES.includes(status) && (
+              <button
+                onClick={handleAssignMechanic}
+                disabled={
+                  !selectedMechanicId ||
+                  selectedMechanicId === appointment.mechanicId?._id ||
+                  assigning
+                }
+                className="mt-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-4 py-2 rounded-md text-sm"
+              >
+                {appointment.mechanicId
+                  ? "Reassign Mechanic"
+                  : "Assign Mechanic"}
+              </button>
+            )}
 
             {appointment.mechanicId && (
               <p className="text-xs text-[#888] mt-1">
@@ -217,7 +228,7 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
           </Section>
         )}
 
-         {/* Vehicle */}
+        {/* Vehicle */}
         <Section title="Vehicle">
           <p>
             {vehicle.make.name} {vehicle.model.name}
@@ -244,7 +255,6 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
 };
 
 export default AppointmentDetailsModal;
-
 
 const Section = ({
   title,

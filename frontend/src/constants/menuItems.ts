@@ -9,9 +9,9 @@ type MenuItem = {
 
 const garageMenuItems = [
   { name: "Overview", path: "/garage", icon: Home, exact: true },
+  { name: "Appointments", path: "/garage/appointments", icon: Calendar },
   { name: "Services", path: "/garage/services", icon: Settings },
   { name: "Mechanics", path: "/garage/mechanics", icon: Wrench },
-  { name: "Appointments", path: "/garage/appointments", icon: Calendar },
   { name: "Reports", path: "/garage/reports", icon: FileText },
   { name: "Plans", path: "/garage/plans", icon: HandCoins },
 ];

@@ -66,7 +66,7 @@ export class EmailService implements IEmailService {
 
     try {
       await this.transporter.sendMail(mailOptions);
-      logger.info(`Resend OTP sent to ${email}`);
+      logger.info(`Resend OTP sent to ${email} - ${otp}`);
     } catch (error) {
       logger.error("Error while resending OTP email", error);
     }

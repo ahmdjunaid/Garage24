@@ -30,16 +30,24 @@ export class AppointmentRepository
   async getActiveAppointments(
     query: GetPaginationQuery
   ): Promise<GetMappedAppointmentResponse> {
+    const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress"];
+    const PREVIOUS_STATUSES = ["completed", "cancelled"];
     const skip = (query.page - 1) * query.limit;
-    const searchFilter = query.searchQuery
-      ? {
-          garageUID: query.id,
-          status: { $in: ["pending", "confirmed", "in_progress"] },
-        }
-      : {
-          garageUID: query.id,
-          status: { $in: ["pending", "confirmed", "in_progress"] },
-        };
+    const searchFilter =
+      query.searchQuery === "current"
+        ? {
+            garageUID: query.id,
+            status: { $in: ACTIVE_STATUSES },
+          }
+        : query.searchQuery === "previous"
+          ? {
+              garageUID: query.id,
+              status: { $in: PREVIOUS_STATUSES },
+            }
+          : {
+              garageUID: query.id,
+              status: { $in: ACTIVE_STATUSES },
+            };
 
     const appointments = await this.model
       .find(searchFilter)
@@ -202,8 +210,9 @@ export class AppointmentRepository
         $set: {
           "services.$.status": status,
         },
-      },{
-        new: true
+      },
+      {
+        new: true,
       }
     );
   }

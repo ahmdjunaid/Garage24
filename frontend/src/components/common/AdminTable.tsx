@@ -11,8 +11,10 @@ interface AdminTableProps<T> {
   data: T[];
   columns: TableColumn<T>[];
   renderActions?: (item: T) => React.ReactNode;
-  sortBy?: string;
-  onSortChange?: (sortBy: string) => void;
+  // sortBy?: string;
+  // onSortChange?: (sortBy: string) => void;
+  emptyMessage?: string;
+
 }
 
 const AdminTable = <T,>({
@@ -21,6 +23,7 @@ const AdminTable = <T,>({
   renderActions,
   // sortBy = "A-Z",
   // onSortChange,
+  emptyMessage = "No Data Found"
 }: AdminTableProps<T>) => {
   const getValueByPath = (obj: any, path: string) => {
     return path.split(".").reduce((acc, key) => acc?.[key], obj);
@@ -29,7 +32,7 @@ const AdminTable = <T,>({
   return (
     <div>
       {data.length === 0 ? (
-        <h1 className="text-center text-gray-400 py-6">No data found!</h1>
+        <h1 className="text-center text-gray-400 py-6">{ emptyMessage }</h1>
       ) : (
         <div className="bg-gradient-to-br from-gray-900 to-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl backdrop-blur-sm">
           {/* Table Controls */}

@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import Dashboard from "@features/management/admin/pages/Dashboard";
+import Dashboard from "@/features/dashboards/pages/admin/Dashboard";
 import ProtectedRoute from "@/app/routes/ProtectedRoute";
 import AdminUser from "@features/management/admin/pages/AdminUsers";
 import AdminGarages from "@features/management/admin/pages/AdminGarages";

@@ -18,10 +18,11 @@ const MechanicAppointments = () => {
     [],
   );
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [totalPages, setTotalPages] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
+  const [view, setView] = useState<"current" | "previous">("current");
+
   const servicesPerPage = 5;
 
 const selectedAppointment = useMemo(
@@ -30,15 +31,14 @@ const selectedAppointment = useMemo(
 );
 
   const fetchAppointments = useCallback(
-    async (currentPage: number, searchQuery: string) => {
+    async (currentPage: number, view: "current" | "previous") => {
       try {
         setLoading(true)
         const response = await getAppointmentsbyMechIdApi(
           currentPage,
           servicesPerPage,
-          searchQuery,
+          view,
         );
-        console.log(response)
         setAppointments(response.appointments);
         setTotalPages(response.totalPages);
       } catch (error) {
@@ -52,23 +52,23 @@ const selectedAppointment = useMemo(
 
   const debouncedFetch = useMemo(
     () =>
-      _.debounce((page: number, query: string) => {
+      _.debounce((page: number, query: "current" | "previous") => {
         fetchAppointments(page, query);
       }, 300),
     [fetchAppointments],
   );
 
   useEffect(() => {
-    if (!searchQuery) {
-      fetchAppointments(currentPage, "");
+    if (!view) {
+      fetchAppointments(currentPage, "current");
     } else {
-      debouncedFetch(currentPage, searchQuery);
+      debouncedFetch(currentPage, view);
     }
 
     return () => {
       debouncedFetch.cancel();
     };
-  }, [currentPage, searchQuery, fetchAppointments, debouncedFetch]);
+  }, [currentPage, view, fetchAppointments, debouncedFetch]);
 
   const columns: TableColumn<PopulatedAppointmentData>[] = [
     { key: "appId", label: "ID" },
@@ -95,15 +95,42 @@ const selectedAppointment = useMemo(
       <div className="flex-1 flex flex-col overflow-hidden">
         <AdminHeader
           text={"Appointments"}
-          searchPlaceholder={"Search Appointments..."}
-          setSearchQuery={setSearchQuery}
         />
         {/* Content Area */}
         <div className="flex-1 bg-gradient-to-br from-gray-950 via-gray-900 to-black p-8 overflow-auto">
+          {/* switch to current and prev */}
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setView("current")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                view === "current"
+                  ? "bg-red-700 text-white"
+                  : "bg-gray-800 text-gray-300"
+              }`}
+            >
+              Current
+            </button>
+
+            <button
+              onClick={() => setView("previous")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                view === "previous"
+                  ? "bg-red-700 text-white"
+                  : "bg-gray-800 text-gray-300"
+              }`}
+            >
+              Previous
+            </button>
+          </div>
           {/* Table with glass effect */}
           <AdminTable
             data={appointments}
             columns={columns}
+            emptyMessage={
+              view === "current"
+                ? "No active appointments found!"
+                : "No previous appointments found!"
+            }
             renderActions={(m) => {
               return (
                 <div className="flex gap-3">
@@ -135,7 +162,7 @@ const selectedAppointment = useMemo(
               isOpen={!!selectedAppointmentId}
               onClose={() => setSelectedAppointmentId(null)}
               role="MECHANIC"
-              onUpdate={()=>fetchAppointments(currentPage, searchQuery)}
+              onUpdate={()=>fetchAppointments(currentPage, view)}
             />
           )}
         </div>

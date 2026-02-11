@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/icons/Logo.png";
+import logo from "@assets/icons/Logo.png";
 import { useDispatch } from "react-redux";
 import { fetchGarageStatusApi } from "@/features/subscription/services/subscriptionService";
 import { errorToast, successToast } from "@/utils/notificationAudio";

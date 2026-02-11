@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Modal from "../../../components/modal/Modal";
 import Input from "../components/Input";
 import AuthButton from "../components/AuthButton";
-import passwordIcon from "../../assets/icons/password.svg";
+import passwordIcon from "@assets/icons/password.svg";
 import { resetPasswordApi } from "../services/authServices";
 import { errorToast, successToast } from "../../../utils/notificationAudio";
 import { passwordRegex } from "../../../constants/commonRegex";

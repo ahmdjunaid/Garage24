@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import SignUp from "@features/auth/pages/SignUp";
 import Onboarding from "@features/management/garage/pages/GarageOnboarding";
 import ProtectedRoute from "./ProtectedRoute";
-import GarageHome from "@features/management/garage/pages/GarageHome";
+import GarageHome from "@/features/dashboards/pages/garage/GarageHome";
 import GarageMechanic from "@features/management/garage/pages/GarageMechanic";
 import PageNotFound from "@features/auth/pages/PageNotFound";
 import GaragePlans from "@features/subscription/pages/GaragePlans";

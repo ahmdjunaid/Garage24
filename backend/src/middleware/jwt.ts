@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import logger from "../config/logger";
 import { Request, Response, NextFunction } from "express";
 import { DecodedUser } from "../types/user";
 import HttpStatus from "../constants/httpStatusCodes";
@@ -13,7 +12,6 @@ const generateToken = (
   id: string | mongoose.Types.ObjectId | undefined,
   role: string | undefined
 ): string => {
-  logger.info(`id: ${id}, role: ${role}`);
 
   return jwt.sign({ id: id, role: role }, process.env.JWT_SECRET as string, {
     expiresIn: "1h",

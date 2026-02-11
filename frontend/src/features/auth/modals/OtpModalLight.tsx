@@ -5,7 +5,7 @@ import AuthButton from "../components/AuthButton";
 import { resendOtpApi, verifyOtpApi } from "../services/authServices";
 import { successToast } from "../../../utils/notificationAudio";
 import { OTP_VERIFIED } from "../../../constants/messages";
-import passwordIcon from "../../assets/icons/password.svg";
+import passwordIcon from "@assets/icons/password.svg";
 import { useOtpTimer } from "../../../hooks/useOtpTimer";
 import { otpRegex } from "../../../constants/commonRegex";
 

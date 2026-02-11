@@ -1,5 +1,5 @@
 import Spinner from "@/components/common/Spinner";
-import { mobileRegex, nameRegex, passwordRegex } from "@/constants/commonRegex";
+import { garageNameRegex, mobileRegex, passwordRegex } from "@/constants/commonRegex";
 import React, { useEffect, useRef, useState } from "react";
 
 export interface ProfileDataUpdate {
@@ -72,7 +72,7 @@ export const CommonProfile: React.FC<CommonProfileProps> = ({
   const handleProfileSave = () => {
     let hasError = false;
 
-    if (!nameRegex.test(username)) {
+    if (!garageNameRegex.test(username)) {
       setNameError("Name must contain only letters and spaces.");
       hasError = true;
     }
@@ -84,6 +84,8 @@ export const CommonProfile: React.FC<CommonProfileProps> = ({
 
     if (hasError) return;
 
+    setNameError("")
+    setNameError("")
     onUpdateProfile({
       name: username,
       mobileNumber: mobile_Number,

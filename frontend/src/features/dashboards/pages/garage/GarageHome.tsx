@@ -1,13 +1,13 @@
 import AdminSidebar from "@/components/common/AdminSidebar";
 import AdminHeader from "@/components/common/AdminHeader";
 import { useEffect, useState } from "react";
-import { getCurrentSubscriptionApi } from "@/features/management/garage/services/garageServices";
 import type { ISubscription } from "@/types/SubscriptionTypes";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store/store";
-import SubscriptionAlertModal from "@/features/subscription/modals/SubscriptionAlertModal";
+import SubscriptionAlertModal from "@/features/dashboards/modals/SubscriptionAlertModal";
 import { calculateDaysLeft } from "@/utils/calculateDaysLeft";
 import { errorToast } from "@/utils/notificationAudio";
+import { getCurrentSubscriptionApi } from "@/features/subscription/services/subscriptionService";
 
 const GarageHome = () => {
   const [currentPlan, setCurrentPlan] = useState<ISubscription | null>(null);

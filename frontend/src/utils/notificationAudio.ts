@@ -1,17 +1,23 @@
 import toast from "react-hot-toast"
-import notification from "../assets/audio/notification.mp3"
+import errorAudio from "@assets/audio/notification.mp3"
+import successAudio from "@assets/audio/suceessAudio.mp3"
 
-const playNotification = () => {
-    const audio = new Audio(notification)
+const playError = () => {
+    const audio = new Audio(errorAudio)
+    audio.play()
+}
+
+const playSuccess = () => {
+    const audio = new Audio(successAudio)
     audio.play()
 }
 
 export const errorToast = (message:string)=>{
     toast.error(message)
-    playNotification()
+    playError()
 }
 
 export const successToast = (message:string)=>{
     toast.success(message)
-    playNotification()
+    playSuccess()
 }

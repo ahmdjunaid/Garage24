@@ -5,7 +5,7 @@ import { type RootState } from "@/redux/store/store";
 import { Navigate, Outlet, useNavigate } from "react-router-dom";
 import Spinner from "@components/common/Spinner";
 import type { approvalStatus } from "@/types/GarageTypes";
-import { fetchGarageStatusApi } from "@features/subscription/services/subscriptionService";
+import { fetchGarageStatusApi } from "@/features/subscription/services/subscriptionService";
 
 interface ProtectedRouteProps {
   requiredRoles: Role[];
