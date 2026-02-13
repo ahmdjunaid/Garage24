@@ -13,10 +13,3 @@ export interface GetMappedPlanResponse {
   totalPlans: number;
   totalPages: number;
 }
-
-export interface ICheckoutSession {
-  garageId: string;
-  planId: string;
-  planName: string;
-  planPrice: number;
-}

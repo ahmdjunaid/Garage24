@@ -28,7 +28,7 @@ const subscriptionController = container.get<SubscriptionController>(TYPES.Subsc
 
 router.route('/onboarding').post(verifyJWT,authorizeRoles("garage"),uploadOnboardingImages,garageController.onboarding)
 router.route('/get-address').get(verifyJWT,authorizeRoles("garage"),locationController.getAddressFromCoordinates)
-router.route('/register-mechanic').post(verifyJWT,hasActivePlan,authorizeRoles("garage"),mechanicController.registerMechanic)
+router.route('/register-mechanic').post(verifyJWT, hasActivePlan,authorizeRoles("garage"),mechanicController.registerMechanic)
 router.route('/resend-invitation/:mechanicId').post(verifyJWT,authorizeRoles("garage"),mechanicController.resendMechanicInvite)
 router.route('/mechanics').get(verifyJWT,authorizeRoles("garage"),mechanicController.getAllMechanics)
 router.route('/mechanic/:userId')

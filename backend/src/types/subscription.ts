@@ -23,10 +23,20 @@ export interface ISubscription {
 
 export interface IRetriveSessionData {
     transactionId: string | null;
-    planName: string;
+    productName: string;
     amountPaid: number;
     paymentMethod: string;
     currency: string;
     date: Date;
     receipt_url: string | null;
+}
+
+
+export interface ICheckoutSession {
+  amount: number;
+  currency?: string;
+  productName: string;
+  metadata: Record<string, string>;
+  successUrl: string;
+  cancelUrl: string;
 }

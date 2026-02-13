@@ -51,9 +51,9 @@ const SelectVehicleModal: React.FC<ModalProps> = ({
                   </div>
 
                   {/* Badge */}
-                  <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-xl border-4 border-black transform group-hover:scale-110 transition-transform duration-300">
-                    {/* <span className="text-xl font-bold text-white">3</span> */}
-                  </div>
+                  {/* <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-xl border-4 border-black transform group-hover:scale-110 transition-transform duration-300">
+                    <span className="text-xl font-bold text-white">3</span>
+                  </div> */}
                 </div>
               </div>
 

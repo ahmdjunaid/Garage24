@@ -23,6 +23,7 @@ import { generateCustomId } from "../../../utils/generateUniqueIds";
 import { IAuthRepository } from "../../../repositories/auth/interface/IAuthRepositories";
 import { USER_NOT_FOUND } from "../../../constants/messages";
 import { IMechanicRepository } from "../../../repositories/mechanic/interface/IMechanicRepository";
+import IStripeService from "../../stripe/interface/IStripeService";
 
 @injectable()
 export class AppointmentService implements IAppointmentService {
@@ -32,7 +33,8 @@ export class AppointmentService implements IAppointmentService {
     @inject(TYPES.SlotService) private _slotService: ISlotService,
     @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository,
     @inject(TYPES.MechanicRepository)
-    private _mechanicRepository: IMechanicRepository
+    private _mechanicRepository: IMechanicRepository,
+    @inject(TYPES.StripeService) private _stripeService: IStripeService
   ) {}
 
   async createAppointment(
@@ -285,10 +287,35 @@ export class AppointmentService implements IAppointmentService {
       throw new AppError(HttpStatus.BAD_REQUEST, USER_NOT_FOUND);
     }
 
-    return await this._appointmentRepository.assignMechanic(
+    const response = await this._appointmentRepository.assignMechanic(
       appointmentId,
       mechanicId
     );
+
+    if (!response) {
+      throw new AppError(HttpStatus.NOT_FOUND, "Appointment is not found.");
+    }
+
+    const garage = await this._authRepository.findById(
+      response?.garageUID.toString()
+    );
+
+    if (!garage) {
+      throw new AppError(HttpStatus.NOT_FOUND, "Garage is not found.");
+    }
+
+    await this._appointmentRepository.pushToArray<IAppointmentEvents>(
+      appointmentId,
+      "events",
+      {
+        actorName: garage?.name,
+        actorRole: "Garage",
+        doneBy: garage._id,
+        message: `Your appointment has been assigned to ${mechanic.name}`,
+      }
+    );
+
+    return response;
   }
 
   async updateServiceStatus(
@@ -313,27 +340,97 @@ export class AppointmentService implements IAppointmentService {
       });
     }
 
+    const mechanic = await this._authRepository.findById(
+      updatedAppointment.mechanicId!.toString()
+    );
+
+    if (!mechanic) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        "Mechanic not assigned to perform this operation."
+      );
+    }
+
+    const service = updatedAppointment.services.find(
+      (s) => s.serviceId === new Types.ObjectId(serviceId)
+    );
+
+    await this._appointmentRepository.pushToArray<IAppointmentEvents>(
+      appointmentId,
+      "events",
+      {
+        actorName: mechanic?.name,
+        actorRole: "Mechanic",
+        doneBy: mechanic?._id,
+        message: `${service?.name ?? "Service"} has been ${status}`,
+      }
+    );
+
     const isCompleted = updatedAppointment.services.every(
       (appoint) =>
         appoint.status === "completed" || appoint.status === "skipped"
     );
 
-
-    if(isCompleted){
+    if (isCompleted) {
       await this._appointmentRepository.findByIdAndUpdate(appointmentId, {
-        status: "completed"
-      })
+        status: "completed",
+      });
+
+      await this._appointmentRepository.pushToArray<IAppointmentEvents>(
+        appointmentId,
+        "events",
+        {
+          actorName: mechanic?.name,
+          actorRole: "Mechanic",
+          doneBy: mechanic?._id,
+          message: `Services completed. OTP sent to your registered email. Provide it at delivery.`,
+        }
+      );
     }
 
     return updatedAppointment;
   }
 
-  async getAllAppointmentByMechId(query: GetPaginationQuery): Promise<GetMappedPopulatedAppointmentResponse> {
-    const mechanic = await this._mechanicRepository.findOneByUserId(query.id!)
-    if(!mechanic){
-      throw new AppError(HttpStatus.BAD_REQUEST, USER_NOT_FOUND)
+  async getAllAppointmentByMechId(
+    query: GetPaginationQuery
+  ): Promise<GetMappedPopulatedAppointmentResponse> {
+    const mechanic = await this._mechanicRepository.findOneByUserId(query.id!);
+    if (!mechanic) {
+      throw new AppError(HttpStatus.BAD_REQUEST, USER_NOT_FOUND);
     }
     query.id = String(mechanic._id);
-    return await this._appointmentRepository.getAllAppointmentByMechId(query)
+    return await this._appointmentRepository.getAllAppointmentByMechId(query);
+  }
+
+  async makeServicePayment(appointmentId: string): Promise<{ url: string }> {
+    const appointment =
+      await this._appointmentRepository.getAppointmentById(appointmentId);
+    if (!appointment)
+      throw new AppError(HttpStatus.NOT_FOUND, "Appointment not found");
+
+    if (appointment.paymentStatus === "paid")
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        "Payment cannot be done at this stage"
+      );
+
+    const totalAmount = appointment.services.reduce(
+      (acc, s) => acc + s.price,
+      0
+    );
+
+    return await this._stripeService.createCheckoutSession({
+      currency: "inr",
+      amount: totalAmount,
+      productName: appointment.appId,
+      metadata: {
+        paymentPurpose: "SERVICE_PAYMENT",
+        productName: appointment.appId,
+        appointmentId: appointment._id.toString(),
+        userId: appointment.userId.toString(),
+      },
+      successUrl: `${process.env.CLIENT_URL}/appointment/${appointmentId}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${process.env.CLIENT_URL}/appointment/${appointmentId}?payment=failed`,
+    });
   }
 }

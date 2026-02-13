@@ -12,4 +12,5 @@ export interface IAppointmentController {
     assignMechanic(req:Request, res:Response, next: NextFunction):Promise<void>;
     updateServiceStatus(req:Request, res:Response, next: NextFunction):Promise<void>;
     getAllAppointmentByMechId(req:Request, res:Response, next: NextFunction):Promise<void>;
+    makeServicePayment(req:Request, res:Response, next: NextFunction): Promise<void>;
 }

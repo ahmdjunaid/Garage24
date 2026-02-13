@@ -1,12 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Phone, CheckCircle2, User, Calendar, Clock } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import type {
   IAppointmentEvents,
   PopulatedAppointmentData,
 } from "@/types/AppointmentTypes";
 import { SERVICE_STATUS_META } from "@/constants/appointmentServiceStatus";
-import { getAppointmentDetails } from "../services/appointmentServices";
+import {
+  getAppointmentDetails,
+  makeServicePaymentApi,
+} from "../services/appointmentServices";
+import { errorToast } from "@/utils/notificationAudio";
+import Spinner from "@/components/common/Spinner";
+import { retriveTransactionApi } from "@/features/subscription/services/subscriptionService";
+import type { IRetriveSessionData } from "@/types/CommonTypes";
+import PaymentSuccessModal from "../modals/PaymentSuccessModal";
 
 interface DetailPageProps {
   isUserView: boolean;
@@ -16,18 +24,51 @@ const AppointmentDetailsPageSection: React.FC<DetailPageProps> = ({
   isUserView,
 }) => {
   const { appointmentId } = useParams<{ appointmentId: string }>();
+  const [loading, setLoading] = useState<boolean>(false);
   const [appointment, setAppointment] =
     useState<PopulatedAppointmentData | null>(null);
+  const [paymentData, setPaymentData] = useState<IRetriveSessionData | null>(
+    null,
+  );
+
+  const location = useLocation();
+  const queryParams = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search],
+  );
+  const sessionId = queryParams.get("session_id");
+
+  useEffect(() => {
+    const fetchTransaction = async () => {
+      if (!sessionId) return;
+      setLoading(true);
+      try {
+        const res = await retriveTransactionApi(sessionId);
+        setPaymentData(res);
+      } catch (error) {
+        if (error instanceof Error)
+          errorToast("Failed to fetch transaction details");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTransaction();
+  }, [sessionId]);
 
   useEffect(() => {
     if (!appointmentId) return;
-    const getAppointmentData = async (appointmentId: string) => {
-      const res = await getAppointmentDetails(appointmentId);
-      setAppointment(res);
-    };
-
     getAppointmentData(appointmentId);
   }, [appointmentId]);
+
+  const getAppointmentData = async (appointmentId: string) => {
+    if(!appointmentId) return
+    try {
+      const res = await getAppointmentDetails(appointmentId);
+      setAppointment(res);
+    } catch (error) {
+      if (error instanceof Error) errorToast(error.message);
+    }
+  };
 
   if (!appointment) {
     return (
@@ -47,9 +88,17 @@ const AppointmentDetailsPageSection: React.FC<DetailPageProps> = ({
   const isCompleted = appointment.status === "completed";
   const isCancelled = appointment.status === "cancelled";
 
-  const handlePayment = () => {
-    console.log("Process payment for appointment:", appointment._id);
-    // Implement your payment logic here
+  const handlePayment = async (appointmentId: string) => {
+    try {
+      setLoading(true);
+      const response = await makeServicePaymentApi(appointmentId);
+      console.log(response);
+      if (response) window.location.href = response.url;
+    } catch (error) {
+      if (error instanceof Error) errorToast(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Format date and time helper
@@ -93,7 +142,9 @@ const AppointmentDetailsPageSection: React.FC<DetailPageProps> = ({
               <div>
                 <h2 className="text-xl font-semibold">
                   {appointment.vehicle.make.name}
-                  <span className="text-gray-400">Polo</span>
+                  <span className="text-gray-400 ms-2">
+                    {appointment.vehicle.model.name}
+                  </span>
                   <span className="text-gray-500 text-base ml-2">
                     ({appointment.vehicle.licensePlate})
                   </span>
@@ -368,7 +419,7 @@ const AppointmentDetailsPageSection: React.FC<DetailPageProps> = ({
         {isUserView && isCompleted && appointment.paymentStatus !== "paid" && (
           <div className="pt-2 pb-4">
             <button
-              onClick={handlePayment}
+              onClick={() => handlePayment(appointment._id)}
               className="w-full bg-[#ef4444] hover:bg-[#dc2626] text-white font-semibold py-3.5 rounded-lg transition-colors"
             >
               Proceed to Payment - ₹{totalPrice}
@@ -376,6 +427,14 @@ const AppointmentDetailsPageSection: React.FC<DetailPageProps> = ({
           </div>
         )}
       </div>
+      <PaymentSuccessModal
+        paymentData={paymentData}
+        isOpen={!!paymentData}
+        onClose={() => {
+          setPaymentData(null);
+        }}
+      />
+      <Spinner loading={loading} />
     </div>
   );
 };

@@ -10,6 +10,7 @@ import HttpStatus from "../../../constants/httpStatusCodes";
 import { SUBSCRIPTION_ERROR } from "../../../constants/messages";
 import ISubscriptionService from "../../subscription/interface/ISubscriptionService";
 import Stripe from "stripe";
+import { IAppointmentRepository } from "../../../repositories/appointment/interface/IAppointmentRepository";
 
 @injectable()
 export class PaymentService implements IPaymentService {
@@ -18,6 +19,8 @@ export class PaymentService implements IPaymentService {
     private _paymentRepository: IPaymentRepository,
     @inject(TYPES.SubscriptionService)
     private _subscriptionService: ISubscriptionService,
+    @inject(TYPES.AppointmentRepository)
+    private _appointmentRepository: IAppointmentRepository
   ) {}
   async createPayment(data: {
     userId: Types.ObjectId;
@@ -29,8 +32,7 @@ export class PaymentService implements IPaymentService {
     status: PaymentStatus;
   }) {
     const transactionId = generateCustomId("transaction");
-    await this._paymentRepository.create({ ...data, transactionId });
-    return { message: "Payment completed successfull" };
+    return await this._paymentRepository.create({ ...data, transactionId });
   }
 
   async handleWebhookEvent(event: Stripe.Event): Promise<void> {
@@ -39,69 +41,95 @@ export class PaymentService implements IPaymentService {
         const session = event.data.object as Stripe.Checkout.Session;
         const metadata = session.metadata;
 
-        if (
-          !metadata?.garageId ||
-          !metadata?.planId ||
-          !session.payment_intent
-        ) {
-          throw new AppError(HttpStatus.BAD_REQUEST, SUBSCRIPTION_ERROR);
+        
+        if (!metadata?.paymentPurpose || !session.payment_intent) {
+          throw new AppError(HttpStatus.BAD_REQUEST, "Invalid Stripe metadata");
         }
 
-        await this._subscriptionService.upsertPlanData(
-          metadata.garageId,
-          metadata.planId,
-          session.id,
-          session.payment_intent.toString()
-        );
+        switch (metadata.paymentPurpose) {
+          case "SUBSCRIPTION": {
+            console.log("2")
+            if (!metadata.garageId || !metadata.productId) {
+              throw new AppError(HttpStatus.BAD_REQUEST, SUBSCRIPTION_ERROR);
+            }
 
-        break;
-      }
+            await this._subscriptionService.upsertPlanData(
+              metadata.garageId,
+              metadata.productId,
+              session.id,
+              session.payment_intent.toString()
+            );
 
-      case "payment_intent.succeeded": {
-        try {
-          const pi = event.data.object as Stripe.PaymentIntent;
+            await this.createPayment({
+              userId: new Types.ObjectId(metadata.garageId),
+              paymentIntentId: session.payment_intent.toString(),
+              amount: session.amount_total! / 100,
+              BillType: "subscription",
+              provider: "stripe",
+              referenceId: new Types.ObjectId(metadata.planId),
+              status: "paid",
+            });
 
-          await this._subscriptionService.upsertPaymentStatus(pi.id, "paid");
+            break;
+          }
 
-          await this.createPayment({
-            userId: new Types.ObjectId(pi.metadata.garageId),
-            paymentIntentId: pi.id,
-            amount: pi.amount / 100,
-            BillType: "subscription",
-            provider: "stripe",
-            referenceId: new Types.ObjectId(pi.metadata.planId),
-            status: "paid",
-          });
-        } catch (error) {
-          console.error("ERROR inside payment_intent.succeeded:", error);
+          case "SERVICE_PAYMENT": {
+            if (!metadata.appointmentId) {
+              throw new AppError(
+                HttpStatus.BAD_REQUEST,
+                "Appointment ID missing"
+              );
+            }
+
+            const paymentDoc = await this.createPayment({
+              userId: new Types.ObjectId(metadata.userId),
+              paymentIntentId: session.payment_intent.toString(),
+              amount: session.amount_total! / 100,
+              BillType: "service",
+              provider: "stripe",
+              referenceId: new Types.ObjectId(metadata.appointmentId),
+              status: "paid",
+            });
+
+            await this._appointmentRepository.findByIdAndUpdate(
+              metadata.appointmentId,
+              {
+                paymentStatus: "paid",
+                paymentId: paymentDoc._id.toString(),
+                amount: session.amount_total! / 100,
+                stripePaymentIntentId: session.payment_intent.toString(),
+              }
+            );
+
+            break;
+          }
+
+          default:
+            console.warn("Unknown paymentPurpose:", metadata.paymentPurpose);
         }
+
         break;
       }
 
       case "payment_intent.payment_failed": {
         const pi = event.data.object as Stripe.PaymentIntent;
 
+        if (!pi.metadata?.paymentPurpose) return;
+
         await this.createPayment({
-          userId: new Types.ObjectId(pi.metadata.garageId),
+          userId: new Types.ObjectId(pi.metadata.userId),
           paymentIntentId: pi.id,
           amount: pi.amount / 100,
-          BillType: "subscription",
+          BillType:
+            pi.metadata.paymentPurpose === "SUBSCRIPTION"
+              ? "subscription"
+              : "service",
           provider: "stripe",
-          referenceId: new Types.ObjectId(pi.metadata.planId),
+          referenceId: new Types.ObjectId(
+            pi.metadata.planId || pi.metadata.appointmentId
+          ),
           status: "failed",
         });
-        break;
-      }
-
-      case "checkout.session.expired": {
-        const session = event.data.object as Stripe.Checkout.Session;
-
-        const paymentIntentId = session.payment_intent;
-
-        if (!paymentIntentId) {
-          console.warn("Expired session has no payment_intent:", session.id);
-          break;
-        }
 
         break;
       }

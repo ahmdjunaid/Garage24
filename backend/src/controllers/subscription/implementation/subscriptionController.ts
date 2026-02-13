@@ -28,10 +28,10 @@ export class SubscriptionController implements ISubscriptionController {
         throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
       const session = await this._subscriptionService.subscribePlan({
+        garageId,
         planId,
         planName,
-        planPrice,
-        garageId,
+        planPrice
       });
 
       res.status(HttpStatus.OK).json(session);

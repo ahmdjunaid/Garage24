@@ -45,5 +45,6 @@ router.route('/appointment/cancel/:appointmentId').patch(verifyJWT, authorizeRol
 router.route('/appointment/reschedule/:appointmentId')
     .get(verifyJWT, authorizeRoles("user"), appointmentController.getAppointmentForReschedule)
     .post(verifyJWT, authorizeRoles("user"), appointmentController.rescheduleAppointment)
+router.route('/appointment/pay/:appointmentId').post(verifyJWT, authorizeRoles("user"), appointmentController.makeServicePayment)
 
 export default router;

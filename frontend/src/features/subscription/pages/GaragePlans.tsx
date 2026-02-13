@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminSidebar from "@/components/common/AdminSidebar";
 import AdminHeader from "@/components/common/AdminHeader";
 import _ from "lodash";
-import type { IPlan, IRetriveSessionData } from "@/types/PlanTypes";
+import type { IPlan } from "@/types/PlanTypes";
 import Pagination from "@/components/common/Pagination";
 import { errorToast } from "@/utils/notificationAudio";
 import { useLocation } from "react-router-dom";
@@ -14,6 +14,7 @@ import type { ISubscription } from "@/types/SubscriptionTypes";
 import PaymentFailed from "@/features/subscription/components/PaymentFailed";
 import { PlanCard } from "@/features/subscription/components/PlanCard";
 import { fetchAllPlansForGarageApi, getCurrentSubscriptionApi, retriveTransactionApi, subscribePlanApi } from "../services/subscriptionService";
+import type { IRetriveSessionData } from "@/types/CommonTypes";
 
 const GaragePlans = () => {
   const [currentPlan, setCurrentPlan] = useState<ISubscription | null>(null);
@@ -100,7 +101,6 @@ const GaragePlans = () => {
       );
       return;
     }
-
     try {
       const response = await subscribePlanApi({ planId, planName, planPrice });
       if (response.url) window.location.href = response.url;

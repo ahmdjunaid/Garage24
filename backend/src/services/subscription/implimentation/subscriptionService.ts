@@ -13,7 +13,6 @@ import mongoose, { Types } from "mongoose";
 import { IPlanRepository } from "../../../repositories/plan/interface/IPlanRepository";
 import { PaymentStatus } from "../../../types/payments";
 import { AppError } from "../../../middleware/errorHandler";
-import { ICheckoutSession } from "../../../types/plan";
 import { calculateDaysLeft } from "../../../utils/calculateDaysLeft";
 import IStripeService from "../../stripe/interface/IStripeService";
 
@@ -26,13 +25,17 @@ export class SubscriptionService implements ISubscriptionService {
     @inject(TYPES.StripeService) private _stripeService: IStripeService
   ) {}
 
-  async subscribePlan(data: ICheckoutSession): Promise<{ url: string }> {
-    const futureSubs = await this._subscriptionRepository.getFutureSubscriptions(
-      data.garageId
-    );
-    if (futureSubs.length >= 1) {
+  async subscribePlan(data: {
+    garageId: string;
+    planId: string;
+    planName: string;
+    planPrice: string;
+  }): Promise<{ url: string }> {
+    const futureSubs =
+      await this._subscriptionRepository.getFutureSubscriptions(data.garageId);
+
+    if (futureSubs.length >= 1)
       throw new AppError(HttpStatus.BAD_REQUEST, RENEWAL_POLICY_VIOLATION);
-    }
 
     const planAlreadyExist =
       await this._subscriptionRepository.getSubscriptionByGarageId(
@@ -47,7 +50,19 @@ export class SubscriptionService implements ISubscriptionService {
       throw new AppError(HttpStatus.BAD_REQUEST, RENEWAL_POLICY_VIOLATION);
     }
 
-    return await this._stripeService.createSubscribeSession(data);
+    return await this._stripeService.createCheckoutSession({
+      currency: "inr",
+      amount: Number(data.planPrice),
+      productName: data.planName,
+      metadata: {
+        paymentPurpose: "SUBSCRIPTION",
+        garageId: data.garageId,
+        productId: data.planId,
+        productName: data.planName,
+      },
+      successUrl: `${process.env.CLIENT_URL}/garage/plans?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${process.env.CLIENT_URL}/garage/plans?payment=failed`,
+    });
   }
 
   async upsertPlanData(

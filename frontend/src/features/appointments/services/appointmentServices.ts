@@ -135,3 +135,9 @@ export const getActiveAppointmentsApi = (
     )
     .then((res) => res.data);
 };
+
+export const makeServicePaymentApi = (appointmentId:string) => {
+  return api
+    .post(`${USER_BASE_ROUTE}/appointment/pay/${appointmentId}`)
+    .then(res => res.data)
+}

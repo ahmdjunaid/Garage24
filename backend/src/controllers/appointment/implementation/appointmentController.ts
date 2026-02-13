@@ -230,6 +230,7 @@ export class AppointmentController implements IAppointmentController {
         appointmentId,
         mechanicId
       );
+
       res.status(HttpStatus.OK).json(response);
     } catch (error) {
       next(error);
@@ -279,6 +280,20 @@ export class AppointmentController implements IAppointmentController {
         await this._appointmentService.getAllAppointmentByMechId(query);
 
       res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  makeServicePayment = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const appointmentId = req.params.appointmentId
+      if(!appointmentId)
+        throw new AppError(HttpStatus.BAD_REQUEST, "Appointment id is required.")
+
+      const response = await this._appointmentService.makeServicePayment(appointmentId)
+      res.status(HttpStatus.OK).json(response)
+      
     } catch (error) {
       next(error)
     }
