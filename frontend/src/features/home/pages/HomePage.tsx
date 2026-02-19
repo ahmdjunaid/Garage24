@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import UserFooter from "@/features/home/components/UserFooter";
-import UserHeader from "@/features/home/components/UserHeader";
+import UserFooter from "@/components/common/UserFooter";
+import UserHeader from "@/components/common/UserHeader";
 import UserProcess from "@/features/home/components/UserProcess";
 import Garage24Testimonials from "@/features/home/components/UserTestimonials";
 import SelectVehicleModal from "@/features/myGarage/modals/SelectVehicleModal";

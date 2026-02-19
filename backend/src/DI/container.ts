@@ -92,6 +92,12 @@ import IUserController from "../controllers/user/interface/IUserController";
 import { UserController } from "../controllers/user/implementation/userController";
 import ISubscriptionController from "../controllers/subscription/interface/ISubscriptionController";
 import { SubscriptionController } from "../controllers/subscription/implementation/subscriptionController";
+import { INotificationRepository } from "../repositories/notification/interface/INotificationRepository";
+import { NotificationRepository } from "../repositories/notification/implementation/notificationRepository.";
+import { INotificationService } from "../services/notification/interface/INotificationService";
+import { NotificationService } from "../services/notification/implementation/notificationService";
+import { Server } from "socket.io";
+import { getIO } from "../socket/soket";
 
 const container = new Container();
 
@@ -174,5 +180,9 @@ container.bind<IAppointmentController>(TYPES.AppointmentController).to(Appointme
 // Location
 container.bind<ILocationService>(TYPES.LocationService).to(LocationService);
 container.bind<ILocationController>(TYPES.LocationController).to(LocationController);
+
+//Notification
+container.bind<INotificationRepository>(TYPES.NotificationRepository).to(NotificationRepository)
+container.bind<INotificationService>(TYPES.NotificationService).to(NotificationService)
 
 export { container };

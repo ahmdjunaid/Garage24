@@ -2,8 +2,8 @@ import {
   CommonProfile,
   type ProfileDataUpdate,
 } from "@/features/profile/components/ProfileOverview";
-import UserFooter from "@/features/home/components/UserFooter";
-import UserHeader from "@/features/home/components/UserHeader";
+import UserFooter from "@/components/common/UserFooter";
+import UserHeader from "@/components/common/UserHeader";
 import { login } from "@/redux/slice/userSlice";
 import type { RootState } from "@/redux/store/store";
 import type { IUsersMappedData, User } from "@/types/UserTypes";

@@ -18,7 +18,7 @@ function App() {
 
   return (
     <>
-      {loading && <Spinner loading={loading}/>}
+      {loading && <Spinner loading={loading} />}
 
       <Routes>
         <Route path="/*" element={<UserRoutes />} />

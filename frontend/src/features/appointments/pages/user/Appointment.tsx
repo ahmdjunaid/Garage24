@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import UserHeader from "@/features/home/components/UserHeader";
-import UserFooter from "@/features/home/components/UserFooter";
+import UserHeader from "@/components/common/UserHeader";
+import UserFooter from "@/components/common/UserFooter";
 import AboutJourney from "@/features/home/components/AboutJourney";
 import CarServiceAppointmentForm from "@/features/appointments/components/AppointmentForm";
 import { useEffect, useState } from "react";

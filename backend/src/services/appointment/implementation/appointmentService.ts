@@ -24,6 +24,7 @@ import { IAuthRepository } from "../../../repositories/auth/interface/IAuthRepos
 import { USER_NOT_FOUND } from "../../../constants/messages";
 import { IMechanicRepository } from "../../../repositories/mechanic/interface/IMechanicRepository";
 import IStripeService from "../../stripe/interface/IStripeService";
+import { INotificationService } from "../../notification/interface/INotificationService";
 
 @injectable()
 export class AppointmentService implements IAppointmentService {
@@ -34,7 +35,9 @@ export class AppointmentService implements IAppointmentService {
     @inject(TYPES.AuthRepository) private _authRepository: IAuthRepository,
     @inject(TYPES.MechanicRepository)
     private _mechanicRepository: IMechanicRepository,
-    @inject(TYPES.StripeService) private _stripeService: IStripeService
+    @inject(TYPES.StripeService) private _stripeService: IStripeService,
+    @inject(TYPES.NotificationService)
+    private _notificationService: INotificationService
   ) {}
 
   async createAppointment(
@@ -101,6 +104,13 @@ export class AppointmentService implements IAppointmentService {
 
       await this._slotService.incrementBookedCount(payload.slotIds, session);
 
+      await this._notificationService.createNotification({
+        recipientId: appointment.garageUID,
+        title: "New Appointment",
+        message: "You have received a new appointment.",
+        isRead: false,
+      });
+
       await session.commitTransaction();
       session.endSession();
 
@@ -135,7 +145,14 @@ export class AppointmentService implements IAppointmentService {
   async getAppointmentDetails(
     appointmentId: string
   ): Promise<PopulatedAppointmentData | null> {
-    return await this._appointmentRepository.getAppointmentById(appointmentId);
+    const appointment =
+      await this._appointmentRepository.getAppointmentById(appointmentId);
+
+    if (!appointment) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Appointment is not found.");
+    }
+
+    return appointment;
   }
 
   async getAllAppointmentsByUserId(
@@ -184,6 +201,13 @@ export class AppointmentService implements IAppointmentService {
         cancelledAppointment.slotIds.map((slotId) => slotId.toString()),
         session
       );
+
+      await this._notificationService.createNotification({
+        recipientId: appointment.garageUID,
+        title: "Appointment Cancelled",
+        message: "A customer has cancelled their appointment.",
+        isRead: false,
+      });
 
       await session.commitTransaction();
 
@@ -262,6 +286,14 @@ export class AppointmentService implements IAppointmentService {
         payload.releasableSlotIds,
         session
       );
+
+      await this._notificationService.createNotification({
+        recipientId: appointment.garageUID,
+        title: "Appointment Rescheduled",
+        message: "A customer has rescheduled their appointment.",
+        isRead: false,
+      });
+
       await session.commitTransaction();
       session.endSession();
 
@@ -315,6 +347,20 @@ export class AppointmentService implements IAppointmentService {
       }
     );
 
+    await this._notificationService.createNotification({
+      recipientId: mechanic.userId,
+      title: "New Appointment",
+      message: `New Appointment has been assigned to you.`,
+      isRead: false,
+    });
+
+    await this._notificationService.createNotification({
+      recipientId: response.userId,
+      title: "Assigned to mechanic",
+      message: `Your appointment has been assigned to ${mechanic.name}`,
+      isRead: false,
+    });
+
     return response;
   }
 
@@ -340,7 +386,7 @@ export class AppointmentService implements IAppointmentService {
       });
     }
 
-    const mechanic = await this._authRepository.findById(
+    const mechanic = await this._mechanicRepository.findById(
       updatedAppointment.mechanicId!.toString()
     );
 
@@ -351,8 +397,8 @@ export class AppointmentService implements IAppointmentService {
       );
     }
 
-    const service = updatedAppointment.services.find(
-      (s) => s.serviceId === new Types.ObjectId(serviceId)
+    const service = updatedAppointment.services.find((s) =>
+      s.serviceId.equals(serviceId)
     );
 
     await this._appointmentRepository.pushToArray<IAppointmentEvents>(
@@ -361,10 +407,17 @@ export class AppointmentService implements IAppointmentService {
       {
         actorName: mechanic?.name,
         actorRole: "Mechanic",
-        doneBy: mechanic?._id,
+        doneBy: mechanic?.userId,
         message: `${service?.name ?? "Service"} has been ${status}`,
       }
     );
+
+    await this._notificationService.createNotification({
+      recipientId: updatedAppointment.userId,
+      title: "Service Status Updated",
+      message: `${service?.name ?? "Service"} has been ${status}`,
+      isRead: false,
+    });
 
     const isCompleted = updatedAppointment.services.every(
       (appoint) =>
@@ -386,6 +439,13 @@ export class AppointmentService implements IAppointmentService {
           message: `Services completed. OTP sent to your registered email. Provide it at delivery.`,
         }
       );
+
+      await this._notificationService.createNotification({
+        recipientId: updatedAppointment.userId,
+        title: "Services completed",
+        message: `Services completed. OTP sent to your registered email. Provide it at delivery.`,
+        isRead: false,
+      });
     }
 
     return updatedAppointment;
@@ -414,10 +474,13 @@ export class AppointmentService implements IAppointmentService {
         "Payment cannot be done at this stage"
       );
 
-    const totalAmount = appointment.services.reduce(
-      (acc, s) => acc + s.price,
-      0
-    );
+    const totalAmount = appointment.services.reduce((acc, s) => {
+      if (s.status !== "skipped") {
+        return acc + s.price;
+      }
+
+      return acc;
+    }, 0);
 
     return await this._stripeService.createCheckoutSession({
       currency: "inr",

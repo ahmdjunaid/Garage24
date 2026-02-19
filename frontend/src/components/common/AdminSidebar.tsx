@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getMenuItems } from "@/constants/menuItems";
 import type { RootState } from "@/redux/store/store";
 import profileIcon from "@assets/icons/profileIcon.png";
+import { socket } from "@/lib/socket";
 
 export interface AdminSidebarProps {
   role: "garage" | "mechanic" | "admin" | "user";
@@ -34,6 +35,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
     try {
       await logoutApi();
       dispatch(logout());
+      socket.disconnect()
       successToast("Logout successful.");
     } catch (error) {
       if (error instanceof Error) errorToast(error.message);

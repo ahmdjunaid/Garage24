@@ -9,6 +9,7 @@ import blackLogo from "@assets/icons/Logo.png";
 import whiteLogo from "@assets/icons/logo-white.png";
 import { Link } from "react-router-dom";
 import { errorToast, successToast } from "@/utils/notificationAudio";
+import { socket } from "@/lib/socket";
 
 interface HeaderProps {
   showCta?: boolean;
@@ -41,6 +42,7 @@ const UserHeader = ({
     try {
       await logoutApi();
       dispatch(logout());
+      socket.disconnect()
       successToast("Logged out!")
     } catch (error) {
       if (error instanceof Error) errorToast(error.message);

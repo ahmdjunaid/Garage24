@@ -10,6 +10,7 @@ import { toastStyles } from "../config/ToastConfig.tsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import SocketProvider from "@/providers/SocketProvider.tsx";
 
 const queryClient = new QueryClient();
 
@@ -22,16 +23,18 @@ createRoot(document.getElementById("root")!).render(
         <GoogleOAuthProvider clientId={googleClientId}>
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
-              <App />
-              <Toaster
-                position="bottom-center"
-                reverseOrder={false}
-                toastOptions={toastStyles}
-              />
+              <SocketProvider>
+                <App />
+                <Toaster
+                  position="bottom-center"
+                  reverseOrder={false}
+                  toastOptions={toastStyles}
+                />
+              </SocketProvider>
             </BrowserRouter>
           </QueryClientProvider>
         </GoogleOAuthProvider>
       </PersistGate>
     </Provider>
-  </StrictMode>
+  </StrictMode>,
 );

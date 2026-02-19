@@ -81,10 +81,13 @@ const AppointmentDetailsPageSection: React.FC<DetailPageProps> = ({
     );
   }
 
-  const totalPrice = appointment.services.reduce(
-    (sum, service) => sum + service.price,
-    0,
-  );
+  const totalPrice = appointment.services.reduce((sum, service) => {
+    if(service.status !== "skipped"){
+      return sum + service.price
+    }
+    return sum
+  },0);
+
   const isCompleted = appointment.status === "completed";
   const isCancelled = appointment.status === "cancelled";
 

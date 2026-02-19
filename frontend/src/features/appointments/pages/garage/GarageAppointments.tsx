@@ -73,6 +73,7 @@ const GarageAppointments = () => {
     { key: "vehicle.make.name", label: "Brand" },
     { key: "vehicle.model.name", label: "Model" },
     { key: "vehicle.licensePlate", label: "Number" },
+    { key: "mechanicId.name", label: "Mechanic" },
     { key: "status", label: "Status" },
     {
       key: "appointmentDate",

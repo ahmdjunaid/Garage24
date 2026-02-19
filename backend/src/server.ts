@@ -19,6 +19,7 @@ import { startSubscriptionActivationJob } from "./jobs/subscriptionActivationJob
 import { container } from "./DI/container";
 import { SubscriptionService } from "./services/subscription/implimentation/subscriptionService";
 import { TYPES } from "./DI/types";
+import { initSocket } from "./socket/soket";
 
 const app = express();
 const server = http.createServer(app);
@@ -39,6 +40,8 @@ app.use(
     credentials: true,
   })
 );
+
+initSocket(server);
 
 app.use("/api/auth", authRouter);
 app.use("/api/garage", garageRouter);

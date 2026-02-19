@@ -1,5 +1,5 @@
-import UserFooter from "@/features/home/components/UserFooter";
-import UserHeader from "@/features/home/components/UserHeader";
+import UserFooter from "@/components/common/UserFooter";
+import UserHeader from "@/components/common/UserHeader";
 import MyAppointmentsSection from "@/features/appointments/components/MyAppointmentSection";
 import { motion } from "framer-motion";
 

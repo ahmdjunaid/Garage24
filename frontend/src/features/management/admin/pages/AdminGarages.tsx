@@ -121,10 +121,10 @@ const AdminGarages = () => {
   ];
 
   return (
-    <div className="flex h-screen bg-gray-950 text-white overflow-hidden">
+    <div className="flex h-screen bg-gray-950 text-white">
       <AdminSidebar role="admin" />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col">
         <AdminHeader
           text={"Garages"}
           searchPlaceholder={"Search garages..."}

@@ -79,4 +79,9 @@ export const TYPES = {
   //Location
   LocationService: Symbol.for("LocationService"),
   LocationController: Symbol.for("LocationController"),
+
+  //Notification
+  NotificationRepository: Symbol.for("NotificationRepository"),
+  NotificationService: Symbol.for("NotificationService"),
+
 };
