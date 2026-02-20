@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction} from "@reduxjs/toolkit";
 
-interface NotificationType {
+export interface NotificationType {
   _id: string;
   recipientId: string;
   title: string;

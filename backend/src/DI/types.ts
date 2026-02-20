@@ -83,5 +83,5 @@ export const TYPES = {
   //Notification
   NotificationRepository: Symbol.for("NotificationRepository"),
   NotificationService: Symbol.for("NotificationService"),
-
+  NotificationController: Symbol.for("NotificationController"),
 };

@@ -8,7 +8,11 @@ import passwordIcon from "@assets/icons/password.svg";
 import emailIcon from "@assets/icons/email.svg";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/redux/store/store";
-import { googleLoginApi, loginApi, type TokenResponse } from "@/features/auth/services/authServices";
+import {
+  googleLoginApi,
+  loginApi,
+  type TokenResponse,
+} from "@/features/auth/services/authServices";
 import { login } from "@/redux/slice/userSlice";
 import type { Role } from "@/types/UserTypes";
 import { errorToast } from "@/utils/notificationAudio";
@@ -25,29 +29,29 @@ const Login = () => {
   const navigate = useNavigate();
 
   const { isAuthenticated, user, token } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
 
-const location = useLocation();
+  const location = useLocation();
 
-useEffect(() => {
-  if (isAuthenticated && user?.role && token) {
-    const roleRoutes: Record<Role, string> = {
-      user: "/",
-      mechanic: "/mechanic",
-      garage: "/garage",
-      admin: "/admin",
-    };
+  useEffect(() => {
+    if (isAuthenticated && user?.role && token) {
+      const roleRoutes: Record<Role, string> = {
+        user: "/",
+        mechanic: "/mechanic",
+        garage: "/garage",
+        admin: "/admin",
+      };
 
-    const targetPath = user.isOnboardingRequired
-      ? `/${user.role}/onboarding`
-      : roleRoutes[user.role] || "/";
+      const targetPath = user.isOnboardingRequired
+        ? `/${user.role}/onboarding`
+        : roleRoutes[user.role] || "/";
 
-    if (location.pathname !== targetPath) {
-      navigate(targetPath, { replace: true });
+      if (location.pathname !== targetPath) {
+        navigate(targetPath, { replace: true });
+      }
     }
-  }
-}, [isAuthenticated, user, token, navigate, location.pathname]);
+  }, [isAuthenticated, user, token, navigate, location.pathname]);
 
   const handleLogin = async () => {
     let hasError = false;
@@ -66,7 +70,7 @@ useEffect(() => {
 
     if (!passwordRegex.test(password)) {
       setPasswordError(
-        "Password must be 8+ chars with uppercase, lowercase, number, and special character."
+        "Password must be 8+ chars with uppercase, lowercase, number, and special character.",
       );
       hasError = true;
     }
@@ -76,7 +80,6 @@ useEffect(() => {
         setLoading(true);
         const response = await loginApi({ email, password });
         dispatch(login({ user: response.user, token: response.token }));
-
         if (response.user.role === "user") {
           navigate("/", { replace: true });
         } else {
@@ -88,8 +91,7 @@ useEffect(() => {
         }
         setLoading(false);
       } catch (error) {
-        if(error instanceof Error)
-          errorToast(error.message)
+        if (error instanceof Error) errorToast(error.message);
         setLoading(false);
       } finally {
         setLoading(false);
@@ -102,16 +104,15 @@ useEffect(() => {
       try {
         const res = await googleLoginApi(tokenResponse as TokenResponse);
         dispatch(login({ user: res.user, token: res.token }));
-
         if (res.user.role === "user") {
           navigate("/");
         } else {
           navigate(`/${user?.role}`);
         }
       } catch (error) {
-        if(error instanceof Error){
+        if (error instanceof Error) {
           errorToast(error.message);
-        }else{
+        } else {
           errorToast("Google login failed");
         }
       }

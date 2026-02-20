@@ -15,9 +15,6 @@ const appointmentController = container.get<AppointmentController>(TYPES.Appoint
 
 router.route('/onboarding').post(verifyJWT,authorizeRoles("mechanic"),uploadProfile,mechanicController.onboarding);
 router.route('/appointments').get(verifyJWT, authorizeRoles("mechanic"), appointmentController.getAllAppointmentByMechId)
-// router.route('/appointments').get((req,res)=>{
-//     console.log(req.query)
-// })
 router.route('/appointment/:appointmentId').get(verifyJWT, authorizeRoles("mechanic"), appointmentController.getAppointmentDetails)
 router.route('/service-status').patch(verifyJWT, authorizeRoles("mechanic"), appointmentController.updateServiceStatus);
 

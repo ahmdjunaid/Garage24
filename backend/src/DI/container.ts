@@ -96,8 +96,8 @@ import { INotificationRepository } from "../repositories/notification/interface/
 import { NotificationRepository } from "../repositories/notification/implementation/notificationRepository.";
 import { INotificationService } from "../services/notification/interface/INotificationService";
 import { NotificationService } from "../services/notification/implementation/notificationService";
-import { Server } from "socket.io";
-import { getIO } from "../socket/soket";
+import { INotificationController } from "../controllers/notification/interface/INotificationController";
+import { NotificationController } from "../controllers/notification/implementation/notificationController";
 
 const container = new Container();
 
@@ -182,7 +182,8 @@ container.bind<ILocationService>(TYPES.LocationService).to(LocationService);
 container.bind<ILocationController>(TYPES.LocationController).to(LocationController);
 
 //Notification
-container.bind<INotificationRepository>(TYPES.NotificationRepository).to(NotificationRepository)
-container.bind<INotificationService>(TYPES.NotificationService).to(NotificationService)
+container.bind<INotificationRepository>(TYPES.NotificationRepository).to(NotificationRepository);
+container.bind<INotificationService>(TYPES.NotificationService).to(NotificationService);
+container.bind<INotificationController>(TYPES.NotificationController).to(NotificationController);
 
 export { container };

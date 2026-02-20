@@ -7,6 +7,16 @@ import {
   CheckCircle,
   User,
   AlertTriangle,
+  MapPin,
+  Timer,
+  User2,
+  CarIcon,
+  LucideTag,
+  Building,
+  Calendar,
+  TimerIcon,
+  TimerResetIcon,
+  IndianRupee,
 } from "lucide-react";
 import { getNext7Days } from "@/utils/getNext7Days";
 import { useSelector } from "react-redux";
@@ -790,8 +800,9 @@ const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({
                       )}
                     </div>
                     <div className="flex items-center gap-4 text-sm">
-                      <span className="bg-black/30 px-3 py-1 rounded-full">
-                        📍 {metersToKm(garage.distance)} km
+                      <span className="bg-black/30 px-3 py-1 rounded-full flex items-center gap-1">
+                        <MapPin size={14} />
+                        {metersToKm(garage.distance)} km
                       </span>
                       <span className="bg-black/30 px-3 py-1 rounded-full">
                         RSA{" "}
@@ -869,8 +880,9 @@ const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({
                                   <span className="bg-black/30 px-3 py-1 rounded-full">
                                     ₹{service.price}
                                   </span>
-                                  <span className="bg-black/30 px-3 py-1 rounded-full">
-                                    ⏱️ {service.durationMinutes} min
+                                  <span className="bg-black/30 px-3 py-1 rounded-full flex items-center gap-1">
+                                    <Timer size={14} />{" "}
+                                    {service.durationMinutes} min
                                   </span>
                                 </div>
                               </button>
@@ -907,8 +919,8 @@ const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({
                           <span className="bg-black/30 px-3 py-1 rounded-full">
                             ₹{service.price}
                           </span>
-                          <span className="bg-black/30 px-3 py-1 rounded-full">
-                            ⏱️ {service.durationMinutes} min
+                          <span className="bg-black/30 px-3 py-1 rounded-full flex items-center gap-1">
+                            <Timer size={14} /> {service.durationMinutes} min
                           </span>
                         </div>
                       </button>
@@ -1074,26 +1086,56 @@ const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({
                   <h3 className="text-xl font-semibold mb-4 text-gray-300">
                     Customer & Vehicle
                   </h3>
-                  <div className="space-y-2 text-gray-300">
-                    <p>👤 {userData.name}</p>
-                    <p>
-                      🚗 {vehicleData.make?.name} {vehicleData.model?.name} (
+                  <div className="space-y-3 text-gray-300 text-sm">
+                    <p className="flex items-center gap-2">
+                      <User2 size={16} className="text-red-400" />
+                      {userData.name}
+                    </p>
+
+                    <p className="flex items-center gap-2">
+                      <CarIcon size={16} className="text-red-400" />
+                      {vehicleData.make?.name} {vehicleData.model?.name} (
                       {vehicleData.registrationYear})
                     </p>
-                    <p>🔖 {vehicleData.licensePlate}</p>
+
+                    <p className="flex items-center gap-2">
+                      <LucideTag size={16} className="text-red-400" />
+                      {vehicleData.licensePlate}
+                    </p>
                   </div>
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold mb-4 text-gray-300">
                     Appointment Details
                   </h3>
-                  <div className="space-y-2 text-gray-300">
-                    <p>🏢 {selectedGarage?.name}</p>
-                    <p>📅 {selectedDate}</p>
-                    <p>⏰ {selectedTime.startTime}</p>
-                    <p>⏱️ Duration: {getTotalServiceDuration()} minutes</p>
-                    <p className="text-xl font-bold text-white mt-3">
-                      💰 Total: ₹{totalPrice}
+                  <div className="space-y-3 text-gray-300 text-sm">
+                    <p className="flex items-center gap-2">
+                      <Building size={16} className="text-red-400" />
+                      {selectedGarage?.name}
+                    </p>
+
+                    <p className="flex items-center gap-2">
+                      <Calendar size={16} className="text-red-400" />
+                      {selectedDate}
+                    </p>
+
+                    <p className="flex items-center gap-2">
+                      <TimerIcon size={16} className="text-red-400" />
+                      {selectedTime.startTime}
+                    </p>
+
+                    <p className="flex items-center gap-2">
+                      <TimerResetIcon size={16} className="text-red-400" />
+                      Duration: {getTotalServiceDuration()} minutes
+                    </p>
+
+                    <p className="flex items-center gap-2 text-xl text-green-400 mt-4 font-semibold">
+                      <IndianRupee size={18} className="text-green-400" />
+                      {totalPrice}
+                    </p>
+
+                    <p className="text-sm text-gray-400 mt-1">
+                      Payable at the time of vehicle delivery
                     </p>
                   </div>
                 </div>

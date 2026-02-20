@@ -3,6 +3,8 @@ import { Search, Bell } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/redux/store/store";
 import { markAllAsRead, markAsRead } from "@/redux/slice/notificationSlice";
+import { errorToast } from "@/utils/notificationAudio";
+import { markAllAsReadApi, markAsReadApi } from "../services/notificationServices";
 
 interface AdminHeaderProps {
   text: string;
@@ -15,9 +17,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   searchPlaceholder,
   setSearchQuery,
 }) => {
-  const { notifications } = useSelector(
-    (state: RootState) => state.notification,
-  );
+  const { notifications } = useSelector((state: RootState) => state.notification);
   const [showNotifications, setShowNotifications] = React.useState(false);
 
   const dispatch = useDispatch();
@@ -25,6 +25,26 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   const unreadCount = React.useMemo(() => {
   return notifications.filter((n) => !n.isRead).length;
 }, [notifications]);
+
+  const handleMarkRead = async (notfId:string) => {
+    try {
+      await markAsReadApi(notfId)
+      dispatch(markAsRead(notfId))
+    } catch (error) {
+      if(error instanceof Error)
+        errorToast(error.message)
+    }
+  }
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllAsReadApi()
+      dispatch(markAllAsRead())
+    } catch (error) {
+      if(error instanceof Error)
+        errorToast(error.message)
+    }
+  }
 
   return (
     <div className="relative bg-gradient-to-br from-red-950 via-red-900 to-red-800 px-8 py-8 overflow-hidden">
@@ -86,7 +106,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
 
                 {unreadCount > 0 && (
                   <button
-                    onClick={() => dispatch(markAllAsRead())}
+                    onClick={() =>handleMarkAllRead()}
                     className="text-xs text-red-400 hover:text-red-300 transition"
                   >
                     Mark all as read
@@ -130,9 +150,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                           {/* Mark as read button */}
                           {!notification.isRead && (
                             <button
-                              onClick={() =>
-                                dispatch(markAsRead(notification._id))
-                              }
+                              onClick={()=>handleMarkRead(notification._id)}
                               className="
                                 mt-3 text-xs
                                 text-red-400 hover:text-red-300

@@ -13,7 +13,6 @@ import { GarageController } from "../controllers/garage/implementation/garageCon
 import { ServiceController } from "../controllers/service/implementation/serviceController";
 import { SlotController } from "../controllers/slot/implementation/slotController";
 
-
 const router = express.Router()
 const vehicleController = container.get<VehicleController>(TYPES.VehicleController)
 const brandController = container.get<BrandController>(TYPES.BrandController)
