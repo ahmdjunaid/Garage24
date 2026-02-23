@@ -14,7 +14,6 @@ export const markAsReadApi = (notifId:string) => {
 }
 
 export const markAllAsReadApi = () => {
-    console.log("hiiii")
     return api
         .patch(`${NOTIF_BASE_ROUTE}`)
         .then(res => res.data)

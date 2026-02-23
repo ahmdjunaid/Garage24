@@ -4,7 +4,6 @@ import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import {
-  ERROR_WHILE_PLAN_UPDATE,
   PLAN_NOT_FOUND,
   RENEWAL_POLICY_VIOLATION,
   SUBSCRIPTION_ERROR,
@@ -65,13 +64,14 @@ export class SubscriptionService implements ISubscriptionService {
     });
   }
 
-  async upsertPlanData(
+  async createPlanData(
     garageId: string,
     planId: string,
     sessionId: string,
-    paymentIntent: string
+    paymentIntent: string,
+    paymentStatus: PaymentStatus
   ) {
-    if (!garageId || !planId || !sessionId || !paymentIntent) {
+    if (!garageId || !planId || !sessionId || !paymentIntent || !paymentStatus) {
       throw new AppError(HttpStatus.BAD_REQUEST, SUBSCRIPTION_ERROR);
     }
 
@@ -101,7 +101,7 @@ export class SubscriptionService implements ISubscriptionService {
       noOfServices: plan.noOfServices,
     };
 
-    await this._subscriptionRepository.upsertSubscription({
+    await this._subscriptionRepository.createSubscription({
       garageId: garageIdConverted,
       planId: planIdConverted,
       planSnapShot,
@@ -110,6 +110,7 @@ export class SubscriptionService implements ISubscriptionService {
       sessionId,
       paymentIntent,
       status: planAlreadyExist ? "pending" : "active",
+      paymentStatus,
     });
 
     return {
@@ -117,22 +118,6 @@ export class SubscriptionService implements ISubscriptionService {
         ? "Plan renewed successfully"
         : "Subscription activated successfully",
     };
-  }
-
-  async upsertPaymentStatus(
-    paymentIntent: string,
-    paymentStatus: PaymentStatus
-  ) {
-    const updatedSubscription =
-      await this._subscriptionRepository.upsertSubscriptionByPaymentIntent(
-        { paymentIntent },
-        { paymentStatus }
-      );
-    if (!updatedSubscription) {
-      throw new AppError(HttpStatus.BAD_REQUEST, ERROR_WHILE_PLAN_UPDATE);
-    }
-
-    return updatedSubscription;
   }
 
   async activePendingSubscriptions(): Promise<void> {

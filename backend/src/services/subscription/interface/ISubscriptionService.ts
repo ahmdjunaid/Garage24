@@ -1,5 +1,7 @@
+// import { PaymentStatus } from "../../../types/payments";
+// import { ISubscription } from "../../../types/subscription";
+
 import { PaymentStatus } from "../../../types/payments";
-import { ISubscription } from "../../../types/subscription";
 
 export default interface ISubscriptionService {
   subscribePlan(data:{
@@ -8,16 +10,13 @@ export default interface ISubscriptionService {
     planName: string,
     planPrice: string
   }): Promise<{ url: string }>;
-  upsertPlanData(
+  createPlanData(
     garageId: string,
     planId: string,
     sessionId: string,
-    paymentIntent: string | null
+    paymentIntent: string | null,
+    paymentStatus: PaymentStatus
   ): Promise<{ message: string }>;
 
-  upsertPaymentStatus(
-    paymentIntent: string,
-    paymentStatus: PaymentStatus
-  ): Promise<ISubscription | null>;
   activePendingSubscriptions(): Promise<void>;
 }

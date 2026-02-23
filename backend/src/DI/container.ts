@@ -98,6 +98,10 @@ import { INotificationService } from "../services/notification/interface/INotifi
 import { NotificationService } from "../services/notification/implementation/notificationService";
 import { INotificationController } from "../controllers/notification/interface/INotificationController";
 import { NotificationController } from "../controllers/notification/implementation/notificationController";
+import { IDashboardService } from "../services/dashboard/interface/IDashboardService";
+import { IDashboardController } from "../controllers/dashboard/interface/IDashboardController";
+import { DashboardService } from "../services/dashboard/implementation/dashboardService";
+import { DashboardController } from "../controllers/dashboard/implementation/dashboardController";
 
 const container = new Container();
 
@@ -185,5 +189,9 @@ container.bind<ILocationController>(TYPES.LocationController).to(LocationControl
 container.bind<INotificationRepository>(TYPES.NotificationRepository).to(NotificationRepository);
 container.bind<INotificationService>(TYPES.NotificationService).to(NotificationService);
 container.bind<INotificationController>(TYPES.NotificationController).to(NotificationController);
+
+//Dashboard
+container.bind<IDashboardService>(TYPES.DashboardService).to(DashboardService);
+container.bind<IDashboardController>(TYPES.DashboardController).to(DashboardController)
 
 export { container };

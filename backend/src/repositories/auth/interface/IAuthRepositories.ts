@@ -19,4 +19,5 @@ export interface IAuthRepository {
   findById(id: string): Promise<UserDocument | null>;
   findOneAndUpdate( userId: string, data: Partial<IUser>): Promise<UserDocument | null>;
   findByIdAndUpdate( userId: string, data: Partial<IUser>): Promise<UserDocument | null>;
+  findAdmin():Promise<UserDocument | null>;
 }

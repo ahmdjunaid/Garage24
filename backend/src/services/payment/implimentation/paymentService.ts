@@ -48,16 +48,16 @@ export class PaymentService implements IPaymentService {
 
         switch (metadata.paymentPurpose) {
           case "SUBSCRIPTION": {
-            console.log("2")
             if (!metadata.garageId || !metadata.productId) {
               throw new AppError(HttpStatus.BAD_REQUEST, SUBSCRIPTION_ERROR);
             }
 
-            await this._subscriptionService.upsertPlanData(
+            await this._subscriptionService.createPlanData(
               metadata.garageId,
               metadata.productId,
               session.id,
-              session.payment_intent.toString()
+              session.payment_intent.toString(),
+              "paid"
             );
 
             await this.createPayment({

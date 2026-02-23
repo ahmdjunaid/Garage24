@@ -1,4 +1,4 @@
-import { User } from "../../../models/user";
+import { User, UserDocument } from "../../../models/user";
 import { IUser, Role } from "../../../types/user";
 import { BaseRepository } from "../../IBaseRepository";
 import { IAuthRepository } from "../interface/IAuthRepositories";
@@ -55,5 +55,9 @@ export class AuthRepository
 
   async findByIdAndUpdate(userId: string, data: Partial<IUser>) {
     return await this.updateById(userId, data);
+  }
+
+  async findAdmin(): Promise<UserDocument | null> {
+    return await this.model.findOne({role: "admin"})
   }
 }

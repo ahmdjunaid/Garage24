@@ -6,6 +6,7 @@ import { injectable } from "inversify";
 import subscription, {
   SubscriptionDocument,
 } from "../../../models/subscription";
+import { DashboardAggregationResult } from "../../../types/dashboard";
 
 @injectable()
 export class SubscriptionRepository
@@ -15,7 +16,7 @@ export class SubscriptionRepository
   constructor() {
     super(subscription);
   }
-  async upsertSubscription(data: Partial<ISubscription>) {
+  async createSubscription(data: Partial<ISubscription>) {
     const update = {
       $set: {
         startDate: data.startDate,
@@ -25,6 +26,7 @@ export class SubscriptionRepository
         planId: new Types.ObjectId(data.planId!),
         planSnapShot: data.planSnapShot,
         status: data.status,
+        paymentStatus: data.paymentStatus
       },
     };
 
@@ -42,15 +44,17 @@ export class SubscriptionRepository
     return await this.getByFilter({
       garageId,
       expiryDate: { $gt: new Date() },
-      status: "active"
+      status: "active",
     });
   }
 
-  async getFutureSubscriptions(garageId: string): Promise<SubscriptionDocument[]> {
+  async getFutureSubscriptions(
+    garageId: string
+  ): Promise<SubscriptionDocument[]> {
     return await this.model.find({
       garageId,
       expiryDate: { $gt: new Date() },
-      status: "pending"
+      status: "pending",
     });
   }
 
@@ -88,12 +92,62 @@ export class SubscriptionRepository
     });
   }
 
-  async expireSubsByUserId(
-    garageId: Types.ObjectId
-  ): Promise<void> {
+  async expireSubsByUserId(garageId: Types.ObjectId): Promise<void> {
     await this.model.updateMany(
       { garageId, status: "active" },
       { status: "expired" }
     );
+  }
+
+  async aggregateDashboardData(
+    start: Date,
+    end: Date,
+    type: "week" | "month" | "year"
+  ): Promise<DashboardAggregationResult> {
+    const groupFormat =
+      type === "year"
+        ? { $month: "$createdAt" }
+        : type === "month"
+          ? { $dayOfMonth: "$createdAt" }
+          : { $dayOfWeek: "$createdAt" };
+
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          paymentStatus: "paid",
+          createdAt: { $gte: start, $lte: end },
+        },
+      },
+      {
+        $facet: {
+          revenue: [
+            {
+              $group: {
+                _id: null,
+                total: {
+                  $sum: {
+                    $toDouble: {
+                      $ifNull: ["$planSnapShot.price", "0"],
+                    },
+                  },
+                },
+              },
+            },
+          ],
+          chart: [
+            {
+              $group: {
+                _id: groupFormat,
+                count: { $sum: 1 },
+              },
+            },
+            { $sort: { _id: 1 } },
+          ],
+          totalCount: [{ $count: "count" }],
+        },
+      },
+    ]);
+
+    return result[0];
   }
 }

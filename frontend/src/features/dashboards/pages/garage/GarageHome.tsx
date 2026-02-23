@@ -12,7 +12,7 @@ import { getCurrentSubscriptionApi } from "@/features/subscription/services/subs
 const GarageHome = () => {
   const [currentPlan, setCurrentPlan] = useState<ISubscription | null>(null);
   const [hasActivePlan, setActivePlan] = useState<boolean>(false);
-  const [pendingPlan, setPendingPlan] = useState<ISubscription[] | null>(null);
+  const [pendingPlan, setPendingPlan] = useState<ISubscription[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const { user } = useSelector((state: RootState) => state.auth);
@@ -28,6 +28,7 @@ const GarageHome = () => {
         try {
           setLoading(true);
           const res = await getCurrentSubscriptionApi(user._id);
+          console.log(res,"garage home")
           setCurrentPlan(res.plan);
           setActivePlan(res.isActive);
           setPendingPlan(res.pendingSubs);
@@ -50,7 +51,8 @@ const GarageHome = () => {
         <AdminHeader text={"Dashboard"} />
       </div>
 
-      {!loading && pendingPlan === null && (
+
+      { !loading && pendingPlan.length < 1 && (
         <SubscriptionAlertModal
           isOpen={
             !hasActivePlan || (typeof daysLeft === "number" && daysLeft < 7)

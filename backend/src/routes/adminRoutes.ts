@@ -6,12 +6,14 @@ import { TYPES } from "../DI/types"
 import { PlanController } from "../controllers/plan/implimentation/planController"
 import { GarageController } from "../controllers/garage/implementation/garageController"
 import { UserController } from "../controllers/user/implementation/userController"
+import { DashboardController } from "../controllers/dashboard/implementation/dashboardController"
 
 const router = express.Router()
 
 const planController = container.get<PlanController>(TYPES.PlanController);
 const garageController = container.get<GarageController>(TYPES.GarageController);
-const userController = container.get<UserController>(TYPES.UserController)
+const userController = container.get<UserController>(TYPES.UserController);
+const dashboardController = container.get<DashboardController>(TYPES.DashboardController)
 
 router.route('/users').get(verifyJWT,authorizeRoles("admin"),userController.getAllUsers)
 router.route('/garages').get(verifyJWT,authorizeRoles("admin"),garageController.getAllGarages)
@@ -25,5 +27,6 @@ router.route('/plans').get(verifyJWT,authorizeRoles("admin"),planController.getA
 router.route('/plans/:planId').put(verifyJWT,authorizeRoles("admin"),planController.updatePlan)
 router.route('/toggle-plan-status/:planId').patch(verifyJWT,authorizeRoles("admin"),planController.toggleStatus)
 router.route('/delete-plan/:planId').delete(verifyJWT,authorizeRoles("admin"),planController.deletePlan)
+router.route('/dashboard').get(dashboardController.adminDashboardData)
 
 export default router;

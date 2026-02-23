@@ -7,6 +7,7 @@ import {
   PopulatedAppointmentData,
 } from "../../../types/appointment";
 import { GetPaginationQuery } from "../../../types/common";
+import { DashboardAggregationResult } from "../../../types/dashboard";
 
 export interface IAppointmentRepository {
   createAppointment(
@@ -42,5 +43,6 @@ export interface IAppointmentRepository {
   ): Promise<AppointmentDocument | null>;
   assignMechanic(appointmentId:string, mechanicId:string): Promise<AppointmentDocument | null>;
   updateServiceStatus(appointmentId:string, serviceId:string, status:string): Promise<AppointmentDocument | null>;
-  getAllAppointmentByMechId(query: GetPaginationQuery): Promise<GetMappedPopulatedAppointmentResponse>
+  getAllAppointmentByMechId(query: GetPaginationQuery): Promise<GetMappedPopulatedAppointmentResponse>;
+  aggregateDashboardData(start: Date, end: Date, type: "week" | "month" | "year"): Promise<DashboardAggregationResult>
 }

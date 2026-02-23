@@ -9,6 +9,7 @@ import {
 import { GetPaginationQuery } from "../../../types/common";
 import { BaseRepository } from "../../IBaseRepository";
 import { IAppointmentRepository } from "../interface/IAppointmentRepository";
+import { DashboardAggregationResult } from "../../../types/dashboard";
 
 export class AppointmentRepository
   extends BaseRepository<IAppointment>
@@ -261,5 +262,51 @@ export class AppointmentRepository
       totalAppointments,
       totalPages,
     };
+  }
+
+  async aggregateDashboardData(
+    start: Date,
+    end: Date,
+    type: "week" | "month" | "year"
+  ): Promise<DashboardAggregationResult> {
+    const groupFormat =
+      type === "year"
+        ? { $month: "$appointmentDate" }
+        : type === "month"
+          ? { $dayOfMonth: "$appointmentDate" }
+          : { $dayOfWeek: "$appointmentDate" };
+
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          paymentStatus: "paid",
+          appointmentDate: { $gte: start, $lte: end },
+        },
+      },
+      {
+        $facet: {
+          revenue: [
+            {
+              $group: {
+                _id: null,
+                total: { $sum: "$amount" },
+              },
+            },
+          ],
+          chart: [
+            {
+              $group: {
+                _id: groupFormat,
+                count: { $sum: 1 },
+              },
+            },
+            { $sort: { _id: 1 } },
+          ],
+          totalCount: [{ $count: "count" }],
+        },
+      },
+    ]);
+
+    return result[0];
   }
 }

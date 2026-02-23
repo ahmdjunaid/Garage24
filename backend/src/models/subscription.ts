@@ -13,7 +13,7 @@ const subscriptionSchema = new Schema<ISubscription>(
     },
     planSnapShot: {
       name: { type: String },
-      price: { type: String },
+      price: { type: Number },
       validity: { type: String },
       noOfMechanics: { type: String },
       noOfServices: { type: String }
@@ -40,7 +40,6 @@ const subscriptionSchema = new Schema<ISubscription>(
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "failed", "refunded"],
-      default: "pending",
     },
   },
   { timestamps: true }

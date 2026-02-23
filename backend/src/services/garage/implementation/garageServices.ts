@@ -22,6 +22,7 @@ import { GARAGE_APPROVAL_FAILED } from "../../../constants/messages";
 import { garageDataMapping } from "../../../utils/dto/garagesDto";
 import { GetPaginationQuery } from "../../../types/common";
 import { IEmailService } from "../../email/interface/IEmailService";
+import { INotificationService } from "../../notification/interface/INotificationService";
 
 @injectable()
 export class GarageService implements IGarageService {
@@ -33,7 +34,9 @@ export class GarageService implements IGarageService {
     private _subscriptionRepository: ISubscriptionRepository,
     @inject(TYPES.MechanicRepository)
     private _mechanicRepository: IMechanicRepository,
-    @inject(TYPES.EmailService) private _emailService: IEmailService
+    @inject(TYPES.EmailService) private _emailService: IEmailService,
+    @inject(TYPES.NotificationService)
+    private _notificationService: INotificationService
   ) {}
   async onboarding(
     name: string,
@@ -108,6 +111,16 @@ export class GarageService implements IGarageService {
     await this._authRepository.findOneAndUpdate(userId, {
       isOnboardingRequired: false,
       imageUrl: imageUrl,
+    });
+
+    const admin = await this._authRepository.findAdmin();
+    if (!admin) throw new AppError(HttpStatus.BAD_REQUEST, "Something went wrong!");
+
+    await this._notificationService.createNotification({
+      recipientId: admin?._id,
+      title: "New Registration Request",
+      message: `A new registration request has been received from ${data.name}.`,
+      isRead: false,
     });
 
     return garageData;
@@ -208,6 +221,13 @@ export class GarageService implements IGarageService {
         garage?.email,
         garage?.name
       );
+
+      await this._notificationService.createNotification({
+        recipientId: garage?._id,
+        title: "Subscription Needed",
+        message: "Choose a subscription plan to unlock full access.",
+        isRead: false,
+      });
     } else if (response?.approvalStatus === "rejected" && garage) {
       await this._emailService.sendGarageRejectionEmail(
         garage?.email,
