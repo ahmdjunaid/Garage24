@@ -27,6 +27,9 @@ router.route('/plans').get(verifyJWT,authorizeRoles("admin"),planController.getA
 router.route('/plans/:planId').put(verifyJWT,authorizeRoles("admin"),planController.updatePlan)
 router.route('/toggle-plan-status/:planId').patch(verifyJWT,authorizeRoles("admin"),planController.toggleStatus)
 router.route('/delete-plan/:planId').delete(verifyJWT,authorizeRoles("admin"),planController.deletePlan)
-router.route('/dashboard').get(dashboardController.adminDashboardData)
+
+//Dashboard
+router.route('/dashboard').get(verifyJWT,authorizeRoles("admin"), dashboardController.adminDashboardData)
+router.route('/top-garages').get(verifyJWT,authorizeRoles("admin"), dashboardController.getTopFiveBookedGarages)
 
 export default router;

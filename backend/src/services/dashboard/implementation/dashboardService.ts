@@ -5,7 +5,9 @@ import { IAppointmentRepository } from "../../../repositories/appointment/interf
 import { ISubscriptionRepository } from "../../../repositories/subscription/interface/ISubscriptionRepository";
 import { getDateRanges } from "../../../utils/getDateRanges";
 import { formatChart } from "../../../utils/fomatChart";
-import { DashboardData } from "../../../types/dashboard";
+import { DashboardData, MostBookedGarage } from "../../../types/dashboard";
+import { IGarageRepository } from "../../../repositories/garage/interface/IGarageRepository";
+import { GarageDocument } from "../../../models/garage";
 
 @injectable()
 export class DashboardService implements IDashboardService {
@@ -13,7 +15,8 @@ export class DashboardService implements IDashboardService {
     @inject(TYPES.AppointmentRepository)
     private _appointmentRepository: IAppointmentRepository,
     @inject(TYPES.SubscriptionRepository)
-    private _subscriptionRepository: ISubscriptionRepository
+    private _subscriptionRepository: ISubscriptionRepository,
+    @inject(TYPES.GarageRepository) private _garageRepository: IGarageRepository,
   ) {}
 
   async getAdminDashboardData(
@@ -80,6 +83,16 @@ export class DashboardService implements IDashboardService {
           : 100
         : ((currentSubCount - previousSubCount) / previousSubCount) * 100;
 
+    // -------- Service Revenue --------
+    const serviceGrowth =
+      previousAppointmentRevenue === 0
+        ? currentAppointmentRevenue === 0
+          ? 0
+          : 100
+        : ((currentAppointmentRevenue - previousAppointmentRevenue) /
+            previousAppointmentRevenue) *
+          100;
+
     // -------- Charts --------
     const appointmentChartData = formatChart(type, currentAppointments.chart);
     const subscriptionChartData = formatChart(type, currentSubs.chart);
@@ -93,6 +106,10 @@ export class DashboardService implements IDashboardService {
       subChange: subscriptionGrowth.toFixed(1) + "%",
       subUp: subscriptionGrowth >= 0,
 
+      services: currentAppointmentRevenue,
+      servChange: serviceGrowth.toFixed(1) + "%",
+      servUp: serviceGrowth >= 0,
+
       totalSubs: currentSubRevenue,
       subGrowth: subsRevenueGrowth.toFixed(1) + "%",
 
@@ -102,5 +119,10 @@ export class DashboardService implements IDashboardService {
       subChart: subscriptionChartData.data,
       subLabels: subscriptionChartData.labels,
     };
+  }
+
+  async getTopFiveGarages(): Promise<MostBookedGarage[]> {
+    const LIMIT = 5
+    return await this._appointmentRepository.getMostBookedGaragesIds(LIMIT)
   }
 }

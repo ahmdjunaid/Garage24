@@ -36,4 +36,13 @@ export class DashboardController implements IDashboardController {
       next(error);
     }
   };
+
+  getTopFiveBookedGarages = async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const response = await this._dashboardService.getTopFiveGarages()
+        res.status(HttpStatus.OK).json(response)
+      } catch (error) {
+        next(error)
+      }
+  }
 }

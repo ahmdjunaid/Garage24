@@ -1,3 +1,6 @@
+import { Types } from "mongoose";
+import { IAddress, ILocation } from "./garage";
+
 export interface DashboardData {
     revenue: number;
     revChange: string;
@@ -5,6 +8,9 @@ export interface DashboardData {
     subscriptions: number;
     subChange: string;
     subUp: boolean;
+    services: number;
+    servChange: string;
+    servUp: boolean;
     totalSubs: number;
     subGrowth: string;
     bookingChart: number[];
@@ -17,4 +23,15 @@ export interface DashboardAggregationResult {
   revenue: { total: number }[];
   chart: { _id: number; count: number }[];
   totalCount: { count: number }[];
+}
+
+export interface MostBookedGarage {
+  garageId: Types.ObjectId;
+  count: number;
+  name: string;
+  location: IAddress;
+  imageUrl: string;
+  supportedFuelTypes: string[];
+  isBlocked: boolean;
+  isDeleted: boolean;
 }

@@ -1,4 +1,4 @@
-import { ClientSession, UpdateQuery } from "mongoose";
+import { ClientSession, ObjectId, UpdateQuery } from "mongoose";
 import { AppointmentDocument } from "../../../models/appointment";
 import {
   GetMappedAppointmentResponse,
@@ -7,7 +7,7 @@ import {
   PopulatedAppointmentData,
 } from "../../../types/appointment";
 import { GetPaginationQuery } from "../../../types/common";
-import { DashboardAggregationResult } from "../../../types/dashboard";
+import { DashboardAggregationResult, MostBookedGarage } from "../../../types/dashboard";
 
 export interface IAppointmentRepository {
   createAppointment(
@@ -45,4 +45,5 @@ export interface IAppointmentRepository {
   updateServiceStatus(appointmentId:string, serviceId:string, status:string): Promise<AppointmentDocument | null>;
   getAllAppointmentByMechId(query: GetPaginationQuery): Promise<GetMappedPopulatedAppointmentResponse>;
   aggregateDashboardData(start: Date, end: Date, type: "week" | "month" | "year"): Promise<DashboardAggregationResult>
+  getMostBookedGaragesIds(limit:number): Promise<MostBookedGarage[]>;
 }

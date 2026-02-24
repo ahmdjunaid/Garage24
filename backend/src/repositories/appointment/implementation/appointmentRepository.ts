@@ -1,4 +1,4 @@
-import { ClientSession, UpdateQuery } from "mongoose";
+import { ClientSession, ObjectId, UpdateQuery } from "mongoose";
 import { Appointment, AppointmentDocument } from "../../../models/appointment";
 import {
   GetMappedAppointmentResponse,
@@ -9,7 +9,7 @@ import {
 import { GetPaginationQuery } from "../../../types/common";
 import { BaseRepository } from "../../IBaseRepository";
 import { IAppointmentRepository } from "../interface/IAppointmentRepository";
-import { DashboardAggregationResult } from "../../../types/dashboard";
+import { DashboardAggregationResult, MostBookedGarage } from "../../../types/dashboard";
 
 export class AppointmentRepository
   extends BaseRepository<IAppointment>
@@ -308,5 +308,42 @@ export class AppointmentRepository
     ]);
 
     return result[0];
+  }
+
+  async getMostBookedGaragesIds(
+    limit: number
+  ): Promise<MostBookedGarage[]> {
+    return this.model.aggregate([
+      {
+        $group: {
+          _id: "$garageId",
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: "garages",
+          localField: "_id",
+          foreignField: "_id",
+          as: "garage",
+        },
+      },
+      { $unwind: "$garage" },
+      {
+        $project: {
+          _id: 0,
+          garageId: "$_id",
+          count: 1,
+          name: "$garage.name",
+          location: "$garage.address",
+          imageUrl: "$garage.imageUrl",
+          supportedFuelTypes: "$garage.supportedFuelTypes",
+          isBlocked: "$garage.isBlocked",
+          isDeleted: "$garage.isDeleted",
+        },
+      },
+    ]);
   }
 }
