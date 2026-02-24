@@ -5,6 +5,7 @@ import { IDashboardService } from "../../../services/dashboard/interface/IDashbo
 import { Request, Response, NextFunction } from "express";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { AppError } from "../../../middleware/errorHandler";
+import { AUTHENTICATION_FAILED } from "../../../constants/messages";
 
 @injectable()
 export class DashboardController implements IDashboardController {
@@ -12,13 +13,12 @@ export class DashboardController implements IDashboardController {
     @inject(TYPES.DashboardService) private _dashboardService: IDashboardService
   ) {}
 
-    adminDashboardData = async (
+  adminDashboardData = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      
       const cycleType = req.query.type as string;
 
       const allowedTypes = ["week", "month", "year"];
@@ -28,8 +28,7 @@ export class DashboardController implements IDashboardController {
 
       const type = cycleType as "week" | "month" | "year";
 
-      const response =
-        await this._dashboardService.getAdminDashboardData(type);
+      const response = await this._dashboardService.getAdminDashboardData(type);
 
       res.status(HttpStatus.OK).json(response);
     } catch (error) {
@@ -37,12 +36,67 @@ export class DashboardController implements IDashboardController {
     }
   };
 
-  getTopFiveBookedGarages = async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const response = await this._dashboardService.getTopFiveGarages()
-        res.status(HttpStatus.OK).json(response)
-      } catch (error) {
-        next(error)
+  getTopFiveBookedGarages = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const response = await this._dashboardService.getTopFiveGarages();
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getGarageDashboardData = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const cycleType = req.query.type as string;
+      const garageId = req.user?.id;
+      const allowedTypes = ["week", "month", "year"];
+
+      if (!garageId) {
+        throw new AppError(HttpStatus.BAD_REQUEST, AUTHENTICATION_FAILED);
       }
-  }
+
+      if (!cycleType || !allowedTypes.includes(cycleType))
+        throw new AppError(HttpStatus.BAD_REQUEST, "Invalid cycle");
+
+      const type = cycleType as "week" | "month" | "year";
+
+      const response = await this._dashboardService.getGarageDashboardData(
+        garageId,
+        type
+      );
+
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getTopFiveBookedServices = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const garageId = req.user?.id;
+
+      if (!garageId) {
+        throw new AppError(HttpStatus.BAD_REQUEST, AUTHENTICATION_FAILED);
+      }
+
+      const response =
+        await this._dashboardService.getTopFiveServices(garageId);
+
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
 }

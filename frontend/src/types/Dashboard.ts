@@ -39,3 +39,28 @@ export interface MostBookedGarage {
   isBlocked: boolean;
   isDeleted: boolean;
 }
+
+export interface MostBookedServices {
+  name: string;
+  durationMinutes: number;
+  count: number;
+  isBlocked: boolean;
+  isDeleted: boolean;
+}
+
+export interface GarageDashboardData {
+    revenue: number;
+    revChange: string;
+    revUp: boolean;
+
+    appointments: number;
+    appointmentChange: string;
+    appointmentUp: boolean;
+
+    completed: number;
+    completedChange: string;
+    completedUp: boolean;
+
+    bookingChart: number[];
+    labels: string[];
+}

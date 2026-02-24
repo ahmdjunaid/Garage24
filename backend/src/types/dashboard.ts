@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { IAddress, ILocation } from "./garage";
+import { IAddress } from "./garage";
 
 export interface DashboardData {
     revenue: number;
@@ -25,6 +25,11 @@ export interface DashboardAggregationResult {
   totalCount: { count: number }[];
 }
 
+export interface AppointmentAggregateOnStatus {
+  totalAppointments: number;
+  completedAppointments: number;
+}
+
 export interface MostBookedGarage {
   garageId: Types.ObjectId;
   count: number;
@@ -34,4 +39,30 @@ export interface MostBookedGarage {
   supportedFuelTypes: string[];
   isBlocked: boolean;
   isDeleted: boolean;
+}
+
+export interface MostBookedServices {
+  name: string;
+  durationMinutes: number;
+  count: number;
+  isBlocked: boolean;
+  isDeleted: boolean;
+}
+
+
+export interface GarageDashboardData {
+    revenue: number;
+    revChange: string;
+    revUp: boolean;
+
+    appointments: number;
+    appointmentChange: string;
+    appointmentUp: boolean;
+
+    completed: number;
+    completedChange: string;
+    completedUp: boolean;
+
+    bookingChart: number[];
+    labels: string[];
 }

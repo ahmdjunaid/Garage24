@@ -1,4 +1,10 @@
-import { ClientSession, ObjectId, UpdateQuery } from "mongoose";
+import {
+  ClientSession,
+  FilterQuery,
+  ObjectId,
+  Types,
+  UpdateQuery,
+} from "mongoose";
 import { Appointment, AppointmentDocument } from "../../../models/appointment";
 import {
   GetMappedAppointmentResponse,
@@ -9,7 +15,12 @@ import {
 import { GetPaginationQuery } from "../../../types/common";
 import { BaseRepository } from "../../IBaseRepository";
 import { IAppointmentRepository } from "../interface/IAppointmentRepository";
-import { DashboardAggregationResult, MostBookedGarage } from "../../../types/dashboard";
+import {
+  AppointmentAggregateOnStatus,
+  DashboardAggregationResult,
+  MostBookedGarage,
+  MostBookedServices,
+} from "../../../types/dashboard";
 
 export class AppointmentRepository
   extends BaseRepository<IAppointment>
@@ -267,7 +278,11 @@ export class AppointmentRepository
   async aggregateDashboardData(
     start: Date,
     end: Date,
-    type: "week" | "month" | "year"
+    type: "week" | "month" | "year",
+    filters?: {
+      garageUID?: Types.ObjectId;
+      mechanicId?: Types.ObjectId;
+    }
   ): Promise<DashboardAggregationResult> {
     const groupFormat =
       type === "year"
@@ -276,30 +291,26 @@ export class AppointmentRepository
           ? { $dayOfMonth: "$appointmentDate" }
           : { $dayOfWeek: "$appointmentDate" };
 
+    const matchStage: FilterQuery<AppointmentDocument> = {
+      paymentStatus: "paid",
+      appointmentDate: { $gte: start, $lte: end },
+    };
+
+    if (filters?.garageUID) {
+      matchStage.garageUID = filters.garageUID;
+    }
+
+    if (filters?.mechanicId) {
+      matchStage.mechanicId = filters.mechanicId;
+    }
+
     const result = await this.model.aggregate([
-      {
-        $match: {
-          paymentStatus: "paid",
-          appointmentDate: { $gte: start, $lte: end },
-        },
-      },
+      { $match: matchStage },
       {
         $facet: {
-          revenue: [
-            {
-              $group: {
-                _id: null,
-                total: { $sum: "$amount" },
-              },
-            },
-          ],
+          revenue: [{ $group: { _id: null, total: { $sum: "$amount" } } }],
           chart: [
-            {
-              $group: {
-                _id: groupFormat,
-                count: { $sum: 1 },
-              },
-            },
+            { $group: { _id: groupFormat, count: { $sum: 1 } } },
             { $sort: { _id: 1 } },
           ],
           totalCount: [{ $count: "count" }],
@@ -310,9 +321,7 @@ export class AppointmentRepository
     return result[0];
   }
 
-  async getMostBookedGaragesIds(
-    limit: number
-  ): Promise<MostBookedGarage[]> {
+  async getMostBookedGaragesIds(limit: number): Promise<MostBookedGarage[]> {
     return this.model.aggregate([
       {
         $group: {
@@ -345,5 +354,85 @@ export class AppointmentRepository
         },
       },
     ]);
+  }
+
+  async aggregateAppointmentOnStatus(
+    start: Date,
+    end: Date,
+    filters?: { garageUID?: Types.ObjectId; mechanicId?: Types.ObjectId }
+  ): Promise<AppointmentAggregateOnStatus> {
+    const matchStage: FilterQuery<AppointmentDocument> = {
+      appointmentDate: { $gte: start, $lte: end },
+    };
+
+    if (filters?.garageUID) {
+      matchStage.garageUID = filters.garageUID;
+    }
+
+    if (filters?.mechanicId) {
+      matchStage.mechanicId = filters.mechanicId;
+    }
+
+    const result = await this.model.aggregate([
+      { $match: matchStage },
+      {
+        $facet: {
+          totalAppointments: [{ $count: "count" }],
+          completedAppointments: [
+            { $match: { status: "completed" } },
+            { $count: "count" },
+          ],
+        },
+      },
+    ]);
+
+    const data = result[0];
+
+    return {
+      totalAppointments: data.totalAppointments[0]?.count ?? 0,
+      completedAppointments: data.completedAppointments[0]?.count ?? 0,
+    };
+  }
+
+  async getMostBookedServices(
+    garageId: string,
+    limit: number
+  ): Promise<MostBookedServices[]> {
+    const objId = new Types.ObjectId(garageId)
+    
+    return await this.model.aggregate([
+      { $match: { garageUID:  objId} },
+      { $unwind: "$services" },
+      {
+        $group: {
+          _id: "$services.serviceId",
+          count: { $sum: 1 },
+        },
+      },
+
+      { $sort: { count: -1 } },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: "garageservices",
+          localField: "_id",
+          foreignField: "_id",
+          as: "service",
+        },
+      },
+        { $unwind: "$service" },
+
+      {
+        $project: {
+          _id: 0,
+          serviceId: "$_id",
+          count: 1,
+          name: "$service.name",
+          durationMinutes: "$service.durationMinutes",
+          isBlocked: "$service.isBlocked",
+          isDeleted: "$service.isDeleted",
+        },
+      },
+    ])
   }
 }

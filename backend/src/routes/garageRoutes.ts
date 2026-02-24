@@ -13,6 +13,7 @@ import { ServiceCategoryController } from "../controllers/serviceCategory/implem
 import { LocationController } from "../controllers/location/implementation/locationController";
 import { AppointmentController } from "../controllers/appointment/implementation/appointmentController";
 import { SubscriptionController } from "../controllers/subscription/implementation/subscriptionController";
+import { DashboardController } from "../controllers/dashboard/implementation/dashboardController";
 
 
 const router = express.Router()
@@ -25,6 +26,7 @@ const serviceCategoryController = container.get<ServiceCategoryController>(TYPES
 const locationController = container.get<LocationController>(TYPES.LocationController)
 const appointmentController = container.get<AppointmentController>(TYPES.AppointmentController)
 const subscriptionController = container.get<SubscriptionController>(TYPES.SubscriptionController)
+const dashboardController = container.get<DashboardController>(TYPES.DashboardController)
 
 router.route('/onboarding').post(verifyJWT,authorizeRoles("garage"),uploadOnboardingImages,garageController.onboarding)
 router.route('/get-address').get(verifyJWT,authorizeRoles("garage"),locationController.getAddressFromCoordinates)
@@ -47,5 +49,10 @@ router.route('/service-categories').get(verifyJWT, authorizeRoles("garage"), ser
 router.route('/appointments').get(verifyJWT, authorizeRoles("garage"), appointmentController.getActiveAppointments)
 router.route('/mechanics/assignable/:garageId').get(verifyJWT, authorizeRoles("garage"), mechanicController.getAssignableMechanics)
 router.route('/appointment/assign-mechanic').post(verifyJWT, authorizeRoles("garage"), appointmentController.assignMechanic)
+
+//Dashboard
+router.route('/dashboard').get(verifyJWT, authorizeRoles("garage"), dashboardController.getGarageDashboardData)
+router.route('/top-services').get(verifyJWT, authorizeRoles("garage"), dashboardController.getTopFiveBookedServices)
+
 
 export default router;

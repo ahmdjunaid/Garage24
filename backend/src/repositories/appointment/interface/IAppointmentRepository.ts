@@ -1,4 +1,4 @@
-import { ClientSession, ObjectId, UpdateQuery } from "mongoose";
+import { ClientSession, ObjectId, Types, UpdateQuery } from "mongoose";
 import { AppointmentDocument } from "../../../models/appointment";
 import {
   GetMappedAppointmentResponse,
@@ -7,7 +7,12 @@ import {
   PopulatedAppointmentData,
 } from "../../../types/appointment";
 import { GetPaginationQuery } from "../../../types/common";
-import { DashboardAggregationResult, MostBookedGarage } from "../../../types/dashboard";
+import {
+  AppointmentAggregateOnStatus,
+  DashboardAggregationResult,
+  MostBookedGarage,
+  MostBookedServices,
+} from "../../../types/dashboard";
 
 export interface IAppointmentRepository {
   createAppointment(
@@ -32,6 +37,7 @@ export interface IAppointmentRepository {
   getAppointmentForReschedule(
     id: string
   ): Promise<PopulatedAppointmentData | null>;
+
   pushToArray<T>(
     appointmentId: string,
     field: "services" | "events",
@@ -41,9 +47,42 @@ export interface IAppointmentRepository {
       new?: boolean;
     }
   ): Promise<AppointmentDocument | null>;
-  assignMechanic(appointmentId:string, mechanicId:string): Promise<AppointmentDocument | null>;
-  updateServiceStatus(appointmentId:string, serviceId:string, status:string): Promise<AppointmentDocument | null>;
-  getAllAppointmentByMechId(query: GetPaginationQuery): Promise<GetMappedPopulatedAppointmentResponse>;
-  aggregateDashboardData(start: Date, end: Date, type: "week" | "month" | "year"): Promise<DashboardAggregationResult>
-  getMostBookedGaragesIds(limit:number): Promise<MostBookedGarage[]>;
+
+  assignMechanic(
+    appointmentId: string,
+    mechanicId: string
+  ): Promise<AppointmentDocument | null>;
+
+  updateServiceStatus(
+    appointmentId: string,
+    serviceId: string,
+    status: string
+  ): Promise<AppointmentDocument | null>;
+
+  getAllAppointmentByMechId(
+    query: GetPaginationQuery
+  ): Promise<GetMappedPopulatedAppointmentResponse>;
+
+  aggregateDashboardData(
+    start: Date,
+    end: Date,
+    type: "week" | "month" | "year",
+    filters?: {
+      garageUID?: Types.ObjectId;
+      mechanicId?: Types.ObjectId;
+    }
+  ): Promise<DashboardAggregationResult>;
+
+  getMostBookedGaragesIds(limit: number): Promise<MostBookedGarage[]>;
+
+  aggregateAppointmentOnStatus(
+    start: Date,
+    end: Date,
+    filters?: {
+      garageUID?: Types.ObjectId;
+      mechanicId?: Types.ObjectId;
+    }
+  ): Promise<AppointmentAggregateOnStatus>;
+
+  getMostBookedServices(garageId:string, limit: number): Promise<MostBookedServices[]>;
 }

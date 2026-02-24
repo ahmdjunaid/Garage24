@@ -8,6 +8,7 @@ import SubscriptionAlertModal from "@/features/dashboards/modals/SubscriptionAle
 import { calculateDaysLeft } from "@/utils/calculateDaysLeft";
 import { errorToast } from "@/utils/notificationAudio";
 import { getCurrentSubscriptionApi } from "@/features/subscription/services/subscriptionService";
+import GarageDashboard from "../../components/GarageDashboard";
 
 const GarageHome = () => {
   const [currentPlan, setCurrentPlan] = useState<ISubscription | null>(null);
@@ -49,6 +50,7 @@ const GarageHome = () => {
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <AdminHeader text={"Dashboard"} />
+        <GarageDashboard />
       </div>
 
 
