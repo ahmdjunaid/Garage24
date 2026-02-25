@@ -399,7 +399,7 @@ export class AppointmentRepository
     limit: number
   ): Promise<MostBookedServices[]> {
     const objId = new Types.ObjectId(garageId)
-    
+
     return await this.model.aggregate([
       { $match: { garageUID:  objId} },
       { $unwind: "$services" },

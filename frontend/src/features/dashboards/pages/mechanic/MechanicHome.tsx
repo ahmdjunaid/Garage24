@@ -1,5 +1,6 @@
 import AdminSidebar from "@/components/common/AdminSidebar";
 import AdminHeader from "@/components/common/AdminHeader";
+import MechanicDashboard from "../../components/MechanicDashboard";
 
 const MechanicHome = () => {
 
@@ -9,6 +10,7 @@ const MechanicHome = () => {
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <AdminHeader text={"Dashboard"} />
+        <MechanicDashboard />
       </div>
     </div>
   );

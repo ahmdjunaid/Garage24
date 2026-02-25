@@ -5,4 +5,5 @@ export interface IDashboardController {
     getTopFiveBookedGarages(req:Request, res:Response, next:NextFunction): Promise<void>;
     getGarageDashboardData(req:Request, res:Response, next:NextFunction): Promise<void>;
     getTopFiveBookedServices(req:Request, res:Response, next:NextFunction): Promise<void>;
+    getMechanicDashboardData(req:Request, res:Response, next:NextFunction): Promise<void>;
 }

@@ -11,8 +11,11 @@ import {
   MostBookedGarage,
   MostBookedServices,
 } from "../../../types/dashboard";
-import { IGarageRepository } from "../../../repositories/garage/interface/IGarageRepository";
 import { Types } from "mongoose";
+import { IMechanicRepository } from "../../../repositories/mechanic/interface/IMechanicRepository";
+import { AppError } from "../../../middleware/errorHandler";
+import HttpStatus from "../../../constants/httpStatusCodes";
+import { INVALID_INPUT } from "../../../constants/messages";
 
 @injectable()
 export class DashboardService implements IDashboardService {
@@ -21,7 +24,8 @@ export class DashboardService implements IDashboardService {
     private _appointmentRepository: IAppointmentRepository,
     @inject(TYPES.SubscriptionRepository)
     private _subscriptionRepository: ISubscriptionRepository,
-    @inject(TYPES.GarageRepository) private _garageRepository: IGarageRepository
+    @inject(TYPES.MechanicRepository)
+    private _mechanicRepository: IMechanicRepository
   ) {}
 
   async getAdminDashboardData(
@@ -233,5 +237,105 @@ export class DashboardService implements IDashboardService {
       garageId,
       LIMIT
     );
+  }
+
+  async getMechanicDashboardData(
+    mechanicId: string,
+    type: "week" | "month" | "year"
+  ): Promise<GarageDashboardData> {
+
+    const mechanic = await this._mechanicRepository.findOneByUserId(mechanicId);
+    if (!mechanic) throw new AppError(HttpStatus.BAD_REQUEST, INVALID_INPUT);
+
+    const { current, previous } = getDateRanges(type);
+
+    const [currentAppointments, previousAppointments] = await Promise.all([
+      this._appointmentRepository.aggregateDashboardData(
+        current.start,
+        current.end,
+        type,
+        { mechanicId: new Types.ObjectId(mechanic._id) }
+      ),
+      this._appointmentRepository.aggregateDashboardData(
+        previous.start,
+        previous.end,
+        type,
+        { mechanicId: new Types.ObjectId(mechanic._id) }
+      ),
+    ]);
+
+    const [currentAppointmentCount, prevAppointmentCount] = await Promise.all([
+      this._appointmentRepository.aggregateAppointmentOnStatus(
+        current.start,
+        current.end,
+        { mechanicId: new Types.ObjectId(mechanic._id) }
+      ),
+      this._appointmentRepository.aggregateAppointmentOnStatus(
+        previous.start,
+        previous.end,
+        { mechanicId: new Types.ObjectId(mechanic._id) }
+      ),
+    ]);
+
+    // -------- Revenue --------
+    const currentAppointmentRevenue =
+      currentAppointments.revenue[0]?.total || 0;
+    const previousAppointmentRevenue =
+      previousAppointments.revenue[0]?.total || 0;
+
+    const revenueGrowth =
+      previousAppointmentRevenue === 0
+        ? 100
+        : ((currentAppointmentRevenue - previousAppointmentRevenue) /
+            previousAppointmentRevenue) *
+          100;
+
+    // --------Total Appointment Count --------
+    const currentTotalAppointment = currentAppointmentCount.totalAppointments;
+    const previousTotalAppointment = prevAppointmentCount.totalAppointments;
+
+    const appointmentGrowth =
+      previousTotalAppointment === 0
+        ? currentTotalAppointment === 0
+          ? 0
+          : 100
+        : ((currentTotalAppointment - previousTotalAppointment) /
+            previousTotalAppointment) *
+          100;
+
+    // -------- Completed Appointment Count --------
+    const currentCompletedAppointment =
+      currentAppointmentCount.completedAppointments;
+    const previousCompletedAppointment =
+      prevAppointmentCount.completedAppointments;
+
+    const completionGrowth =
+      previousCompletedAppointment === 0
+        ? currentCompletedAppointment === 0
+          ? 0
+          : 100
+        : ((currentCompletedAppointment - previousCompletedAppointment) /
+            previousCompletedAppointment) *
+          100;
+
+    // -------- Charts --------
+    const appointmentChartData = formatChart(type, currentAppointments.chart);
+
+    return {
+      revenue: currentAppointmentRevenue,
+      revChange: revenueGrowth.toFixed(1) + "%",
+      revUp: revenueGrowth >= 0,
+
+      appointments: currentTotalAppointment,
+      appointmentChange: appointmentGrowth.toFixed(1) + "%",
+      appointmentUp: appointmentGrowth >= 0,
+
+      completed: currentCompletedAppointment,
+      completedChange: completionGrowth.toFixed(1) + "%",
+      completedUp: completionGrowth >= 0,
+
+      bookingChart: appointmentChartData.data,
+      labels: appointmentChartData.labels,
+    };
   }
 }

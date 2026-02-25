@@ -5,4 +5,5 @@ export interface IDashboardService {
     getTopFiveGarages(): Promise<MostBookedGarage[]>
     getGarageDashboardData(garageId: string, type: "week" | "month" | "year"): Promise<GarageDashboardData>;
     getTopFiveServices(garageId:string): Promise<MostBookedServices[]>;
+    getMechanicDashboardData(mechanicId: string, type: "week" | "month" | "year"): Promise<GarageDashboardData>;
 }

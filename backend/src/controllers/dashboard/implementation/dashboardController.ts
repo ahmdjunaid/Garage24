@@ -99,4 +99,35 @@ export class DashboardController implements IDashboardController {
       next(error);
     }
   };
+
+  getMechanicDashboardData = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const cycleType = req.query.type as string;
+      const mechanicId = req.user?.id;
+      const allowedTypes = ["week", "month", "year"];
+
+
+      if (!mechanicId) {
+        throw new AppError(HttpStatus.BAD_REQUEST, AUTHENTICATION_FAILED);
+      }
+
+      if (!cycleType || !allowedTypes.includes(cycleType))
+        throw new AppError(HttpStatus.BAD_REQUEST, "Invalid cycle");
+
+      const type = cycleType as "week" | "month" | "year";
+
+      const response = await this._dashboardService.getMechanicDashboardData(
+        mechanicId,
+        type
+      );
+
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
 }

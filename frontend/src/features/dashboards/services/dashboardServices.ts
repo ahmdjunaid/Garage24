@@ -1,4 +1,4 @@
-import { ADMIN_BASE_ROUTE, GARAGE_BASE_ROUTE } from "@/constants/apiRoutes";
+import { ADMIN_BASE_ROUTE, GARAGE_BASE_ROUTE, MECHANIC_BASE_ROUTE } from "@/constants/apiRoutes";
 import api from "@/services/api";
 
 export type cycleType = "week" | "month" | "year";
@@ -24,5 +24,11 @@ export const getGarageDashboardDataApi = (type: cycleType) => {
 export const getMostBookedServicesApi = () => {
     return api
         .get(`${GARAGE_BASE_ROUTE}/top-services`)
+        .then(res => res.data)
+}
+
+export const getMechanicDashboardDataApi = (type: cycleType) => {
+    return api
+        .get(`${MECHANIC_BASE_ROUTE}/dashboard?type=${type}`)
         .then(res => res.data)
 }

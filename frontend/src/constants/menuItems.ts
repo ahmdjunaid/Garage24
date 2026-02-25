@@ -21,7 +21,6 @@ const mechanicMenuItems = [
     { name: "Overview", path: "/mechanic", icon: Home, exact: true },
     { name: "Appointments", path: "/mechanic/appointments", icon: CheckCheck },
     { name: "Service Records", path: "/mechanic/service-records", icon: CalendarCheck },
-    { name: "Reports", path: "/mechanic/reports", icon: FileText },
 ]
 
 const superAdminMenuItems = [
