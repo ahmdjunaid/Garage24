@@ -15,7 +15,6 @@ import { AppointmentController } from "../controllers/appointment/implementation
 import { SubscriptionController } from "../controllers/subscription/implementation/subscriptionController";
 import { DashboardController } from "../controllers/dashboard/implementation/dashboardController";
 
-
 const router = express.Router()
 
 const garageController = container.get<GarageController>(TYPES.GarageController)
@@ -53,6 +52,5 @@ router.route('/appointment/assign-mechanic').post(verifyJWT, authorizeRoles("gar
 //Dashboard
 router.route('/dashboard').get(verifyJWT, authorizeRoles("garage"), dashboardController.getGarageDashboardData)
 router.route('/top-services').get(verifyJWT, authorizeRoles("garage"), dashboardController.getTopFiveBookedServices)
-
 
 export default router;

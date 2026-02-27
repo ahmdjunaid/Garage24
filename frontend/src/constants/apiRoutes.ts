@@ -5,3 +5,4 @@ export const STRIPE_BASE_ROUTE = "stripe";
 export const MECHANIC_BASE_ROUTE = "mechanic";
 export const AUTH_BASE_ROUTE = "auth"
 export const NOTIF_BASE_ROUTE = "notification"
+export const CHAT_BASE_ROUTE = "chat";

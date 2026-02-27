@@ -6,7 +6,13 @@ import Pagination from "../../../components/common/Pagination";
 import Spinner from "@/components/common/Spinner";
 import { ConfirmModal } from "@/components/modal/ConfirmModal";
 import { useNavigate } from "react-router-dom";
-import { cancelAppointmentApi, getAllAppointmentByUserIdApi } from "../services/appointmentServices";
+import {
+  cancelAppointmentApi,
+  getAllAppointmentByUserIdApi,
+} from "../services/appointmentServices";
+import ChatModal from "./ChatModal";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/redux/store/store";
 
 const MyAppointmentsSection = () => {
   const [appointments, setAppointments] = useState<PopulatedAppointmentData[]>(
@@ -18,6 +24,9 @@ const MyAppointmentsSection = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [isCancelling, setIsCancelling] = useState<boolean>(false);
   const [idForCancel, setIdForCancel] = useState<string>("");
+  const [appointmentId, setAppointmentId] = useState<string | null>(null);
+
+  const currentUserId = useSelector((state: RootState) => state.auth.user?._id);
 
   const appointmentsPerPage = 6;
   const navigate = useNavigate();
@@ -114,6 +123,7 @@ const MyAppointmentsSection = () => {
           handleCancel={(id) => setIdForCancel(id)}
           handleReschedule={handleReschedule}
           handleViewDetails={(id) => navigate(`/appointment/${id}`)}
+          handleChat={(id) => setAppointmentId(id)}
         />
 
         {/* Empty State */}
@@ -146,6 +156,15 @@ const MyAppointmentsSection = () => {
         onConfirm={handleCancel}
         onCancel={() => setIdForCancel("")}
       />
+      
+      {appointmentId && currentUserId && (
+        <ChatModal
+          appointmentId={appointmentId}
+          currentUserId={currentUserId}
+          isOpen={!!appointmentId}
+          onClose={() => setAppointmentId(null)}
+        />
+      )}
     </div>
   );
 };

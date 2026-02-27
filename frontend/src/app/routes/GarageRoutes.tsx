@@ -9,6 +9,7 @@ import GaragePlans from "@features/subscription/pages/GaragePlans";
 import GarageServices from "@features/management/garage/pages/GarageServices";
 import GarageAppointments from "@features/appointments/pages/garage/GarageAppointments";
 import ProfilePage from "@features/profile/pages/Profile";
+import ChatGaragePage from "@/features/chat/pages/garage/ChatGaragePage";
 
 const GarageRoutes = () => {
   return (
@@ -24,6 +25,7 @@ const GarageRoutes = () => {
         <Route path="/plans" element={<GaragePlans />} />
         <Route path="/appointments" element={<GarageAppointments />} />
         <Route path="/profile" element={<ProfilePage />}/>
+        <Route path="/messages" element={<ChatGaragePage />} />
         <Route path="*" element={<PageNotFound/>}/>
       </Route>
     </Routes>

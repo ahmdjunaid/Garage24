@@ -1,12 +1,13 @@
 import type { PopulatedAppointmentData } from "@/types/AppointmentTypes";
 import React from "react";
-import { Car } from "lucide-react";
+import { Car, MessageCircle } from "lucide-react";
 
 interface CardProps {
   appointments: PopulatedAppointmentData[];
   handleCancel: (id: string) => void;
   handleReschedule: (id: string) => void;
   handleViewDetails: (id: string) => void;
+  handleChat: (id: string) => void;
 }
 
 const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress"];
@@ -16,86 +17,84 @@ const AppointmentCard: React.FC<CardProps> = ({
   handleCancel,
   handleReschedule,
   handleViewDetails,
+  handleChat,
 }) => {
   return (
-    <div>
-      <div className="space-y-5">
-        {appointments.map((appointment) => (
-          <div
-            key={appointment._id}
-            className="bg-[#1f1f1f] border border-[#2f2f2f] rounded-2xl p-7 transition-colors hover:border-[#ef4444]/40"
-          >
-            <div className="flex items-center justify-between gap-6">
-              {/* Left */}
-              <div className="flex items-center gap-5">
-                <div className="w-[70px] h-[70px] rounded-xl flex items-center justify-center border border-[#ef4444]/30 bg-[#2a2a2a] overflow-hidden">
-                  {appointment.vehicle.imageUrl ? (
-                    <img
-                      src={appointment.vehicle.imageUrl}
-                      alt="Vehicle"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Car
-                      size={36}
-                      className="text-[#ef4444]"
-                      strokeWidth={1.5}
-                    />
-                  )}
-                </div>
-
-                <div>
-                  <h3 className="text-white text-lg font-semibold">
-                    {appointment.vehicle.make.name +
-                      appointment.vehicle.model.name}
-                    <span className="text-[#888] font-normal">
-                      ({appointment.vehicle.licensePlate})
-                    </span>
-                  </h3>
-                  <p className="text-[#999] text-sm">
-                    {appointment.services
-                      .map((service) => service.name)
-                      .join(", ")}
-                  </p>
-                  <span className="inline-block px-3 py-1 rounded-lg text-xs font-semibold bg-gray-600 text-white capitalize">
-                    {new Date(appointment.appointmentDate).toDateString()}
-                    {" • "}
-                    {appointment.startTime}
-                    {" • "}
-                    {appointment.status}
-                  </span>
-                </div>
+    <div className="space-y-4">
+      {appointments.map((appointment) => (
+        <div
+          key={appointment._id}
+          className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-4 flex flex-col md:flex-row md:items-center gap-4"
+        >
+          {/* Vehicle Image */}
+          <div className="flex-shrink-0 w-24 h-24 rounded-lg bg-[#2a2a2a] overflow-hidden">
+            {appointment.vehicle.imageUrl ? (
+              <img
+                src={appointment.vehicle.imageUrl}
+                alt="Vehicle"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <Car className="text-[#555]" size={36} />
               </div>
-
-              {/* Actions */}
-              <div className="flex gap-3">
-                {ACTIVE_STATUSES.includes(appointment.status) && (
-                  <>
-                    <button
-                      onClick={() => handleCancel(appointment._id)}
-                      className="px-5 py-2 bg-[#2a2a2a] hover:bg-[#333] text-[#ddd] rounded-lg text-sm border border-[#3a3a3a]"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={() => handleReschedule(appointment._id)}
-                      className="px-5 py-2 bg-[#2a2a2a] hover:bg-[#333] text-[#ddd] rounded-lg text-sm border border-[#3a3a3a]"
-                    >
-                      Reschedule
-                    </button>
-                  </>
-                )}
-                <button
-                  onClick={() => handleViewDetails(appointment._id)}
-                  className="px-5 py-2 bg-[#ef4444] hover:bg-[#dc2626] text-white rounded-lg text-sm"
-                >
-                  View Details
-                </button>
-              </div>
-            </div>
+            )}
           </div>
-        ))}
-      </div>
+
+          {/* Vehicle Info */}
+          <div className="flex-1 min-w-0">
+            <p className="text-white font-semibold text-base truncate">
+              {appointment.vehicle.make.name} {appointment.vehicle.model.name}{" "}
+              <span className="text-[#888] font-normal text-sm">
+                ({appointment.vehicle.licensePlate})
+              </span>
+            </p>
+            <p className="text-[#aaa] text-sm mt-1 truncate">
+              {appointment.services.map((s) => s.name).join(", ")}
+            </p>
+            <p className="text-[#666] text-xs mt-2">
+              {new Date(appointment.appointmentDate).toDateString()}
+              {" • "}
+              {appointment.startTime}
+              {" • "}
+              <span className="capitalize">{appointment.status}</span>
+            </p>
+          </div>
+
+          {/* Action Buttons — right side on md+, below on mobile */}
+          <div className="flex flex-wrap items-center gap-2 md:flex-nowrap md:justify-end md:flex-shrink-0">
+            {ACTIVE_STATUSES.includes(appointment.status) && (
+              <>
+                <button
+                  onClick={() => handleCancel(appointment._id)}
+                  className="px-4 py-2 bg-[#2a2a2a] hover:bg-[#333] text-[#ddd] rounded-lg text-sm border border-[#3a3a3a] transition-colors whitespace-nowrap"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleReschedule(appointment._id)}
+                  className="px-4 py-2 bg-[#2a2a2a] hover:bg-[#333] text-[#ddd] rounded-lg text-sm border border-[#3a3a3a] transition-colors whitespace-nowrap"
+                >
+                  Reschedule
+                </button>
+                <button
+                  onClick={() => handleChat(appointment._id)}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-[#2a2a2a] hover:bg-[#1d3a5c] text-[#60a5fa] hover:text-[#93c5fd] rounded-lg text-sm border border-[#3a3a3a] hover:border-[#3b6ea8] transition-colors whitespace-nowrap"
+                >
+                  <MessageCircle size={15} />
+                  Chat
+                </button>
+              </>
+            )}
+            <button
+              onClick={() => handleViewDetails(appointment._id)}
+              className="px-4 py-2 bg-[#ef4444] hover:bg-[#dc2626] text-white rounded-lg text-sm transition-colors whitespace-nowrap"
+            >
+              View Details
+            </button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

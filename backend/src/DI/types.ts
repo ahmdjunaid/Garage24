@@ -88,4 +88,9 @@ export const TYPES = {
   //Dashboard
   DashboardService: Symbol.for("DashboardService"),
   DashboardController: Symbol.for("DashboardController"),
+
+  //Chat
+  ChatRepository: Symbol.for("ChatRepository"),
+  ChatService: Symbol.for("ChatService"),
+  ChatController: Symbol.for("ChatController"),
 };

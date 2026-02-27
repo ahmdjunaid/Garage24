@@ -102,6 +102,12 @@ import { IDashboardService } from "../services/dashboard/interface/IDashboardSer
 import { IDashboardController } from "../controllers/dashboard/interface/IDashboardController";
 import { DashboardService } from "../services/dashboard/implementation/dashboardService";
 import { DashboardController } from "../controllers/dashboard/implementation/dashboardController";
+import { IChatRepository } from "../repositories/chat/interface/IChatRepository";
+import { ChatRepository } from "../repositories/chat/implementaion/chatRepository";
+import { IChatService } from "../services/chat/interface/IChatServices";
+import { ChatService } from "../services/chat/implementaion/chatServices";
+import { IChatController } from "../controllers/chat/interface/IChatController";
+import { ChatController } from "../controllers/chat/implementaion/chatController";
 
 const container = new Container();
 
@@ -192,6 +198,11 @@ container.bind<INotificationController>(TYPES.NotificationController).to(Notific
 
 //Dashboard
 container.bind<IDashboardService>(TYPES.DashboardService).to(DashboardService);
-container.bind<IDashboardController>(TYPES.DashboardController).to(DashboardController)
+container.bind<IDashboardController>(TYPES.DashboardController).to(DashboardController);
+
+//Chat
+container.bind<IChatRepository>(TYPES.ChatRepository).to(ChatRepository);
+container.bind<IChatService>(TYPES.ChatService).to(ChatService);
+container.bind<IChatController>(TYPES.ChatController).to(ChatController);
 
 export { container };

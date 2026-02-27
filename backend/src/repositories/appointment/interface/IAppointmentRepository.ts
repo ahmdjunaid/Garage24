@@ -13,6 +13,7 @@ import {
   MostBookedGarage,
   MostBookedServices,
 } from "../../../types/dashboard";
+import { AppointmentDocForChat, AppointmentFilterForChat } from "../../../types/chat";
 
 export interface IAppointmentRepository {
   createAppointment(
@@ -85,4 +86,8 @@ export interface IAppointmentRepository {
   ): Promise<AppointmentAggregateOnStatus>;
 
   getMostBookedServices(garageId:string, limit: number): Promise<MostBookedServices[]>;
+
+  getParticipants(appointmentId:string): Promise<string[]>;
+  getAppointmentsForChat(query: AppointmentFilterForChat): Promise<AppointmentDocForChat[]>;
+  getAppointmentsForChatById(appointmentId: string): Promise<AppointmentDocForChat | null>
 }

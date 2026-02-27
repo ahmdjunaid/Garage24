@@ -1,4 +1,5 @@
 import {
+  CHAT_BASE_ROUTE,
   GARAGE_BASE_ROUTE,
   MECHANIC_BASE_ROUTE,
   USER_BASE_ROUTE,
@@ -140,4 +141,10 @@ export const makeServicePaymentApi = (appointmentId:string) => {
   return api
     .post(`${USER_BASE_ROUTE}/appointment/pay/${appointmentId}`)
     .then(res => res.data)
+}
+
+export const fetchApptForChatByAppIdApi = (appointmentId:string) =>{
+    return api
+        .get(`${CHAT_BASE_ROUTE}/appointments/${appointmentId}`)
+        .then(res => res.data)
 }

@@ -21,6 +21,7 @@ import {
   MostBookedGarage,
   MostBookedServices,
 } from "../../../types/dashboard";
+import { AppointmentDocForChat, AppointmentFilterForChat } from "../../../types/chat";
 
 export class AppointmentRepository
   extends BaseRepository<IAppointment>
@@ -398,10 +399,10 @@ export class AppointmentRepository
     garageId: string,
     limit: number
   ): Promise<MostBookedServices[]> {
-    const objId = new Types.ObjectId(garageId)
+    const objId = new Types.ObjectId(garageId);
 
     return await this.model.aggregate([
-      { $match: { garageUID:  objId} },
+      { $match: { garageUID: objId } },
       { $unwind: "$services" },
       {
         $group: {
@@ -420,7 +421,7 @@ export class AppointmentRepository
           as: "service",
         },
       },
-        { $unwind: "$service" },
+      { $unwind: "$service" },
 
       {
         $project: {
@@ -433,6 +434,65 @@ export class AppointmentRepository
           isDeleted: "$service.isDeleted",
         },
       },
-    ])
+    ]);
+  }
+
+  async getParticipants(appointmentId: string): Promise<string[]> {
+    const appointment = await this.model.findById(appointmentId);
+
+    if (!appointment) {
+      throw new Error("Appointment not found");
+    }
+
+    const participants = [
+      appointment.userId,
+      appointment.garageUID,
+      appointment.mechanicId,
+    ].filter((id): id is Types.ObjectId => Boolean(id));
+
+    return participants.map((id) => id.toString());
+  }
+
+  async getAppointmentsForChat(
+    query: AppointmentFilterForChat
+  ): Promise<AppointmentDocForChat[]> {
+    const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress"];
+    
+    const filter:FilterQuery<AppointmentDocument> = {
+      status: { $in: ACTIVE_STATUSES }
+    };
+
+    if (query?.garageUID) {
+      filter.garageUID = query.garageUID;
+    }
+
+    if (query?.mechanicId) {
+      filter.mechanicId = query.mechanicId;
+    }
+
+    const appointments = await this.model
+      .find(filter)
+      .select("_id vehicle.licensePlate vehicle.make.name vehicle.model.name status appointmentDate")
+      .lean();
+
+    return appointments as unknown as AppointmentDocForChat[]
+  }
+
+    async getAppointmentsForChatById(
+    appointmentId: string
+  ): Promise<AppointmentDocForChat|null> {
+    const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress"];
+    
+    const filter:FilterQuery<AppointmentDocument> = {
+      _id: appointmentId,
+      status: { $in: ACTIVE_STATUSES }
+    };
+
+    const appointments = await this.model
+      .findOne(filter)
+      .select("_id vehicle.licensePlate vehicle.make.name vehicle.model.name status appointmentDate")
+      .lean();
+
+    return appointments as unknown as AppointmentDocForChat | null
   }
 }
