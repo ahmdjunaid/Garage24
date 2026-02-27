@@ -1,6 +1,8 @@
 import type { IChatAppointment } from "@/types/ChatTypes";
 import { STATUS_CONFIG } from "../constants/constantsDatas";
 import { initials, vehicleDisplayName } from "../handlers/handler";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/redux/store/store";
 
 export function AppointmentRow({
   appt,
@@ -13,6 +15,7 @@ export function AppointmentRow({
 }) {
   const st   = STATUS_CONFIG[appt.status];
   const name = vehicleDisplayName(appt);
+  const { unreadCounts } = useSelector((state:RootState)=>state.chat)
 
   return (
     <button
@@ -45,9 +48,9 @@ export function AppointmentRow({
             <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} />
             {st.label}
           </span>
-          {(appt.unreadCount ?? 0) > 0 && (
+          {(unreadCounts[appt._id] ?? 0) > 0 && (
             <span className="bg-[#E5173F] text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow">
-              {appt.unreadCount}
+              {unreadCounts[appt._id]}
             </span>
           )}
         </div>

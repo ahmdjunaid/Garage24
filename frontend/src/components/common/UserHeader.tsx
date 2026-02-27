@@ -40,6 +40,7 @@ const UserHeader = ({
   const [showNotifications, setShowNotifications] = useState(false);
 
   const { user } = useSelector((state: RootState) => state.auth);
+  const { totalUnread } = useSelector((state:RootState) => state.chat)
   const { notifications } = useSelector(
     (state: RootState) => state.notification,
   );
@@ -202,10 +203,10 @@ const UserHeader = ({
                   onClick={() => navigate("/my-appointments")}
                   className={`relative p-2 rounded-xl border transition-all duration-200 bg-white/5 border-white/10 text-gray-300 hover:bg-red-600/15 hover:border-red-500/40 hover:text-red-400`}
                 >
-                  <MessageCircle size={16} />
-                  {unreadCount > 0 && (
+                  <MessageCircle size={14} />
+                  {totalUnread > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-red-600 border-2 border-zinc-950 rounded-full text-[10px] font-bold text-white flex items-center justify-center animate-pulse">
-                      {/* {unreadCount} */}
+                      {totalUnread}
                     </span>
                   )}
                 </button>
@@ -213,14 +214,14 @@ const UserHeader = ({
                 {/* Notification */}
                 <button
                   onClick={() => setShowNotifications((prev) => !prev)}
-                  className={`relative p-2.5 rounded-xl border transition-all duration-200
+                  className={`relative p-2 rounded-xl border transition-all duration-200
                     ${
                       showNotifications
                         ? "bg-red-600/20 border-red-500 text-red-400"
                         : "bg-white/5 border-white/10 text-gray-300 hover:bg-red-600/15 hover:border-red-500/40 hover:text-red-400"
                     }`}
                 >
-                  <Bell size={16} />
+                  <Bell size={14} />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-red-600 border-2 border-zinc-950 rounded-full text-[10px] font-bold text-white flex items-center justify-center animate-pulse">
                       {unreadCount}
@@ -231,10 +232,9 @@ const UserHeader = ({
                 {/* ── Logout Button ── */}
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 active:scale-95 rounded-xl text-white text-sm font-bold tracking-wider uppercase transition-all duration-200"
+                  className="flex items-center gap-2 px-2 py-2 bg-red-600 hover:bg-red-700 active:scale-95 rounded-xl text-white text-sm font-bold tracking-wider uppercase transition-all duration-200"
                 >
-                  <LogOutIcon size={16} />
-                  Logout
+                  <LogOutIcon size={14} />
                 </button>
               </div>
             )}
@@ -421,9 +421,9 @@ const UserHeader = ({
                     className={`relative p-2 rounded-xl border transition-all duration-200 bg-white/5 border-white/10 text-gray-300 hover:bg-red-600/15 hover:border-red-500/40 hover:text-red-400`}
                   >
                     <MessageCircle size={14} />
-                    {unreadCount > 0 && (
+                    {totalUnread > 0 && (
                       <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-red-600 border-2 border-zinc-950 rounded-full text-[10px] font-bold text-white flex items-center justify-center animate-pulse">
-                        {/* {unreadCount} */}
+                        {totalUnread}
                       </span>
                     )}
                   </button>
@@ -576,8 +576,8 @@ const UserHeader = ({
               </Link>
 
               <Link
-                to="/appointment"
-                className={`block hover:text-gray-300 ${isActive("/appointment") ? "text-red-500" : ""}`}
+                to="/my-appointments"
+                className={`block hover:text-gray-300 ${isActive("/my-appointments") ? "text-red-500" : ""}`}
                 onClick={() => setShowMobileMenu(false)}
               >
                 My Appointments

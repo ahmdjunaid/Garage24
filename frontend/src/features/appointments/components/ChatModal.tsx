@@ -20,6 +20,8 @@ import { errorToast } from "@/utils/notificationAudio";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { fetchApptForChatByAppIdApi } from "../services/appointmentServices";
 import { EmptyState } from "@/features/chat/components/ChatMechanic";
+import { useDispatch } from "react-redux";
+import { clearUnread } from "@/redux/slice/chatSlice";
 
 interface ChatModalProps {
   currentUserId: string;
@@ -40,6 +42,7 @@ const ChatModal: React.FC<ChatModalProps> = ({
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [appt, setAppt] = useState<IChatAppointment | null>(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchAppointment = async (appointmentId: string) => {
@@ -81,6 +84,8 @@ const ChatModal: React.FC<ChatModalProps> = ({
 
     const handleReceiveMessage = (msg: IChatMessage) => {
       setMessages((prev) => [...prev, msg]);
+      dispatch(clearUnread(appointmentId));
+      socket.emit("markAsRead", appointmentId, currentUserId);
     };
 
     socket.on("receiveMessage", handleReceiveMessage);
@@ -89,11 +94,16 @@ const ChatModal: React.FC<ChatModalProps> = ({
       socket.off("receiveMessage", handleReceiveMessage);
       socket.emit("leaveRoom", appointmentId);
     };
-  }, [appointmentId, currentUserId]);
+  }, [appointmentId, currentUserId, dispatch]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    dispatch(clearUnread(appointmentId));
+    socket.emit("markAsRead", appointmentId, currentUserId);
+  }, [appointmentId, dispatch, currentUserId]);
 
   const send = useCallback(() => {
     const trimmed = input.trim();

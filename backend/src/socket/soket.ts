@@ -42,22 +42,28 @@ export const initSocket = (server: httpServer) => {
           readBy: [senderId],
         });
 
-        const room = `appointment_${appointmentId}`;
-
-        io.to(room).emit("receiveMessage", savedMessage);
-
         const participants = await chatService.getParticipants(appointmentId);
-
-        participants.forEach((userId) => {
-          if (userId !== senderId) {
+        
+        participants.forEach((id) => {
+          const userId = id.toString();
+          
+          if (userId !== senderId.toString()) {
             io.to(userId).emit("newMessageNotification", {
               appointmentId,
             });
           }
         });
+
+        const room = `appointment_${appointmentId}`;
+        io.to(room).emit("receiveMessage", savedMessage);
+        
       } catch (error) {
         logger.error("Send message error", error);
       }
+    });
+
+    socket.on("markAsRead", async (appointmentId, userId) => {
+      await chatService.markAsRead(appointmentId, userId)
     });
   });
 

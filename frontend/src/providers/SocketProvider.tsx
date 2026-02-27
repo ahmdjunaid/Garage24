@@ -1,5 +1,7 @@
+import { getUnreadCountApi } from "@/components/services/chatServices";
 import { getNotificationByUserIdApi } from "@/components/services/notificationServices";
 import { socket } from "@/lib/socket";
+import { incrementUnread, setUnreadCounts } from "@/redux/slice/chatSlice";
 import {
   addNotification,
   setNotifications,
@@ -23,6 +25,15 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [dispatch]);
 
+  const fetchMessageUnreadCount = useCallback(async () => {
+    try {
+      const unreadCount = await getUnreadCountApi();
+      dispatch(setUnreadCounts(unreadCount));
+    } catch (error) {
+      if (error instanceof Error) errorToast(error.message);
+    }
+  }, [dispatch]);
+
   useEffect(() => {
     if (!user?._id) return;
 
@@ -40,8 +51,25 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (user?._id) {
       fetchNotifications();
+      fetchMessageUnreadCount();
     }
-  }, [user, fetchNotifications]);
+  }, [user, fetchNotifications, fetchMessageUnreadCount]);
+
+  useEffect(() => {
+    const handleNotification = ({
+      appointmentId,
+    }: {
+      appointmentId: string;
+    }) => {
+      dispatch(incrementUnread(appointmentId));
+    };
+
+    socket.on("newMessageNotification", handleNotification);
+
+    return () => {
+      socket.off("newMessageNotification", handleNotification);
+    };
+  }, []);
 
   useEffect(() => {
     const handler = (data: NotificationType) => {

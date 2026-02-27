@@ -19,6 +19,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
   const menuItems = getMenuItems(role);
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
+  const { totalUnread } = useSelector((state: RootState) => state.chat);
 
   const [open, setOpen] = useState(false);
 
@@ -27,7 +28,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
       name: "Messages",
       path: `/${role}/messages`,
       icon: MessageSquare,
-      badge: 10,
+      badge: totalUnread,
     },
   ];
 
@@ -35,7 +36,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
     try {
       await logoutApi();
       dispatch(logout());
-      socket.disconnect()
+      socket.disconnect();
       successToast("Logout successful.");
     } catch (error) {
       if (error instanceof Error) errorToast(error.message);
@@ -144,7 +145,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
                 <item.icon className="w-5 h-5" />
                 <span>{item.name}</span>
 
-                {item.badge && (
+                {item.badge > 0 && (
                   <span className="ml-auto bg-red-600 text-white text-xs px-2 py-0.5 rounded-full">
                     {item.badge}
                   </span>

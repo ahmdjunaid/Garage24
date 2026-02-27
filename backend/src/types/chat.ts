@@ -9,6 +9,7 @@ export interface IChatDatas {
 }
 
 export interface AppointmentFilterForChat {
+  userId?: string;
   garageUID?: string;
   mechanicId?: string;
 }

@@ -4,7 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/redux/store/store";
 import { markAllAsRead, markAsRead } from "@/redux/slice/notificationSlice";
 import { errorToast } from "@/utils/notificationAudio";
-import { markAllAsReadApi, markAsReadApi } from "../services/notificationServices";
+import {
+  markAllAsReadApi,
+  markAsReadApi,
+} from "../services/notificationServices";
 
 interface AdminHeaderProps {
   text: string;
@@ -17,34 +20,34 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   searchPlaceholder,
   setSearchQuery,
 }) => {
-  const { notifications } = useSelector((state: RootState) => state.notification);
+  const { notifications } = useSelector(
+    (state: RootState) => state.notification,
+  );
   const [showNotifications, setShowNotifications] = React.useState(false);
 
   const dispatch = useDispatch();
 
   const unreadCount = React.useMemo(() => {
-  return notifications.filter((n) => !n.isRead).length;
-}, [notifications]);
+    return notifications.filter((n) => !n.isRead).length;
+  }, [notifications]);
 
-  const handleMarkRead = async (notfId:string) => {
+  const handleMarkRead = async (notfId: string) => {
     try {
-      await markAsReadApi(notfId)
-      dispatch(markAsRead(notfId))
+      await markAsReadApi(notfId);
+      dispatch(markAsRead(notfId));
     } catch (error) {
-      if(error instanceof Error)
-        errorToast(error.message)
+      if (error instanceof Error) errorToast(error.message);
     }
-  }
+  };
 
   const handleMarkAllRead = async () => {
     try {
-      await markAllAsReadApi()
-      dispatch(markAllAsRead())
+      await markAllAsReadApi();
+      dispatch(markAllAsRead());
     } catch (error) {
-      if(error instanceof Error)
-        errorToast(error.message)
+      if (error instanceof Error) errorToast(error.message);
     }
-  }
+  };
 
   return (
     <div className="relative bg-gradient-to-br from-red-950 via-red-900 to-red-800 px-8 py-8 overflow-hidden">
@@ -57,7 +60,13 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
       </div>
 
       <div className="relative flex items-center justify-between">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
+        <h1
+          className="lg:text-4xl
+            ml-5 lg:ml-0
+            font-bold 
+            bg-gradient-to-r from-white via-gray-100 to-gray-300 
+            bg-clip-text text-transparent"
+        >
           {text}
         </h1>
         <div className="flex items-center gap-4">
@@ -106,7 +115,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
 
                 {unreadCount > 0 && (
                   <button
-                    onClick={() =>handleMarkAllRead()}
+                    onClick={() => handleMarkAllRead()}
                     className="text-xs text-red-400 hover:text-red-300 transition"
                   >
                     Mark all as read
@@ -150,7 +159,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                           {/* Mark as read button */}
                           {!notification.isRead && (
                             <button
-                              onClick={()=>handleMarkRead(notification._id)}
+                              onClick={() => handleMarkRead(notification._id)}
                               className="
                                 mt-3 text-xs
                                 text-red-400 hover:text-red-300

@@ -1,4 +1,4 @@
-import { ClientSession, ObjectId, Types, UpdateQuery } from "mongoose";
+import { ClientSession, Types, UpdateQuery } from "mongoose";
 import { AppointmentDocument } from "../../../models/appointment";
 import {
   GetMappedAppointmentResponse,
@@ -90,4 +90,5 @@ export interface IAppointmentRepository {
   getParticipants(appointmentId:string): Promise<string[]>;
   getAppointmentsForChat(query: AppointmentFilterForChat): Promise<AppointmentDocForChat[]>;
   getAppointmentsForChatById(appointmentId: string): Promise<AppointmentDocForChat | null>
+  getAppointmentsIdsForChat(currentUID:string): Promise<Types.ObjectId[]>;
 }

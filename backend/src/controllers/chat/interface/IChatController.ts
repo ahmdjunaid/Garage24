@@ -4,4 +4,5 @@ export interface IChatController {
     getAppointmentsForChat(req:Request, res:Response, next:NextFunction): Promise<void>;
     getMessagesByAppointmentId(req:Request, res:Response, next:NextFunction): Promise<void>;
     getAppointmentForChatById(req:Request, res:Response, next:NextFunction): Promise<void>;
+    getUnreadCount(req:Request, res:Response, next:NextFunction): Promise<void>;
 }

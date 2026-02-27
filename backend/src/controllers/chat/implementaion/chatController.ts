@@ -5,7 +5,10 @@ import { TYPES } from "../../../DI/types";
 import { IChatService } from "../../../services/chat/interface/IChatServices";
 import { AppError } from "../../../middleware/errorHandler";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import { INVALID_INPUT } from "../../../constants/messages";
+import {
+  AUTHENTICATION_FAILED,
+  INVALID_INPUT,
+} from "../../../constants/messages";
 import { FilterQuery } from "mongoose";
 import { AppointmentFilterForChat } from "../../../types/chat";
 
@@ -62,16 +65,38 @@ export class ChatController implements IChatController {
     }
   };
 
-  getAppointmentForChatById = async (req: Request, res: Response, next: NextFunction) => {
+  getAppointmentForChatById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const appointmentId = req.params.appointmentId
-      if(!appointmentId) throw new AppError(HttpStatus.BAD_REQUEST, INVALID_INPUT)
-      
-      const response = await this._chatService.getAppointmentsForChatById(appointmentId)
+      const appointmentId = req.params.appointmentId;
+      if (!appointmentId)
+        throw new AppError(HttpStatus.BAD_REQUEST, INVALID_INPUT);
+
+      const response =
+        await this._chatService.getAppointmentsForChatById(appointmentId);
 
       res.status(HttpStatus.OK).json(response);
     } catch (error) {
-      next(error)
+      next(error);
     }
-  }
+  };
+
+  getUnreadCount = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.user?.id;
+      const role = req.user?.role;
+      if (!userId || !role) {
+        throw new AppError(HttpStatus.BAD_REQUEST, AUTHENTICATION_FAILED);
+      }
+
+      const response = await this._chatService.getUnreadCount(userId, role);
+
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
 }

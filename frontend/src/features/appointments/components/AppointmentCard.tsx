@@ -1,6 +1,8 @@
 import type { PopulatedAppointmentData } from "@/types/AppointmentTypes";
 import React from "react";
 import { Car, MessageCircle } from "lucide-react";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/redux/store/store";
 
 interface CardProps {
   appointments: PopulatedAppointmentData[];
@@ -19,6 +21,8 @@ const AppointmentCard: React.FC<CardProps> = ({
   handleViewDetails,
   handleChat,
 }) => {
+  const { unreadCounts } = useSelector((state: RootState) => state.chat);
+
   return (
     <div className="space-y-4">
       {appointments.map((appointment) => (
@@ -79,10 +83,25 @@ const AppointmentCard: React.FC<CardProps> = ({
                 </button>
                 <button
                   onClick={() => handleChat(appointment._id)}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-[#2a2a2a] hover:bg-[#1d3a5c] text-[#60a5fa] hover:text-[#93c5fd] rounded-lg text-sm border border-[#3a3a3a] hover:border-[#3b6ea8] transition-colors whitespace-nowrap"
+                  className="relative flex items-center gap-1.5 px-4 py-2 
+                      bg-[#2a2a2a] hover:bg-[#1d3a5c] text-[#60a5fa] 
+                      hover:text-[#93c5fd] rounded-lg text-sm 
+                      border border-[#3a3a3a] hover:border-[#3b6ea8] 
+                      transition-colors whitespace-nowrap"
                 >
                   <MessageCircle size={15} />
                   Chat
+                  {unreadCounts?.[appointment._id] > 0 && (
+                    <span
+                      className="absolute -top-1.5 -right-1.5 
+                          min-w-[18px] h-[18px] px-1 
+                          bg-red-600 border-2 border-zinc-950 
+                          rounded-full text-[10px] font-bold 
+                          text-white flex items-center justify-center"
+                    >
+                      {unreadCounts[appointment._id]}
+                    </span>
+                  )}
                 </button>
               </>
             )}

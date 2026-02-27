@@ -12,5 +12,6 @@ const chatController = container.get<ChatController>(TYPES.ChatController)
 router.route('/appointments').get(verifyJWT, chatController.getAppointmentsForChat)
 router.route('/appointments/:appointmentId').get(verifyJWT, chatController.getAppointmentForChatById)
 router.route('/messages/:appointmentId').get(verifyJWT, chatController.getMessagesByAppointmentId)
+router.route('/unread-count').get(verifyJWT, chatController.getUnreadCount)
 
 export default router;

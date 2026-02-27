@@ -3,8 +3,23 @@ import { socket } from "@/lib/socket";
 import { fetchMessagesByAppIdApi } from "../services/chatServices";
 import { errorToast } from "@/utils/notificationAudio";
 import type { IChatAppointment, IChatMessage } from "@/types/ChatTypes";
-import { formatTime, getSenderId, groupByDate, initials, messageIsOwn, vehicleDisplayName } from "../handlers/handler";
-import { ROLE_AVATAR_COLOR, ROLE_BUBBLE, ROLE_LABEL, STATUS_CONFIG } from "../constants/constantsDatas";
+import {
+  formatTime,
+  getSenderId,
+  groupByDate,
+  initials,
+  messageIsOwn,
+  vehicleDisplayName,
+} from "../handlers/handler";
+import {
+  ROLE_AVATAR_COLOR,
+  ROLE_BUBBLE,
+  ROLE_LABEL,
+  STATUS_CONFIG,
+} from "../constants/constantsDatas";
+import { useDispatch, useSelector } from "react-redux";
+import { clearUnread } from "@/redux/slice/chatSlice";
+import type { RootState } from "@/redux/store/store";
 
 export function ChatPanel({
   appt,
@@ -15,13 +30,15 @@ export function ChatPanel({
   appt: IChatAppointment;
   currentUserId: string;
   onBack: () => void;
-  role: string
+  role: string;
 }) {
   const [input, setInput] = useState<string>("");
   const [messages, setMessages] = useState<IChatMessage[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
     setMessages([]);
@@ -42,11 +59,18 @@ export function ChatPanel({
   }, [appt._id]);
 
   useEffect(() => {
+    dispatch(clearUnread(appt._id));
+    socket.emit("markAsRead", appt._id, user?._id);
+  }, [appt._id, dispatch, user]);
+
+  useEffect(() => {
     if (!socket.connected) socket.connect();
     socket.emit("joinAppointmentRoom", appt._id);
 
     const handleReceiveMessage = (msg: IChatMessage) => {
-      setMessages(prev => [...prev, msg]);
+      setMessages((prev) => [...prev, msg]);
+      dispatch(clearUnread(appt._id));
+      socket.emit("markAsRead", appt._id, currentUserId);
     };
 
     socket.on("receiveMessage", handleReceiveMessage);
@@ -55,7 +79,7 @@ export function ChatPanel({
       socket.off("receiveMessage", handleReceiveMessage);
       socket.emit("leaveRoom", appt._id);
     };
-  }, [appt._id, currentUserId]);
+  }, [appt._id, currentUserId, dispatch]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -84,7 +108,6 @@ export function ChatPanel({
 
   return (
     <div className="flex flex-col h-full">
-
       {/* ── Header ── */}
       <div className="flex-shrink-0 bg-gradient-to-r from-gray-900 to-black border-b border-gray-800 px-4 py-3 flex items-center gap-3 shadow-lg">
         <button
@@ -92,8 +115,18 @@ export function ChatPanel({
           className="md:hidden p-1.5 -ml-1 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-gray-800 transition-colors"
           aria-label="Back to list"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
         </button>
 
@@ -103,8 +136,12 @@ export function ChatPanel({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-semibold text-white truncate">{name}</span>
-            <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${st.bg} ${st.text}`}>
+            <span className="text-sm font-semibold text-white truncate">
+              {name}
+            </span>
+            <span
+              className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${st.bg} ${st.text}`}
+            >
               <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} />
               {st.label}
             </span>
@@ -123,14 +160,23 @@ export function ChatPanel({
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 gap-2 text-gray-500 text-sm">
-            <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            <svg
+              className="w-8 h-8 text-gray-700"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
             </svg>
             No messages yet
           </div>
         ) : (
-          groups.map(group => (
+          groups.map((group) => (
             <div key={group.label}>
               {/* Date divider */}
               <div className="flex justify-center my-4">
@@ -140,7 +186,9 @@ export function ChatPanel({
               </div>
 
               {group.messages.map((msg, i) => {
-                const prevSenderId = getSenderId(group.messages[i - 1]?.senderId);
+                const prevSenderId = getSenderId(
+                  group.messages[i - 1]?.senderId,
+                );
                 const sameSender = prevSenderId === getSenderId(msg.senderId);
                 const isOwn = messageIsOwn(msg, currentUserId);
                 return (
@@ -153,9 +201,12 @@ export function ChatPanel({
                         {!sameSender ? (
                           <div
                             className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[11px] font-bold shadow"
-                            style={{ backgroundColor: ROLE_AVATAR_COLOR[msg.senderRole] }}
+                            style={{
+                              backgroundColor:
+                                ROLE_AVATAR_COLOR[msg.senderRole],
+                            }}
                           >
-                            {(msg.senderRole[0]).toUpperCase()}
+                            {msg.senderRole[0].toUpperCase()}
                           </div>
                         ) : (
                           <div className="w-7 h-7" />
@@ -163,20 +214,28 @@ export function ChatPanel({
                       </div>
                     )}
 
-                    <div className={`max-w-[72%] sm:max-w-[58%] flex flex-col ${isOwn ? "items-end" : "items-start"}`}>
+                    <div
+                      className={`max-w-[72%] sm:max-w-[58%] flex flex-col ${isOwn ? "items-end" : "items-start"}`}
+                    >
                       {!sameSender && (
-                        <span className={`text-[11px] font-semibold mb-1 px-1 ${
-                          isOwn ? "text-[#E5173F]" : ROLE_LABEL[msg.senderRole].color
-                        }`}>
+                        <span
+                          className={`text-[11px] font-semibold mb-1 px-1 ${
+                            isOwn
+                              ? "text-[#E5173F]"
+                              : ROLE_LABEL[msg.senderRole].color
+                          }`}
+                        >
                           {isOwn ? "You" : `${ROLE_LABEL[msg.senderRole].text}`}
                         </span>
                       )}
 
-                      <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-md ${
-                        isOwn
-                          ? "bg-[#E5173F] text-white rounded-br-md"
-                          : `${ROLE_BUBBLE[msg.senderRole]} rounded-bl-md`
-                      }`}>
+                      <div
+                        className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-md ${
+                          isOwn
+                            ? "bg-[#E5173F] text-white rounded-br-md"
+                            : `${ROLE_BUBBLE[msg.senderRole]} rounded-bl-md`
+                        }`}
+                      >
                         {msg.message}
                       </div>
 
@@ -195,18 +254,20 @@ export function ChatPanel({
 
       {/* ── Input ── */}
       <div className="flex-shrink-0 bg-gradient-to-r from-gray-900 to-black border-t border-gray-800 px-4 py-3 shadow-lg">
-        <div className={`flex items-end gap-3 bg-gradient-to-br from-gray-950 to-black border rounded-xl px-4 py-2.5 transition-colors duration-200 ${
-          input ? "border-[#E5173F]" : "border-gray-800"
-        }`}>
+        <div
+          className={`flex items-end gap-3 bg-gradient-to-br from-gray-950 to-black border rounded-xl px-4 py-2.5 transition-colors duration-200 ${
+            input ? "border-[#E5173F]" : "border-gray-800"
+          }`}
+        >
           <textarea
             ref={textareaRef}
             value={input}
-            onChange={e => {
+            onChange={(e) => {
               setInput(e.target.value);
               e.target.style.height = "auto";
               e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
             }}
-            onKeyDown={e => {
+            onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 send();
@@ -226,12 +287,24 @@ export function ChatPanel({
             }`}
             aria-label="Send"
           >
-            <svg className="w-4 h-4 translate-x-px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            <svg
+              className="w-4 h-4 translate-x-px"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+              />
             </svg>
           </button>
         </div>
-        <p className="text-[10px] text-gray-600 mt-1.5 text-center select-none">Shift + Enter for new line</p>
+        <p className="text-[10px] text-gray-600 mt-1.5 text-center select-none">
+          Shift + Enter for new line
+        </p>
       </div>
     </div>
   );
