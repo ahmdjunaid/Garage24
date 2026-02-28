@@ -57,7 +57,8 @@ export interface IAppointmentRepository {
   updateServiceStatus(
     appointmentId: string,
     serviceId: string,
-    status: string
+    status: string,
+    skipReason: string,
   ): Promise<AppointmentDocument | null>;
 
   getAllAppointmentByMechId(
@@ -91,4 +92,6 @@ export interface IAppointmentRepository {
   getAppointmentsForChat(query: AppointmentFilterForChat): Promise<AppointmentDocForChat[]>;
   getAppointmentsForChatById(appointmentId: string): Promise<AppointmentDocForChat | null>
   getAppointmentsIdsForChat(currentUID:string): Promise<Types.ObjectId[]>;
+  getAppointmentDoc(appointmentId:string): Promise<AppointmentDocument| null>;
+  insertRating(appointmentId: Types.ObjectId, rating: number): Promise<AppointmentDocument| null>;
 }

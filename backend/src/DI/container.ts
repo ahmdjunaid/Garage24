@@ -108,6 +108,12 @@ import { IChatService } from "../services/chat/interface/IChatServices";
 import { ChatService } from "../services/chat/implementaion/chatServices";
 import { IChatController } from "../controllers/chat/interface/IChatController";
 import { ChatController } from "../controllers/chat/implementaion/chatController";
+import { IReviewRepository } from "../repositories/review/interface/IReviewRepository";
+import { ReviewRepository } from "../repositories/review/implementation/reviewRepository";
+import { IReviewService } from "../services/review/interface/IReviewService";
+import { ReviewService } from "../services/review/implementation/reviewService";
+import { IReviewController } from "../controllers/review/interface/IReviewController";
+import { ReviewController } from "../controllers/review/implementation/reviewController";
 
 const container = new Container();
 
@@ -204,5 +210,10 @@ container.bind<IDashboardController>(TYPES.DashboardController).to(DashboardCont
 container.bind<IChatRepository>(TYPES.ChatRepository).to(ChatRepository);
 container.bind<IChatService>(TYPES.ChatService).to(ChatService);
 container.bind<IChatController>(TYPES.ChatController).to(ChatController);
+
+//Review
+container.bind<IReviewRepository>(TYPES.ReviewRepository).to(ReviewRepository);
+container.bind<IReviewService>(TYPES.ReviewService).to(ReviewService);
+container.bind<IReviewController>(TYPES.ReviewController).to(ReviewController)
 
 export { container };

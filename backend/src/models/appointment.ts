@@ -40,6 +40,7 @@ const appointmentSchema = new Schema<IAppointment>(
         price: {type:Number, required:true},
         durationMinutes: {type:Number, required:true},
         status: {type:String, enum: ["pending","started","completed","skipped"], default: "pending"},
+        skipReason: {type: String},
         startedAt: {type: Date},
         completedAt: {type: Date},
       }
@@ -54,7 +55,7 @@ const appointmentSchema = new Schema<IAppointment>(
     paymentStatus: { type: String, enum: ["pending", "paid", "failed", "refunded"], default: "pending"},
     stripePaymentIntentId: { type: String },
 
-    status: { type: String, enum: ["pending", "confirmed", "in_progress", "completed", "cancelled"], default: "pending"},
+    status: { type: String, enum: ["pending", "confirmed", "in_progress", "completed", "cancelled", "delivered"], default: "pending"},
 
     events: [
       {
@@ -70,6 +71,9 @@ const appointmentSchema = new Schema<IAppointment>(
 
     customerNote: { type: String, default: null },
     mechanicNote: { type: String, default: null },
+
+    isRated: { type: Boolean, default: false },
+    rating: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

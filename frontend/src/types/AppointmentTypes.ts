@@ -6,7 +6,8 @@ export type AppointmentStatus =
   | "confirmed"
   | "in_progress"
   | "completed"
-  | "cancelled";
+  | "cancelled"
+  | "delivered";
 
 export interface IAppointmentVehicleSnapshot {
   vehicleId?: string;
@@ -41,6 +42,7 @@ export interface IAppointmentServiceData {
   price: number;
   durationMinutes: number;
   status: AppointmentServiceStatus;
+  skipReason: string;
 
   startedAt?: Date;
   completedAt?: Date;
@@ -93,6 +95,9 @@ export interface IAppointment {
 
   customerNote?: string;
   mechanicNote?: string;
+
+  isRated: boolean;
+  rating: number;
 }
 
 export interface CreateAppointmentRequest {
@@ -167,7 +172,7 @@ export interface PopulatedAppointmentData
 
 export interface ReschedulePayload {
   date: string;
-  releasableSlotIds?: string[]
+  releasableSlotIds?: string[];
   slotIds: string[];
   startTime?: string;
   duration?: number;

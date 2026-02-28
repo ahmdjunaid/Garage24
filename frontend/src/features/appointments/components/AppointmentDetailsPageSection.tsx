@@ -419,7 +419,7 @@ const AppointmentDetailsPageSection: React.FC<DetailPageProps> = ({
         )}
 
         {/* Payment Button - Show only when completed and payment is pending */}
-        {isUserView && isCompleted && appointment.paymentStatus !== "paid" && (
+        {isUserView && isCompleted && appointment.paymentStatus !== "paid" && totalPrice > 0 && (
           <div className="pt-2 pb-4">
             <button
               onClick={() => handlePayment(appointment._id)}

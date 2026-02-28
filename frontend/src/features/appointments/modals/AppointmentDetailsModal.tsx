@@ -40,14 +40,18 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
   } = appointment;
 
   const [selectedMechanicId, setSelectedMechanicId] = useState<string>(
-    appointment.mechanicId?._id || "",
+    appointment.mechanicId?._id || ""
   );
   const [assigning, setAssigning] = useState(false);
   const [mechanics, setMechanics] = useState<AssignableMechanic[] | []>([]);
+  const [skipServiceId, setSkipServiceId] = useState<string | null>(null);
+  const [skipReason, setSkipReason] = useState("");
+
   const PREVIOUS_STATUSES = ["completed", "cancelled"];
 
   useEffect(() => {
     if (role === "MECHANIC") return;
+
     const fetchMechanics = async (garageId: string) => {
       try {
         const res = await getAssignableMechanics(garageId);
@@ -77,12 +81,19 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
 
   const handleServiceStatusUpdate = async (
     serviceId: string,
-    status: "started" | "completed" | "skipped",
+    status: "started" | "completed" | "skipped"
   ) => {
     try {
-      await updateServiceStatusApi(_id, serviceId, status);
+      await updateServiceStatusApi(
+        _id,
+        serviceId,
+        status,
+        status === "skipped" ? skipReason : undefined
+      );
       onUpdate();
       successToast("Status Updated");
+      setSkipServiceId(null);
+      setSkipReason("");
     } catch (error) {
       if (error instanceof Error) errorToast(error.message);
     }
@@ -112,7 +123,7 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
             value={
               status === "cancelled"
                 ? "Cancelled"
-                : (paymentStatus ?? "Not Available")
+                : paymentStatus ?? "Not Available"
             }
           />
         </div>
@@ -124,58 +135,101 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
             {services.map((service) => (
               <div
                 key={service.serviceId}
-                className="flex justify-between items-center bg-[#222] px-4 py-2 rounded-lg"
+                className="bg-[#222] px-4 py-3 rounded-lg"
               >
-                <div>
-                  <p className="text-sm">{service.name}</p>
-                  <p className="text-xs text-[#888] capitalize">
-                    {service.status}
-                  </p>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm">{service.name}</p>
+                    <p className="text-xs text-[#888] capitalize">
+                      {service.status}
+                    </p>
+
+                    {service.status === "skipped" &&
+                      service.skipReason && (
+                        <p className="text-xs text-red-400 mt-1">
+                          Reason: {service.skipReason}
+                        </p>
+                      )}
+                  </div>
+
+                  {role === "MECHANIC" && (
+                    <div className="flex gap-2">
+                      {service.status === "pending" && (
+                        <button
+                          onClick={() =>
+                            handleServiceStatusUpdate(
+                              service.serviceId,
+                              "started"
+                            )
+                          }
+                          className="px-3 py-1 text-xs bg-blue-600 rounded"
+                        >
+                          Start
+                        </button>
+                      )}
+
+                      {service.status === "started" && (
+                        <>
+                          <button
+                            onClick={() =>
+                              handleServiceStatusUpdate(
+                                service.serviceId,
+                                "completed"
+                              )
+                            }
+                            className="px-3 py-1 text-xs bg-green-600 rounded"
+                          >
+                            Complete
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              setSkipServiceId(service.serviceId)
+                            }
+                            className="px-3 py-1 text-xs bg-red-600 rounded"
+                          >
+                            Skip
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {role === "MECHANIC" && (
-                  <div className="flex gap-2">
-                    {service.status === "pending" && (
+                {/* Inline Skip Section */}
+                {skipServiceId === service.serviceId && (
+                  <div className="mt-3 bg-[#111] p-3 rounded-md space-y-2">
+                    <textarea
+                      value={skipReason}
+                      onChange={(e) => setSkipReason(e.target.value)}
+                      placeholder="Enter reason for skipping..."
+                      className="w-full bg-[#222] border border-[#333] rounded px-2 py-1 text-xs"
+                    />
+
+                    <div className="flex justify-end gap-2">
                       <button
+                        onClick={() => {
+                          setSkipServiceId(null);
+                          setSkipReason("");
+                        }}
+                        className="px-3 py-1 text-xs bg-gray-600 rounded"
+                      >
+                        Cancel
+                      </button>
+
+                      <button
+                        disabled={!skipReason.trim()}
                         onClick={() =>
                           handleServiceStatusUpdate(
                             service.serviceId,
-                            "started",
+                            "skipped"
                           )
                         }
-                        className="px-3 py-1 text-xs bg-blue-600 rounded"
+                        className="px-3 py-1 text-xs bg-red-600 rounded disabled:opacity-50"
                       >
-                        Start
+                        Confirm
                       </button>
-                    )}
-
-                    {service.status === "started" && (
-                      <>
-                        <button
-                          onClick={() =>
-                            handleServiceStatusUpdate(
-                              service.serviceId,
-                              "completed",
-                            )
-                          }
-                          className="px-3 py-1 text-xs bg-green-600 rounded"
-                        >
-                          Complete
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            handleServiceStatusUpdate(
-                              service.serviceId,
-                              "skipped",
-                            )
-                          }
-                          className="px-3 py-1 text-xs bg-red-600 rounded"
-                        >
-                          Skip
-                        </button>
-                      </>
-                    )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -194,17 +248,13 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
             >
               <option value="">Select mechanic</option>
               {mechanics.map((m) => (
-                <option
-                  key={m._id}
-                  value={m._id}
-                  selected={m._id === selectedMechanicId}
-                >
+                <option key={m._id} value={m._id}>
                   {m.name}
                 </option>
               ))}
             </select>
 
-            { !PREVIOUS_STATUSES.includes(status) && (
+            {!PREVIOUS_STATUSES.includes(status) && (
               <button
                 onClick={handleAssignMechanic}
                 disabled={
@@ -238,7 +288,7 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
           </p>
         </Section>
 
-        {/* Customer (Garage / Mechanic) */}
+        {/* Customer */}
         {userData && (
           <Section title="Customer">
             <p>{userData.name}</p>

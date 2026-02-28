@@ -4,4 +4,5 @@ export interface IEmailService {
   sendMechanicInvitation(email: string, password: string, name: string): Promise<void>;
   sendGarageApprovalEmail(email: string, garageName: string): Promise<void>;
   sendGarageRejectionEmail(email: string, garageName: string, reason:string): Promise<void>;
+  sendInvalidPlanBookingEmail(email: string, garageName: string): Promise<void>;
 }

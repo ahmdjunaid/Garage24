@@ -93,4 +93,9 @@ export const TYPES = {
   ChatRepository: Symbol.for("ChatRepository"),
   ChatService: Symbol.for("ChatService"),
   ChatController: Symbol.for("ChatController"),
+
+  //Review
+  ReviewRepository: Symbol.for("ReviewRepository"),
+  ReviewService: Symbol.for("ReviewService"),
+  ReviewController: Symbol.for("ReviewController"),
 };

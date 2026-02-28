@@ -217,13 +217,15 @@ export class AppointmentRepository
   async updateServiceStatus(
     appointmentId: string,
     serviceId: string,
-    status: string
+    status: string,
+    skipReason:string,
   ): Promise<AppointmentDocument | null> {
     return await this.model.findOneAndUpdate(
       { _id: appointmentId, "services.serviceId": serviceId },
       {
         $set: {
           "services.$.status": status,
+          skipReason,
         },
       },
       {
@@ -515,5 +517,16 @@ export class AppointmentRepository
     }).select("_id")
 
     return appointments.map((a) => a._id as Types.ObjectId) as unknown as Types.ObjectId[]
+  }
+
+  async getAppointmentDoc(appointmentId: string): Promise<AppointmentDocument | null> {
+    return await this.model.findById(appointmentId)
+  }
+
+  async insertRating(appointmentId: Types.ObjectId, rating: number): Promise<AppointmentDocument | null> {
+    return await this.updateOneByFilter({_id:appointmentId}, {
+      isRated: true,
+      rating,
+    })
   }
 }

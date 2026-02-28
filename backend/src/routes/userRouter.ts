@@ -12,6 +12,7 @@ import { LocationController } from "../controllers/location/implementation/locat
 import { GarageController } from "../controllers/garage/implementation/garageController";
 import { ServiceController } from "../controllers/service/implementation/serviceController";
 import { SlotController } from "../controllers/slot/implementation/slotController";
+import { ReviewController } from "../controllers/review/implementation/reviewController";
 
 const router = express.Router()
 const vehicleController = container.get<VehicleController>(TYPES.VehicleController)
@@ -22,6 +23,9 @@ const locationController = container.get<LocationController>(TYPES.LocationContr
 const garageController = container.get<GarageController>(TYPES.GarageController)
 const serviceController = container.get<ServiceController>(TYPES.ServiceController)
 const slotController = container.get<SlotController>(TYPES.SlotController)
+const reviewController = container.get<ReviewController>(TYPES.ReviewController)
+
+router.route('/home/testimonials').get(reviewController.getPaginatedReviews)
 
 router.route('/vehicles').post(verifyJWT, uploadVehicleImage, authorizeRoles("user"), vehicleController.createVehicle)
 router.route('/vehicles').get(verifyJWT, authorizeRoles("user"), vehicleController.getAllVehicleByUserId)
@@ -36,6 +40,8 @@ router.route('/get-address').get(verifyJWT,authorizeRoles("user"),locationContro
 router.route('/get-coordinates').get(verifyJWT,authorizeRoles("user"),locationController.getCoordinatesFromName)
 router.route('/garages/nearby').get(verifyJWT, authorizeRoles("user"), garageController.findNearbyGarages)
 router.route('/services/available').get(verifyJWT, authorizeRoles("user"), serviceController.getServicesByGarageId)
+
+//Appointment
 router.route('/slots/available').get(verifyJWT, authorizeRoles("user"), slotController.getSlotsByGarageIdAndDate)
 router.route('/appointment/book').post(verifyJWT, authorizeRoles("user"), appointmentController.createAppointment)
 router.route('/appointment/success/:appointmentId').get(verifyJWT, authorizeRoles("user"), appointmentController.getAppointmentDetails)
@@ -45,5 +51,6 @@ router.route('/appointment/reschedule/:appointmentId')
     .get(verifyJWT, authorizeRoles("user"), appointmentController.getAppointmentForReschedule)
     .post(verifyJWT, authorizeRoles("user"), appointmentController.rescheduleAppointment)
 router.route('/appointment/pay/:appointmentId').post(verifyJWT, authorizeRoles("user"), appointmentController.makeServicePayment)
+router.route('/appointment/review').post(verifyJWT, authorizeRoles("user"), reviewController.createReview)
 
 export default router;

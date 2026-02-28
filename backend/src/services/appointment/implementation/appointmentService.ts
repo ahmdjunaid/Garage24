@@ -21,10 +21,15 @@ import HttpStatus from "../../../constants/httpStatusCodes";
 import { AppError } from "../../../middleware/errorHandler";
 import { generateCustomId } from "../../../utils/generateUniqueIds";
 import { IAuthRepository } from "../../../repositories/auth/interface/IAuthRepositories";
-import { USER_NOT_FOUND } from "../../../constants/messages";
+import {
+  PLAN_NOT_AVAILABLE_USER,
+  USER_NOT_FOUND,
+} from "../../../constants/messages";
 import { IMechanicRepository } from "../../../repositories/mechanic/interface/IMechanicRepository";
 import IStripeService from "../../stripe/interface/IStripeService";
 import { INotificationService } from "../../notification/interface/INotificationService";
+import IGarageService from "../../garage/interface/IGarageService";
+import { IEmailService } from "../../email/interface/IEmailService";
 
 @injectable()
 export class AppointmentService implements IAppointmentService {
@@ -37,7 +42,9 @@ export class AppointmentService implements IAppointmentService {
     private _mechanicRepository: IMechanicRepository,
     @inject(TYPES.StripeService) private _stripeService: IStripeService,
     @inject(TYPES.NotificationService)
-    private _notificationService: INotificationService
+    private _notificationService: INotificationService,
+    @inject(TYPES.GarageService) private _garageService: IGarageService,
+    @inject(TYPES.EmailService) private _emailService: IEmailService
   ) {}
 
   async createAppointment(
@@ -54,6 +61,19 @@ export class AppointmentService implements IAppointmentService {
       const user = await this._authRepository.findById(userId);
       if (!user) {
         throw new AppError(HttpStatus.NOT_FOUND, USER_NOT_FOUND);
+      }
+
+      const { isActive, plan } = await this._garageService.getCurrentPlan(
+        payload.garageUID
+      );
+
+      if (!isActive || !plan) {
+        const garage = await this._authRepository.findById(payload.garageUID);
+        await this._emailService.sendInvalidPlanBookingEmail(
+          garage!.email,
+          garage!.name
+        );
+        throw new AppError(HttpStatus.FORBIDDEN, PLAN_NOT_AVAILABLE_USER);
       }
 
       const endTime = calculateEndTime(
@@ -367,13 +387,15 @@ export class AppointmentService implements IAppointmentService {
   async updateServiceStatus(
     appointmentId: string,
     serviceId: string,
-    status: string
+    status: string,
+    skipReason: string
   ): Promise<AppointmentDocument | null> {
     const updatedAppointment =
       await this._appointmentRepository.updateServiceStatus(
         appointmentId,
         serviceId,
-        status
+        status,
+        skipReason
       );
 
     if (!updatedAppointment) {
@@ -401,16 +423,31 @@ export class AppointmentService implements IAppointmentService {
       s.serviceId.equals(serviceId)
     );
 
-    await this._appointmentRepository.pushToArray<IAppointmentEvents>(
-      appointmentId,
-      "events",
-      {
-        actorName: mechanic?.name,
-        actorRole: "Mechanic",
-        doneBy: mechanic?.userId,
-        message: `${service?.name ?? "Service"} has been ${status}`,
-      }
-    );
+    if (status !== "skipped") {
+      await this._appointmentRepository.pushToArray<IAppointmentEvents>(
+        appointmentId,
+        "events",
+        {
+          actorName: mechanic?.name,
+          actorRole: "Mechanic",
+          doneBy: mechanic?.userId,
+          message: `${service?.name ?? "Service"} has been ${status}`,
+        }
+      );
+    }
+
+    if (status === "skipped") {
+      await this._appointmentRepository.pushToArray<IAppointmentEvents>(
+        appointmentId,
+        "events",
+        {
+          actorName: mechanic?.name,
+          actorRole: "Mechanic",
+          doneBy: mechanic?.userId,
+          message: `${service?.name ?? "Service"} has been ${status}, Due to ${skipReason}`,
+        }
+      );
+    }
 
     await this._notificationService.createNotification({
       recipientId: updatedAppointment.userId,

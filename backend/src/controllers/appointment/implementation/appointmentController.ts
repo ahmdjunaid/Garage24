@@ -243,7 +243,7 @@ export class AppointmentController implements IAppointmentController {
     next: NextFunction
   ) => {
     try {
-      const { appointmentId, serviceId, status } = req.body;
+      const { appointmentId, serviceId, status, skipReason = "" } = req.body;
       if (!appointmentId || !serviceId || !status) {
         throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
       }
@@ -251,7 +251,8 @@ export class AppointmentController implements IAppointmentController {
       const response = await this._appointmentService.updateServiceStatus(
         appointmentId,
         serviceId,
-        status
+        status,
+        skipReason
       );
 
       res.status(HttpStatus.OK).json(response);

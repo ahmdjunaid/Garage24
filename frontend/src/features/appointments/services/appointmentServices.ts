@@ -10,6 +10,7 @@ import type {
   CreateAppointmentRequest,
   ReschedulePayload,
 } from "@/types/AppointmentTypes";
+import type { IReview } from "../modals/RatingModal";
 
 export const getAvailableSlotsByGarageId = (garageId: string, date: string) => {
   return api
@@ -115,12 +116,14 @@ export const updateServiceStatusApi = (
   appointmentId: string,
   serviceId: string,
   status: AppointmentServiceStatus,
+  skipReason: string | undefined
 ) => {
   return api
     .patch(`/${MECHANIC_BASE_ROUTE}/service-status`, {
       appointmentId,
       serviceId,
       status,
+      skipReason
     })
     .then((res) => res.data);
 };
@@ -147,4 +150,10 @@ export const fetchApptForChatByAppIdApi = (appointmentId:string) =>{
     return api
         .get(`${CHAT_BASE_ROUTE}/appointments/${appointmentId}`)
         .then(res => res.data)
+}
+
+export const rateAppointmentApi = (data:Partial<IReview>) => {
+  return api
+    .post(`${USER_BASE_ROUTE}/appointment/review`, data)
+    .then((res) => res.data)
 }

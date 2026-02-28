@@ -1,6 +1,6 @@
 import type { PopulatedAppointmentData } from "@/types/AppointmentTypes";
 import React from "react";
-import { Car, MessageCircle } from "lucide-react";
+import { Car, MessageCircle, Star } from "lucide-react";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store/store";
 
@@ -10,6 +10,7 @@ interface CardProps {
   handleReschedule: (id: string) => void;
   handleViewDetails: (id: string) => void;
   handleChat: (id: string) => void;
+  handleRating: (id: string) => void;
 }
 
 const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress"];
@@ -20,6 +21,7 @@ const AppointmentCard: React.FC<CardProps> = ({
   handleReschedule,
   handleViewDetails,
   handleChat,
+  handleRating,
 }) => {
   const { unreadCounts } = useSelector((state: RootState) => state.chat);
 
@@ -65,6 +67,22 @@ const AppointmentCard: React.FC<CardProps> = ({
             </p>
           </div>
 
+          {appointment.isRated && appointment.rating > 0 && (
+            <div className="flex items-center gap-1 mt-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  size={13}
+                  className={
+                    star <= appointment.rating
+                      ? "fill-[#f59e0b] text-[#f59e0b]"
+                      : "fill-transparent text-[#3a3a3a]"
+                  }
+                />
+              ))}
+            </div>
+          )}
+
           {/* Action Buttons — right side on md+, below on mobile */}
           <div className="flex flex-wrap items-center gap-2 md:flex-nowrap md:justify-end md:flex-shrink-0">
             {ACTIVE_STATUSES.includes(appointment.status) && (
@@ -104,6 +122,19 @@ const AppointmentCard: React.FC<CardProps> = ({
                   )}
                 </button>
               </>
+            )}
+            {appointment.status === "completed" && !appointment.isRated && (
+              <button
+                onClick={() => handleRating(appointment._id)}
+                className="relative flex items-center gap-1.5 px-4 py-2 
+                      bg-[#2a2a2a] hover:bg-[#1d3a5c] text-[#60a5fa] 
+                      hover:text-[#93c5fd] rounded-lg text-sm 
+                      border border-[#3a3a3a] hover:border-[#3b6ea8] 
+                      transition-colors whitespace-nowrap"
+              >
+                <Star size={15} />
+                Rate
+              </button>
             )}
             <button
               onClick={() => handleViewDetails(appointment._id)}

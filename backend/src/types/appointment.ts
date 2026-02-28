@@ -7,7 +7,8 @@ export type AppointmentStatus =
   | "confirmed"
   | "in_progress"
   | "completed"
-  | "cancelled";
+  | "cancelled"
+  | "delivered";
 
 export interface IAppointmentVehicleSnapshot {
   vehicleId?: Types.ObjectId;
@@ -48,6 +49,7 @@ export interface IAppointmentServiceData {
   price: number;
   durationMinutes: number;
   status: AppointmentServiceStatus;
+  skipReason?: string;
 
   startedAt?: Date;
   completedAt?: Date;
@@ -95,6 +97,9 @@ export interface IAppointment {
 
   customerNote?: string;
   mechanicNote?: string;
+
+  isRated: boolean,
+  rating: number,
 }
 
 export interface GetMappedAppointmentResponse {

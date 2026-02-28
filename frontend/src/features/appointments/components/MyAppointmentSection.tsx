@@ -13,6 +13,7 @@ import {
 import ChatModal from "./ChatModal";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store/store";
+import RatingModal from "../modals/RatingModal";
 
 const MyAppointmentsSection = () => {
   const [appointments, setAppointments] = useState<PopulatedAppointmentData[]>(
@@ -25,6 +26,7 @@ const MyAppointmentsSection = () => {
   const [isCancelling, setIsCancelling] = useState<boolean>(false);
   const [idForCancel, setIdForCancel] = useState<string>("");
   const [appointmentId, setAppointmentId] = useState<string | null>(null);
+  const [ratingId, setRatingId] = useState<string | null>(null);
 
   const currentUserId = useSelector((state: RootState) => state.auth.user?._id);
 
@@ -124,6 +126,7 @@ const MyAppointmentsSection = () => {
           handleReschedule={handleReschedule}
           handleViewDetails={(id) => navigate(`/appointment/${id}`)}
           handleChat={(id) => setAppointmentId(id)}
+          handleRating={(id)=>setRatingId(id)}
         />
 
         {/* Empty State */}
@@ -156,13 +159,24 @@ const MyAppointmentsSection = () => {
         onConfirm={handleCancel}
         onCancel={() => setIdForCancel("")}
       />
-      
+
       {appointmentId && currentUserId && (
         <ChatModal
           appointmentId={appointmentId}
           currentUserId={currentUserId}
           isOpen={!!appointmentId}
           onClose={() => setAppointmentId(null)}
+        />
+      )}
+
+      {ratingId && currentUserId && (
+        <RatingModal
+          appointmentId={ratingId}
+          isOpen={!!ratingId}
+          onClose={() => {
+            setRatingId(null)
+            fetchAppointments(currentPage, "previous")
+          }}
         />
       )}
     </div>

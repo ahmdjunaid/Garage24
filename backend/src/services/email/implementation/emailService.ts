@@ -188,4 +188,47 @@ export class EmailService implements IEmailService {
       logger.error("Error while sending garage rejection email", error);
     }
   }
+
+  async sendInvalidPlanBookingEmail(
+    email: string,
+    garageName: string
+  ): Promise<void> {
+    const mailOptions = {
+      from: this.fromEmail,
+      to: email,
+      subject:
+        "Action Required: Activate Your Garage24 Plan to Receive Bookings",
+      html: `
+      <p><strong>Hello ${garageName},</strong></p>
+
+      <p>We noticed that a customer recently attempted to book an appointment at your garage.</p>
+
+      <p>However, your Garage24 subscription plan is currently inactive or has expired.</p>
+
+      <p>To continue receiving and managing customer bookings, please activate a valid plan at your earliest convenience.</p>
+
+      <p>🔗 <strong>
+        <a href="https://garage24.com/subscription">
+          Click here to purchase or renew your plan
+        </a>
+      </strong></p>
+
+      <p>Once your plan is active, customers will be able to successfully book appointments with your garage.</p>
+
+      <br/>
+      <p>If you have any questions or need assistance, feel free to contact our support team.</p>
+
+      <br/>
+      <p>Best regards,</p>
+      <p><strong>Garage24 Support Team</strong></p>
+    `,
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+      logger.info(`Plan activation reminder sent to ${email}`);
+    } catch (error) {
+      logger.error("Error while sending plan activation email", error);
+    }
+  }
 }
