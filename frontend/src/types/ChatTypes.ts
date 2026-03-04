@@ -1,5 +1,5 @@
 export type ChatRole = "customer" | "mechanic" | "garage";
-export type ChatAppointmentStatus = "pending" | "confirmed" | "in_progress";
+export type ChatAppointmentStatus = "pending" | "confirmed" | "in_progress" | "completed";
 
 export interface IChatMessage {
   _id?: string;

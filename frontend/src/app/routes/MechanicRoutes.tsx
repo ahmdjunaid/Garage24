@@ -7,6 +7,7 @@ import PageNotFound from "@features/auth/pages/PageNotFound";
 import ProfilePage from "@features/profile/pages/Profile";
 import MechanicAppointments from "@features/appointments/pages/mechanic/MechanicAppointment";
 import ChatMechanicPage from "@/features/chat/pages/mechanic/ChatMechanicPage";
+import HistoryMechanic from "@/features/vehicleHistory/pages/mechanic/HistoryMechanic";
 
 const MechanicRoute: React.FC = () => {
   return (
@@ -16,6 +17,7 @@ const MechanicRoute: React.FC = () => {
         <Route path="/" element={<MechanicHome />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/appointments" element={<MechanicAppointments/>} />
+        <Route path="/service-records" element={<HistoryMechanic />} />
         <Route path="/messages" element={<ChatMechanicPage />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>

@@ -22,6 +22,9 @@ router.route('/appointment/:appointmentId').get(verifyJWT, authorizeRoles("mecha
 router.route('/service-status').patch(verifyJWT, authorizeRoles("mechanic"), appointmentController.updateServiceStatus);
 
 //Dashboard
-router.route('/dashboard').get(verifyJWT, authorizeRoles("mechanic"), dashboardController.getMechanicDashboardData)
+router.route('/dashboard').get(verifyJWT, authorizeRoles("mechanic"), dashboardController.getMechanicDashboardData);
+
+//ServiceHistory
+router.route('/vehicle/appointment').get(verifyJWT, authorizeRoles("mechanic"), appointmentController.getAppointmentByVehicleNum);
 
 export default router;

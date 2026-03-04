@@ -11,6 +11,7 @@ import { AppError } from "../../../middleware/errorHandler";
 import { validateCreateAppointment } from "../../../utils/validateAppointmentData";
 import {
   ALL_FIELDS_REQUIRED,
+  AUTHENTICATION_FAILED,
   USER_ID_REQUIRED,
 } from "../../../constants/messages";
 
@@ -261,7 +262,11 @@ export class AppointmentController implements IAppointmentController {
     }
   };
 
-  getAllAppointmentByMechId = async (req: Request, res: Response, next: NextFunction) => {
+  getAllAppointmentByMechId = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const { page = 1, limit = 10, searchQuery = "" } = req.query;
       const userId = req.user?.id;
@@ -282,21 +287,61 @@ export class AppointmentController implements IAppointmentController {
 
       res.status(HttpStatus.OK).json(response);
     } catch (error) {
-      next(error)
+      next(error);
     }
-  }
+  };
 
-  makeServicePayment = async (req: Request, res: Response, next: NextFunction) => {
+  makeServicePayment = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const appointmentId = req.params.appointmentId
-      if(!appointmentId)
-        throw new AppError(HttpStatus.BAD_REQUEST, "Appointment id is required.")
+      const appointmentId = req.params.appointmentId;
+      if (!appointmentId)
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          "Appointment id is required."
+        );
 
-      const response = await this._appointmentService.makeServicePayment(appointmentId)
-      res.status(HttpStatus.OK).json(response)
-      
+      const response =
+        await this._appointmentService.makeServicePayment(appointmentId);
+      res.status(HttpStatus.OK).json(response);
     } catch (error) {
-      next(error)
+      next(error);
+    }
+  };
+
+  getAppointmentByVehicleNum = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { page = 1, limit = 10, searchQuery = "" } = req.query;
+      const userId = req.user?.id;
+      const role = req.user?.role;
+
+      if (!userId || !role) {
+        throw new AppError(HttpStatus.BAD_REQUEST, AUTHENTICATION_FAILED);
+      }
+
+      const query: GetPaginationQuery = {
+        page: Number(page),
+        limit: Number(limit),
+        searchQuery: String(searchQuery),
+      };
+
+      const response =
+        await this._appointmentService.getAppointmentByVehicleNum(
+          query,
+          userId,
+          role
+        );
+
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
     }
   }
 }

@@ -1,9 +1,12 @@
 import type { ChatAppointmentStatus, ChatRole } from "@/types/ChatTypes";
 
 export const STATUS_CONFIG: Record<ChatAppointmentStatus, { label: string; bg: string; text: string; dot: string }> = {
-  "pending":     { label: "Pending",     bg: "bg-[#2d2006]", text: "text-[#f0a000]", dot: "bg-[#f0a000]" },
-  "confirmed":     { label: "Confirmed",     bg: "bg-[#0a1a2d]", text: "text-[#3b82f6]", dot: "bg-[#3b82f6]" },
-  "in_progress": { label: "In Progress", bg: "bg-[#0a1f15]", text: "text-[#3fb950]", dot: "bg-[#3fb950]" },
+  "pending":     { label: "Pending", bg: "bg-[#2d2006]", text: "text-[#f0a000]", dot: "bg-[#f0a000]" },
+  "confirmed":     { label: "Confirmed", bg: "bg-[#0a1a2d]", text: "text-[#3b82f6]", dot: "bg-[#3b82f6]" },
+  "in_progress": { label: "In Progress", bg: "bg-[#0a1f15]",  text: "text-[#22c55e]", dot: "bg-[#22c55e]" },
+  "completed": {  label: "Completed", bg: "bg-[#052e1a]", text: "text-[#16a34a]",  dot: "bg-[#16a34a]"
+},
+
 };
 
 export const ROLE_BUBBLE: Record<ChatRole, string> = {

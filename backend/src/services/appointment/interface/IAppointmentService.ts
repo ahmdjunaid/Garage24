@@ -28,5 +28,6 @@ export interface IAppointmentService {
   assignMechanic(appointmentId:string, mechanicId:string):Promise<AppointmentDocument | null>;
   updateServiceStatus(appointmentId:string, serviceId:string, status:string, skipReason:string): Promise<AppointmentDocument | null>;
   getAllAppointmentByMechId(query: GetPaginationQuery): Promise<GetMappedPopulatedAppointmentResponse>;
-  makeServicePayment(appointmentId:string):Promise<{ url:string }>
+  makeServicePayment(appointmentId:string):Promise<{ url:string }>;
+  getAppointmentByVehicleNum(query:GetPaginationQuery, userId:string, role:string): Promise<GetMappedPopulatedAppointmentResponse>;
 }

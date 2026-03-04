@@ -94,4 +94,5 @@ export interface IAppointmentRepository {
   getAppointmentsIdsForChat(currentUID:string): Promise<Types.ObjectId[]>;
   getAppointmentDoc(appointmentId:string): Promise<AppointmentDocument| null>;
   insertRating(appointmentId: Types.ObjectId, rating: number): Promise<AppointmentDocument| null>;
+  getAppointmentByVehicleNum(query: GetPaginationQuery, filters: AppointmentFilterForChat): Promise<GetMappedPopulatedAppointmentResponse>
 }

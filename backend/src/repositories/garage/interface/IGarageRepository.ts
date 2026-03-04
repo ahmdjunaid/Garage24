@@ -6,7 +6,6 @@ import {
   IPopulatedGarage,
 } from "../../../types/garage";
 import { GetPaginationQuery } from "../../../types/common";
-import { GarageDocument } from "../../../models/garage";
 
 export interface IGarageRepository {
   onboarding(garageData: {

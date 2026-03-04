@@ -264,8 +264,6 @@ export class DashboardService implements IDashboardService {
       ),
     ]);
 
-    console.log(currentAppointments, previousAppointments)
-
     const [currentAppointmentCount, prevAppointmentCount] = await Promise.all([
       this._appointmentRepository.aggregateAppointmentOnStatus(
         current.start,

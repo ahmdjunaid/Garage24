@@ -22,6 +22,8 @@ import { AppError } from "../../../middleware/errorHandler";
 import { generateCustomId } from "../../../utils/generateUniqueIds";
 import { IAuthRepository } from "../../../repositories/auth/interface/IAuthRepositories";
 import {
+  AUTHENTICATION_FAILED,
+  INVALID_INPUT,
   PLAN_NOT_AVAILABLE_USER,
   USER_NOT_FOUND,
 } from "../../../constants/messages";
@@ -532,5 +534,39 @@ export class AppointmentService implements IAppointmentService {
       successUrl: `${process.env.CLIENT_URL}/appointment/${appointmentId}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${process.env.CLIENT_URL}/appointment/${appointmentId}?payment=failed`,
     });
+  }
+
+  async getAppointmentByVehicleNum(
+    query: GetPaginationQuery,
+    userId: string,
+    role: string
+  ): Promise<GetMappedPopulatedAppointmentResponse> {
+
+    if (role === "mechanic") {
+      const mechanic = await this._mechanicRepository.findOneByUserId(userId);
+
+      if (!mechanic) {
+        throw new AppError(HttpStatus.BAD_REQUEST, INVALID_INPUT);
+      }
+
+      return await this._appointmentRepository.getAppointmentByVehicleNum(query, {
+        garageUID: mechanic.garageId.toString(),
+      });
+    }
+
+    if (role === "garage") {
+      return this._appointmentRepository.getAppointmentByVehicleNum(query, {
+        garageUID: userId,
+      });
+    }
+    
+    if (role === "user") {
+      return await this._appointmentRepository.getAppointmentByVehicleNum(query, {
+        userId: userId,
+      });
+    }
+
+
+    throw new AppError(HttpStatus.FORBIDDEN, AUTHENTICATION_FAILED);
   }
 }

@@ -1,9 +1,4 @@
-import {
-  ClientSession,
-  FilterQuery,
-  Types,
-  UpdateQuery,
-} from "mongoose";
+import { ClientSession, FilterQuery, Types, UpdateQuery } from "mongoose";
 import { Appointment, AppointmentDocument } from "../../../models/appointment";
 import {
   GetMappedAppointmentResponse,
@@ -218,7 +213,7 @@ export class AppointmentRepository
     appointmentId: string,
     serviceId: string,
     status: string,
-    skipReason:string,
+    skipReason: string
   ): Promise<AppointmentDocument | null> {
     return await this.model.findOneAndUpdate(
       { _id: appointmentId, "services.serviceId": serviceId },
@@ -460,7 +455,12 @@ export class AppointmentRepository
   async getAppointmentsForChat(
     query: AppointmentFilterForChat
   ): Promise<AppointmentDocForChat[]> {
-    const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress"];
+    const ACTIVE_STATUSES = [
+      "pending",
+      "confirmed",
+      "in_progress",
+      "completed",
+    ];
 
     const filter: FilterQuery<AppointmentDocument> = {
       status: { $in: ACTIVE_STATUSES },
@@ -487,7 +487,12 @@ export class AppointmentRepository
   async getAppointmentsForChatById(
     appointmentId: string
   ): Promise<AppointmentDocForChat | null> {
-    const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress"];
+    const ACTIVE_STATUSES = [
+      "pending",
+      "confirmed",
+      "in_progress",
+      "completed",
+    ];
 
     const filter: FilterQuery<AppointmentDocument> = {
       _id: appointmentId,
@@ -504,29 +509,97 @@ export class AppointmentRepository
     return appointments as unknown as AppointmentDocForChat | null;
   }
 
-  async getAppointmentsIdsForChat(currentUID: string): Promise<Types.ObjectId[]> {
-    const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress"];
+  async getAppointmentsIdsForChat(
+    currentUID: string
+  ): Promise<Types.ObjectId[]> {
+    const ACTIVE_STATUSES = [
+      "pending",
+      "confirmed",
+      "in_progress",
+      "completed",
+    ];
 
-    const appointments = await this.model.find({
-      $or: [
-        { mechanicId: currentUID },
-        { garageUID: currentUID },
-        { userId: currentUID },
-      ],
-      status: {$in : ACTIVE_STATUSES }
-    }).select("_id")
+    const appointments = await this.model
+      .find({
+        $or: [
+          { mechanicId: currentUID },
+          { garageUID: currentUID },
+          { userId: currentUID },
+        ],
+        status: { $in: ACTIVE_STATUSES },
+      })
+      .select("_id");
 
-    return appointments.map((a) => a._id as Types.ObjectId) as unknown as Types.ObjectId[]
+    return appointments.map(
+      (a) => a._id as Types.ObjectId
+    ) as unknown as Types.ObjectId[];
   }
 
-  async getAppointmentDoc(appointmentId: string): Promise<AppointmentDocument | null> {
-    return await this.model.findById(appointmentId)
+  async getAppointmentDoc(
+    appointmentId: string
+  ): Promise<AppointmentDocument | null> {
+    return await this.model.findById(appointmentId);
   }
 
-  async insertRating(appointmentId: Types.ObjectId, rating: number): Promise<AppointmentDocument | null> {
-    return await this.updateOneByFilter({_id:appointmentId}, {
-      isRated: true,
-      rating,
-    })
+  async insertRating(
+    appointmentId: Types.ObjectId,
+    rating: number
+  ): Promise<AppointmentDocument | null> {
+    return await this.updateOneByFilter(
+      { _id: appointmentId },
+      {
+        isRated: true,
+        rating,
+      }
+    );
+  }
+
+  async getAppointmentByVehicleNum(
+    query: GetPaginationQuery,
+    filters: AppointmentFilterForChat
+  ): Promise<GetMappedPopulatedAppointmentResponse> {
+    const skip = (query.page - 1) * query.limit;
+
+    const searchFilter: FilterQuery<AppointmentDocument> = {};
+
+    if (query.searchQuery) {
+      searchFilter["vehicle.licensePlate"] = {
+        $regex: query.searchQuery,
+        $options: "i",
+      };
+    }
+
+    if (filters.userId) {
+      searchFilter.userId = filters.userId;
+    }
+
+    if (filters.garageUID) {
+      searchFilter.garageUID = filters.garageUID;
+    }
+
+    const appointments = await this.model
+      .find(searchFilter)
+      .populate([
+        {
+          path: "garageId",
+          select: "name address mobileNumber location",
+        },
+        {
+          path: "mechanicId",
+          select: "name mobileNumber skills",
+        },
+      ])
+      .skip(skip)
+      .limit(query.limit)
+      .sort({ createdAt: -1 });
+
+    const totalAppointments = await this.model.countDocuments(searchFilter);
+    const totalPages = Math.ceil(totalAppointments / query.limit);
+
+    return {
+      appointments: appointments as unknown as PopulatedAppointmentData[],
+      totalAppointments,
+      totalPages,
+    };
   }
 }
