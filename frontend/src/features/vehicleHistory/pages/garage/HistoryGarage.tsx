@@ -6,10 +6,10 @@ import _ from "lodash";
 import Spinner from "@/components/common/Spinner";
 import Pagination from "@/components/common/Pagination";
 import type { PopulatedAppointmentData } from "@/types/AppointmentTypes";
-import { fetchAptsByVehicleForMechNumApi } from "../../services/historyServices";
+import { fetchAptsByVehicleNumForGarageApi } from "../../services/historyServices";
 import AppointmentHistoryModal from "../../modals/AppointmentHistoryModal";
 
-const HistoryMechanic = () => {
+const HistoryGarage = () => {
   const [appointments, setAppointments] = useState<PopulatedAppointmentData[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
@@ -30,7 +30,7 @@ const HistoryMechanic = () => {
       try {
         setLoading(true);
         setNoResults(false);
-        const response = await fetchAptsByVehicleForMechNumApi(page, appointmentPerPage, licensePlate);
+        const response = await fetchAptsByVehicleNumForGarageApi(page, appointmentPerPage, licensePlate);
         setAppointments(response.appointments);
         setTotalPages(response.totalPages);
         setNoResults(response.appointments.length === 0 && !!licensePlate);
@@ -83,7 +83,7 @@ const HistoryMechanic = () => {
 
   return (
     <div className="flex h-screen bg-gray-950 text-white overflow-hidden">
-      <AdminSidebar role="mechanic" />
+      <AdminSidebar role="garage" />
 
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header WITHOUT search */}
@@ -167,4 +167,4 @@ const HistoryMechanic = () => {
   );
 };
 
-export default HistoryMechanic;
+export default HistoryGarage;

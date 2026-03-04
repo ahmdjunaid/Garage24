@@ -53,4 +53,7 @@ router.route('/appointment/assign-mechanic').post(verifyJWT, authorizeRoles("gar
 router.route('/dashboard').get(verifyJWT, authorizeRoles("garage"), dashboardController.getGarageDashboardData)
 router.route('/top-services').get(verifyJWT, authorizeRoles("garage"), dashboardController.getTopFiveBookedServices)
 
+//ServiceHistory
+router.route('/vehicle/appointment').get(verifyJWT, authorizeRoles("garage"), appointmentController.getAppointmentByVehicleNum);
+
 export default router;

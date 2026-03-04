@@ -12,6 +12,7 @@ const garageMenuItems = [
   { name: "Appointments", path: "/garage/appointments", icon: Calendar },
   { name: "Services", path: "/garage/services", icon: Settings },
   { name: "Mechanics", path: "/garage/mechanics", icon: Wrench },
+  { name: "Service Records", path: "/garage/service-records", icon: CalendarCheck },
   { name: "Reports", path: "/garage/reports", icon: FileText },
   { name: "Plans", path: "/garage/plans", icon: HandCoins },
 ];

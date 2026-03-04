@@ -229,15 +229,6 @@ const AppointmentHistoryModal: React.FC<AppointmentHistoryModalProps> = ({
                   <Phone size={11} /> {mechanicId.mobileNumber}
                 </p>
               )}
-              {mechanicId.skills?.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-1.5">
-                  {mechanicId.skills.map((s) => (
-                    <span key={s} className="text-[10px] bg-[#1a1a1a] text-[#666] px-2 py-0.5 rounded-full">
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              )}
             </div>
           </Section>
         )}
