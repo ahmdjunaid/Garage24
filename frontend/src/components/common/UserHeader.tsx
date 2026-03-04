@@ -40,7 +40,7 @@ const UserHeader = ({
   const [showNotifications, setShowNotifications] = useState(false);
 
   const { user } = useSelector((state: RootState) => state.auth);
-  const { totalUnread } = useSelector((state:RootState) => state.chat)
+  const { totalUnread } = useSelector((state: RootState) => state.chat);
   const { notifications } = useSelector(
     (state: RootState) => state.notification,
   );
@@ -142,13 +142,13 @@ const UserHeader = ({
                     >
                       My Appointments
                     </Link>
-                    <a
-                      href="#services"
-                      className="block px-4 py-2 hover:bg-gray-100"
+                    <Link
+                      to="/service-history"
+                      className={`block px-4 py-2 hover:bg-gray-100 ${isActive("/service-history") ? "text-red-500" : ""}`}
                       onClick={() => setShowMoreMenu(false)}
                     >
-                      Services
-                    </a>
+                      Service History
+                    </Link>
                     <a
                       href="#about"
                       className="block px-4 py-2 hover:bg-gray-100"
@@ -272,13 +272,13 @@ const UserHeader = ({
             >
               My Appointments
             </Link>
-            <a
-              href="#services"
-              className="block hover:text-gray-300"
-              onClick={() => setShowMobileMenu(false)}
+            <Link
+              to="/service-history"
+              className={`block hover:text-gray-300 ${isActive("/service-history") ? "text-red-500" : ""}`}
+              onClick={() => setShowMoreMenu(false)}
             >
-              Services
-            </a>
+              Service History
+            </Link>
             <a
               href="#about"
               className="block hover:text-gray-300"
@@ -359,13 +359,13 @@ const UserHeader = ({
                       >
                         My Appointments
                       </Link>
-                      <a
-                        href="#services"
-                        className="block px-4 py-2 hover:bg-gray-100"
+                      <Link
+                        to="/service-history"
+                        className={`block px-4 py-2 hover:bg-gray-100 ${isActive("/service-history") ? "text-red-500" : ""}`}
                         onClick={() => setShowMoreMenu(false)}
                       >
-                        Services
-                      </a>
+                        Service History
+                      </Link>
                       <a
                         href="#about"
                         className="block px-4 py-2 hover:bg-gray-100"

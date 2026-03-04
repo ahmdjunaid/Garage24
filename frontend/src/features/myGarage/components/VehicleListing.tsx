@@ -67,6 +67,7 @@ export const VehicleListing: React.FC = () => {
               onView={(vehicle) => setVehicleToView(vehicle)}
               onBook={(id) => navigate(`/appointment?vehicleId=${id}`)}
               onRemove={setIdToDelete}
+              onHistory={(licence_plate) => navigate(`/service-history?licence_plate=${licence_plate}`)}
             />
           ))}
         </div>

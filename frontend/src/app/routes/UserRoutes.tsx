@@ -13,6 +13,7 @@ import MyAppointments from "@features/appointments/pages/user/MyAppointments";
 import RescheduleAppointment from "@features/appointments/pages/user/RescheduleAppointment";
 import AppointmentDetailsPage from "@features/appointments/pages/user/AppointmentDetailsPage";
 import HomePage from "@features/home/pages/HomePage";
+import AppointmentHistory from "@/features/vehicleHistory/pages/user/HistoryUser";
 
 const UserRoutes: React.FC = () => {
   return (
@@ -29,6 +30,7 @@ const UserRoutes: React.FC = () => {
         <Route path="/appointment/:appointmentId/reschedule" element={<RescheduleAppointment />}/>
         <Route path="/appointment/:appointmentId" element={<AppointmentDetailsPage isUserView={true}/>}/>
         <Route path="/profile" element={<Profile />}/>
+        <Route path="/service-history" element={<AppointmentHistory />}/>
         <Route path="*" element={<PageNotFound/>}/>
       </Route>
     </Routes>

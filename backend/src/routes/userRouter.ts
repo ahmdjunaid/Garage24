@@ -53,4 +53,7 @@ router.route('/appointment/reschedule/:appointmentId')
 router.route('/appointment/pay/:appointmentId').post(verifyJWT, authorizeRoles("user"), appointmentController.makeServicePayment)
 router.route('/appointment/review').post(verifyJWT, authorizeRoles("user"), reviewController.createReview)
 
+//Service History
+router.route('/vehicle/appointment').get(verifyJWT, authorizeRoles("user"), appointmentController.getAppointmentByVehicleNum);
+
 export default router;
