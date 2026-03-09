@@ -5,7 +5,7 @@ import { IDashboardService } from "../../../services/dashboard/interface/IDashbo
 import { Request, Response, NextFunction } from "express";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { AppError } from "../../../middleware/errorHandler";
-import { AUTHENTICATION_FAILED } from "../../../constants/messages";
+import { AUTHENTICATION_FAILED, INVALID_CYCLE } from "../../../constants/messages";
 
 @injectable()
 export class DashboardController implements IDashboardController {
@@ -24,7 +24,7 @@ export class DashboardController implements IDashboardController {
       const allowedTypes = ["week", "month", "year"];
 
       if (!cycleType || !allowedTypes.includes(cycleType))
-        throw new AppError(HttpStatus.BAD_REQUEST, "Invalid cycle");
+        throw new AppError(HttpStatus.BAD_REQUEST, INVALID_CYCLE);
 
       const type = cycleType as "week" | "month" | "year";
 
@@ -64,7 +64,7 @@ export class DashboardController implements IDashboardController {
       }
 
       if (!cycleType || !allowedTypes.includes(cycleType))
-        throw new AppError(HttpStatus.BAD_REQUEST, "Invalid cycle");
+        throw new AppError(HttpStatus.BAD_REQUEST, INVALID_CYCLE);
 
       const type = cycleType as "week" | "month" | "year";
 
@@ -116,7 +116,7 @@ export class DashboardController implements IDashboardController {
       }
 
       if (!cycleType || !allowedTypes.includes(cycleType))
-        throw new AppError(HttpStatus.BAD_REQUEST, "Invalid cycle");
+        throw new AppError(HttpStatus.BAD_REQUEST, INVALID_CYCLE);
 
       const type = cycleType as "week" | "month" | "year";
 

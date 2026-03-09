@@ -41,7 +41,7 @@ const MyAppointmentsHistorySection = () => {
         const response = await fetchAptsByVehicleNumForUserApi(
           page,
           appointmentsPerPage,
-          query,
+          normalizePlate(query),
         );
         setAppointments(response.appointments);
         setTotalPages(response.totalPages);
@@ -53,6 +53,10 @@ const MyAppointmentsHistorySection = () => {
     },
     [appointmentsPerPage],
   );
+
+  function normalizePlate(plate: string) {
+    return plate.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  }
 
   useEffect(() => {
     if (currentPage !== 1) {

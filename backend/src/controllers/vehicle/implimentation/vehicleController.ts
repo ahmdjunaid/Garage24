@@ -3,6 +3,7 @@ import HttpStatus from "../../../constants/httpStatusCodes";
 import {
   ALL_FIELDS_REQUIRED,
   ERROR_WHILE_FETCH_DATA,
+  VEHICLE_ID_REQUIRED,
 } from "../../../constants/messages";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
@@ -110,7 +111,7 @@ export class VehicleController implements IVehicleController {
     try {
       const vehicleId = req.params.vehicleId;
       if (!vehicleId) {
-        throw new AppError(HttpStatus.BAD_REQUEST, "Vehicle ID Required");
+        throw new AppError(HttpStatus.BAD_REQUEST, VEHICLE_ID_REQUIRED);
       }
 
       const response = await this._vehicleService.deleteVehicleById(vehicleId);
@@ -129,7 +130,7 @@ export class VehicleController implements IVehicleController {
     try {
       const vehicleId = req.params.vehicleId;
       if (!vehicleId) {
-        throw new AppError(HttpStatus.BAD_REQUEST, "Vehicle ID Required");
+        throw new AppError(HttpStatus.BAD_REQUEST, VEHICLE_ID_REQUIRED);
       }
       const {
         color,

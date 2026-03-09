@@ -22,8 +22,10 @@ import { AppError } from "../../../middleware/errorHandler";
 import { generateCustomId } from "../../../utils/generateUniqueIds";
 import { IAuthRepository } from "../../../repositories/auth/interface/IAuthRepositories";
 import {
+  APPOINTMENT_NOT_FOUND,
   AUTHENTICATION_FAILED,
   INVALID_INPUT,
+  PAYMENT_STAGE_MISSING,
   PLAN_NOT_AVAILABLE_USER,
   USER_NOT_FOUND,
 } from "../../../constants/messages";
@@ -505,12 +507,12 @@ export class AppointmentService implements IAppointmentService {
     const appointment =
       await this._appointmentRepository.getAppointmentById(appointmentId);
     if (!appointment)
-      throw new AppError(HttpStatus.NOT_FOUND, "Appointment not found");
+      throw new AppError(HttpStatus.NOT_FOUND, APPOINTMENT_NOT_FOUND);
 
     if (appointment.paymentStatus === "paid")
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        "Payment cannot be done at this stage"
+        PAYMENT_STAGE_MISSING
       );
 
     const totalAmount = appointment.services.reduce((acc, s) => {

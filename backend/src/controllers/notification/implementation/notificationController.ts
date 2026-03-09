@@ -5,7 +5,7 @@ import { TYPES } from "../../../DI/types";
 import { INotificationService } from "../../../services/notification/interface/INotificationService";
 import { AppError } from "../../../middleware/errorHandler";
 import HttpStatus from "../../../constants/httpStatusCodes";
-import { USER_ID_REQUIRED } from "../../../constants/messages";
+import { NOTIFICATION_ID_MISSING, USER_ID_REQUIRED } from "../../../constants/messages";
 
 @injectable()
 export class NotificationController implements INotificationController {
@@ -40,7 +40,7 @@ export class NotificationController implements INotificationController {
       if (!notifId)
         throw new AppError(
           HttpStatus.BAD_REQUEST,
-          "Notification id is missing"
+          NOTIFICATION_ID_MISSING
         );
 
       const response = await this._notificationService.markAsRead(notifId);

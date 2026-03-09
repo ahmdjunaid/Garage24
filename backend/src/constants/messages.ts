@@ -72,9 +72,24 @@ export const SERVICE_CREATED_SUCCESS="Service created successful."
 export const SERVICE_DOESNT_EXIST="Service does't exist."
 
 //vehicle
-export const VEHICLE_ALREADY_EXIST="Vehicle already exist in your Garage."
 export const ERROR_WHILE_CREATING_VEHICLE="Error while creating vehicle"
 export const VEHICLE_CREATED_SUCCESS="Vehicle created successful"
 
 // location
 export const POINTS_MISSING = "Latitude and Longitude cannot be blank."
+
+//Appointment
+export const APPOINTMENT_ID_REQUIRED="Appointment id is required."
+export const APPOINTMENT_NOT_FOUND="Appointment not found"
+export const PAYMENT_STAGE_MISSING="Payment cannot be done at this stage"
+
+//Dashboard
+export const INVALID_CYCLE="Invalid cycle"
+export const INVALID_REPORT_PERIOD="Period should be selected to generate report."
+
+//Notification
+export const NOTIFICATION_ID_MISSING="Notification id is missing"
+
+export const VEHICLE_ID_REQUIRED="Vehicle ID Required"
+export const VEHICLE_ALREADY_EXIST="Vehicle with same licence plate already exist."
+export const VEHICLE_NOT_FOUND="Vehicle not found."

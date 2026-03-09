@@ -1,7 +1,9 @@
 import HttpStatus from "../../../constants/httpStatusCodes";
 import {
   ERROR_WHILE_CREATING_VEHICLE,
+  VEHICLE_ALREADY_EXIST,
   VEHICLE_CREATED_SUCCESS,
+  VEHICLE_NOT_FOUND,
 } from "../../../constants/messages";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
@@ -33,11 +35,18 @@ export class VehicleService implements IVehicleService {
     const userIdConverted = new Types.ObjectId(data.userId);
     const makeConverted = new Types.ObjectId(data.make);
     const modelConverted = new Types.ObjectId(data.model);
+    const normalizedPlate = normalizePlate(data.licensePlate);
+    
+    const vehicleExist = await this._vehicleRepository.getVehicleByLicencePlate(normalizedPlate, data.userId!)
+
+    if(vehicleExist){
+      throw new AppError(HttpStatus.CONFLICT, VEHICLE_ALREADY_EXIST)
+    }
 
     const imageUrl = await uploadFile(data.image, "vehicle");
     if (data.image?.path) deleteLocalFile(data.image.path);
 
-    const normalizedPlate = normalizePlate(data.licensePlate);
+
 
     const response = await this._vehicleRepository.create({
       userId: userIdConverted,
@@ -99,7 +108,7 @@ export class VehicleService implements IVehicleService {
   ): Promise<VehicleDocument | null> {
     const vehicle = await this._vehicleRepository.getVehicleById(vid);
     if (!vehicle) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Vehicle not found.");
+      throw new AppError(HttpStatus.BAD_REQUEST, VEHICLE_NOT_FOUND);
     }
 
     const updatePayload: Partial<IVehicle> = {};

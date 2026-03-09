@@ -11,6 +11,7 @@ import { AppError } from "../../../middleware/errorHandler";
 import { validateCreateAppointment } from "../../../utils/validateAppointmentData";
 import {
   ALL_FIELDS_REQUIRED,
+  APPOINTMENT_ID_REQUIRED,
   AUTHENTICATION_FAILED,
   USER_ID_REQUIRED,
 } from "../../../constants/messages";
@@ -52,7 +53,7 @@ export class AppointmentController implements IAppointmentController {
       const userId = req.user?.id;
 
       if (!userId) {
-        throw new AppError(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        throw new AppError(HttpStatus.UNAUTHORIZED, AUTHENTICATION_FAILED);
       }
 
       const response = await this._appointmentService.createAppointment(
@@ -151,7 +152,7 @@ export class AppointmentController implements IAppointmentController {
       if (!appointmentId) {
         throw new AppError(
           HttpStatus.BAD_REQUEST,
-          "Appointment id is required."
+          APPOINTMENT_ID_REQUIRED
         );
       }
 
@@ -174,7 +175,7 @@ export class AppointmentController implements IAppointmentController {
       if (!appointmentId) {
         throw new AppError(
           HttpStatus.BAD_REQUEST,
-          "Appointment id is required."
+          APPOINTMENT_ID_REQUIRED
         );
       }
 
@@ -199,7 +200,7 @@ export class AppointmentController implements IAppointmentController {
       if (!appointmentId) {
         throw new AppError(
           HttpStatus.BAD_REQUEST,
-          "Appointment id is required."
+          APPOINTMENT_ID_REQUIRED
         );
       }
 

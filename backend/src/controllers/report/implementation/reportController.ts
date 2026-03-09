@@ -4,7 +4,7 @@ import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
 import { IReportService } from "../../../services/report/interface/IReportService";
 import { AppError } from "../../../middleware/errorHandler";
-import { AUTHENTICATION_FAILED } from "../../../constants/messages";
+import { AUTHENTICATION_FAILED, INVALID_REPORT_PERIOD } from "../../../constants/messages";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import XLSX from "xlsx";
 import puppeteer from "puppeteer";
@@ -33,7 +33,7 @@ export class ReportController implements IReportController {
       if (!startDate || !endDate || !page || !limit) {
         throw new AppError(
           HttpStatus.BAD_REQUEST,
-          "Period should be selected to generate report."
+          INVALID_REPORT_PERIOD
         );
       }
 

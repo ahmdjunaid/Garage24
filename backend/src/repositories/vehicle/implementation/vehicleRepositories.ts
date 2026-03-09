@@ -17,32 +17,42 @@ export class VehicleRepository
     return await this.model.create(data);
   }
 
-  async getAllVehicleByUserId(
-    userId: string
-  ): Promise<IPopulatedVehicle[]> {
+  async getAllVehicleByUserId(userId: string): Promise<IPopulatedVehicle[]> {
     const vehicles = await this.model
       .find({ userId, isDeleted: false })
       .populate([
         { path: "make", select: "name" },
         { path: "model", select: "name" },
       ])
-      .lean()
+      .lean();
 
-    return vehicles as unknown as IPopulatedVehicle[]
+    return vehicles as unknown as IPopulatedVehicle[];
   }
 
   async getVehicleById(vid: string): Promise<IPopulatedVehicle | null> {
-    const vehicle = await this.model.findById(vid)
-      .populate([{path:"make", select:"name"},{path:"model", select:"name"}])
+    const vehicle = await this.model.findById(vid).populate([
+      { path: "make", select: "name" },
+      { path: "model", select: "name" },
+    ]);
 
     return vehicle as unknown as IPopulatedVehicle;
   }
 
   async deleteVehicleById(vid: string): Promise<VehicleDocument | null> {
-    return await this.deleteById(vid)
+    return await this.deleteById(vid);
   }
 
-  async updateVehicleData(vid: string, data: Partial<IVehicle>): Promise<VehicleDocument|null> {
-    return await this.updateById(vid, data)
+  async updateVehicleData(
+    vid: string,
+    data: Partial<IVehicle>
+  ): Promise<VehicleDocument | null> {
+    return await this.updateById(vid, data);
+  }
+
+  async getVehicleByLicencePlate(
+    licensePlate: string,
+    userId: string
+  ): Promise<VehicleDocument | null> {
+    return await this.getByFilter({ licensePlate, userId });
   }
 }
