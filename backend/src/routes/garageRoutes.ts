@@ -14,6 +14,7 @@ import { LocationController } from "../controllers/location/implementation/locat
 import { AppointmentController } from "../controllers/appointment/implementation/appointmentController";
 import { SubscriptionController } from "../controllers/subscription/implementation/subscriptionController";
 import { DashboardController } from "../controllers/dashboard/implementation/dashboardController";
+import { ReportController } from "../controllers/report/implementation/reportController";
 
 const router = express.Router()
 
@@ -26,6 +27,7 @@ const locationController = container.get<LocationController>(TYPES.LocationContr
 const appointmentController = container.get<AppointmentController>(TYPES.AppointmentController)
 const subscriptionController = container.get<SubscriptionController>(TYPES.SubscriptionController)
 const dashboardController = container.get<DashboardController>(TYPES.DashboardController)
+const reportController = container.get<ReportController>(TYPES.ReportController)
 
 router.route('/onboarding').post(verifyJWT,authorizeRoles("garage"),uploadOnboardingImages,garageController.onboarding)
 router.route('/get-address').get(verifyJWT,authorizeRoles("garage"),locationController.getAddressFromCoordinates)
@@ -55,5 +57,10 @@ router.route('/top-services').get(verifyJWT, authorizeRoles("garage"), dashboard
 
 //ServiceHistory
 router.route('/vehicle/appointment').get(verifyJWT, authorizeRoles("garage"), appointmentController.getAppointmentByVehicleNum);
+
+//Reports
+router.route('/appointment/report').get(verifyJWT, authorizeRoles("garage"), reportController.getAppointmentReport);
+router.route('/appointment/report/excel').get(verifyJWT, authorizeRoles("garage"), reportController.downloadExcel);
+router.route('/appointment/report/pdf').get(verifyJWT, authorizeRoles("garage"), reportController.downloadPDF);
 
 export default router;

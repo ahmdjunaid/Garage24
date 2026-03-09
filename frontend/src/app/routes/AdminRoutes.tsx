@@ -6,6 +6,7 @@ import AdminGarages from "@features/management/admin/pages/AdminGarages";
 import PageNotFound from "@features/auth/pages/PageNotFound";
 import AdminPlans from "@features/subscription/pages/AdminPlans";
 import ProfilePage from "@features/profile/pages/Profile";
+import AppointnmentReportAdmin from "@/features/reports/pages/admin/AppointnmentReportAdmin";
 
 const AdminRoutes = () => {
   return (
@@ -17,6 +18,7 @@ const AdminRoutes = () => {
           <Route path="/garages" element={<AdminGarages/>}/>
           <Route path="/plans" element={<AdminPlans/>}/>
           <Route path="/profile" element={<ProfilePage />}/>
+          <Route path="/reports" element={<AppointnmentReportAdmin />} />
           <Route path="*" element={<PageNotFound/>}/>
         </Route>
       </Routes>

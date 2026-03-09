@@ -61,7 +61,7 @@ export class ReviewController implements IReviewController {
 
       res.status(HttpStatus.OK).json(response);
     } catch (error) {
-        next(error)
+        next(error);
     }
   }
 }

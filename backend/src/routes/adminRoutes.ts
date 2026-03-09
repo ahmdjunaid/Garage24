@@ -7,13 +7,15 @@ import { PlanController } from "../controllers/plan/implimentation/planControlle
 import { GarageController } from "../controllers/garage/implementation/garageController"
 import { UserController } from "../controllers/user/implementation/userController"
 import { DashboardController } from "../controllers/dashboard/implementation/dashboardController"
+import { ReportController } from "../controllers/report/implementation/reportController"
 
 const router = express.Router()
 
 const planController = container.get<PlanController>(TYPES.PlanController);
 const garageController = container.get<GarageController>(TYPES.GarageController);
 const userController = container.get<UserController>(TYPES.UserController);
-const dashboardController = container.get<DashboardController>(TYPES.DashboardController)
+const dashboardController = container.get<DashboardController>(TYPES.DashboardController);
+const reportController = container.get<ReportController>(TYPES.ReportController);
 
 router.route('/users').get(verifyJWT,authorizeRoles("admin"),userController.getAllUsers)
 router.route('/garages').get(verifyJWT,authorizeRoles("admin"),garageController.getAllGarages)
@@ -31,5 +33,10 @@ router.route('/delete-plan/:planId').delete(verifyJWT,authorizeRoles("admin"),pl
 //Dashboard
 router.route('/dashboard').get(verifyJWT,authorizeRoles("admin"), dashboardController.adminDashboardData)
 router.route('/top-garages').get(verifyJWT,authorizeRoles("admin"), dashboardController.getTopFiveBookedGarages)
+
+//Reports
+router.route('/appointment/report').get(verifyJWT, authorizeRoles("admin"), reportController.getAppointmentReport);
+router.route('/appointment/report/excel').get(verifyJWT, authorizeRoles("admin"), reportController.downloadExcel);
+router.route('/appointment/report/pdf').get(verifyJWT, authorizeRoles("admin"), reportController.downloadPDF);
 
 export default router;

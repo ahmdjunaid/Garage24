@@ -11,6 +11,7 @@ import GarageAppointments from "@features/appointments/pages/garage/GarageAppoin
 import ProfilePage from "@features/profile/pages/Profile";
 import ChatGaragePage from "@/features/chat/pages/garage/ChatGaragePage";
 import HistoryGarage from "@/features/vehicleHistory/pages/garage/HistoryGarage";
+import AppointnmentReportGarage from "@/features/reports/pages/garage/AppointnmentReportGarage";
 
 const GarageRoutes = () => {
   return (
@@ -28,6 +29,7 @@ const GarageRoutes = () => {
         <Route path="/service-records" element={<HistoryGarage />} />
         <Route path="/profile" element={<ProfilePage />}/>
         <Route path="/messages" element={<ChatGaragePage />} />
+        <Route path="/reports" element={<AppointnmentReportGarage />} />
         <Route path="*" element={<PageNotFound/>}/>
       </Route>
     </Routes>

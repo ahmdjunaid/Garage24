@@ -19,6 +19,8 @@ import {
   AppointmentDocForChat,
   AppointmentFilterForChat,
 } from "../../../types/chat";
+import { AppointmentReportResponse } from "../../../types/reports";
+import { PipelineStage } from "mongoose";
 
 export class AppointmentRepository
   extends BaseRepository<IAppointment>
@@ -600,6 +602,123 @@ export class AppointmentRepository
       appointments: appointments as unknown as PopulatedAppointmentData[],
       totalAppointments,
       totalPages,
+    };
+  }
+
+  async getAppointmentReport(
+    startDate: string,
+    endDate: string,
+    garageId?: string,
+    page?: number,
+    limit?: number
+  ): Promise<AppointmentReportResponse> {
+    const appointmentsPipeline: PipelineStage.FacetPipelineStage[] = [
+      { $unwind: "$services" },
+
+      {
+        $project: {
+          appointmentId: "$appId",
+          customer: "$userData.name",
+          phone: "$userData.mobileNumber",
+          vehicle: {
+            $concat: ["$vehicle.make.name", " ", "$vehicle.model.name"],
+          },
+          plate: "$vehicle.licensePlate",
+          service: "$services.name",
+          price: "$services.price",
+          date: "$appointmentDate",
+          time: {
+            $concat: ["$startTime", " - ", "$endTime"],
+          },
+          status: "$status",
+          paymentStatus: "$paymentStatus",
+        },
+      },
+
+      { $sort: { date: -1 } },
+    ];
+
+    if (page && limit) {
+      appointmentsPipeline.push(
+        { $skip: (page - 1) * limit },
+        { $limit: limit }
+      );
+    }
+
+    const matchStage: FilterQuery<AppointmentDocument> = {
+      appointmentDate: {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      },
+    };
+
+    if (garageId && Types.ObjectId.isValid(garageId)) {
+      matchStage.garageUID = new Types.ObjectId(garageId);
+    }
+
+    const result = await this.model.aggregate([
+      {
+        $match: matchStage,
+      },
+
+      {
+        $facet: {
+          appointments: appointmentsPipeline,
+
+          summary: [
+            { $unwind: "$services" },
+
+            {
+              $group: {
+                _id: null,
+
+                completed: {
+                  $sum: {
+                    $cond: [{ $eq: ["$status", "completed"] }, 1, 0],
+                  },
+                },
+
+                cancelled: {
+                  $sum: {
+                    $cond: [{ $eq: ["$status", "cancelled"] }, 1, 0],
+                  },
+                },
+
+                revenue: {
+                  $sum: {
+                    $cond: [
+                      { $eq: ["$status", "completed"] },
+                      "$services.price",
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+
+            {
+              $project: {
+                _id: 0,
+                completed: 1,
+                cancelled: 1,
+                revenue: 1,
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    const total = result[0].appointments?.length || 0;
+
+    return {
+      summary: result[0].summary[0] || {
+        completed: 0,
+        cancelled: 0,
+        revenue: 0,
+      },
+      appointments: result[0].appointments,
+      totalPages: page && limit ? Math.ceil(total / limit) : 1,
     };
   }
 }

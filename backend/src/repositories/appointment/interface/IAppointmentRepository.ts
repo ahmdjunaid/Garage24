@@ -13,7 +13,11 @@ import {
   MostBookedGarage,
   MostBookedServices,
 } from "../../../types/dashboard";
-import { AppointmentDocForChat, AppointmentFilterForChat } from "../../../types/chat";
+import {
+  AppointmentDocForChat,
+  AppointmentFilterForChat,
+} from "../../../types/chat";
+import { AppointmentReportResponse } from "../../../types/reports";
 
 export interface IAppointmentRepository {
   createAppointment(
@@ -58,7 +62,7 @@ export interface IAppointmentRepository {
     appointmentId: string,
     serviceId: string,
     status: string,
-    skipReason: string,
+    skipReason: string
   ): Promise<AppointmentDocument | null>;
 
   getAllAppointmentByMechId(
@@ -86,13 +90,33 @@ export interface IAppointmentRepository {
     }
   ): Promise<AppointmentAggregateOnStatus>;
 
-  getMostBookedServices(garageId:string, limit: number): Promise<MostBookedServices[]>;
+  getMostBookedServices(
+    garageId: string,
+    limit: number
+  ): Promise<MostBookedServices[]>;
 
-  getParticipants(appointmentId:string): Promise<string[]>;
-  getAppointmentsForChat(query: AppointmentFilterForChat): Promise<AppointmentDocForChat[]>;
-  getAppointmentsForChatById(appointmentId: string): Promise<AppointmentDocForChat | null>
-  getAppointmentsIdsForChat(currentUID:string): Promise<Types.ObjectId[]>;
-  getAppointmentDoc(appointmentId:string): Promise<AppointmentDocument| null>;
-  insertRating(appointmentId: Types.ObjectId, rating: number): Promise<AppointmentDocument| null>;
-  getAppointmentByVehicleNum(query: GetPaginationQuery, filters: AppointmentFilterForChat): Promise<GetMappedPopulatedAppointmentResponse>
+  getParticipants(appointmentId: string): Promise<string[]>;
+  getAppointmentsForChat(
+    query: AppointmentFilterForChat
+  ): Promise<AppointmentDocForChat[]>;
+  getAppointmentsForChatById(
+    appointmentId: string
+  ): Promise<AppointmentDocForChat | null>;
+  getAppointmentsIdsForChat(currentUID: string): Promise<Types.ObjectId[]>;
+  getAppointmentDoc(appointmentId: string): Promise<AppointmentDocument | null>;
+  insertRating(
+    appointmentId: Types.ObjectId,
+    rating: number
+  ): Promise<AppointmentDocument | null>;
+  getAppointmentByVehicleNum(
+    query: GetPaginationQuery,
+    filters: AppointmentFilterForChat
+  ): Promise<GetMappedPopulatedAppointmentResponse>;
+  getAppointmentReport(
+    startDate: string,
+    endDate: string,
+    garageId?: string,
+    page?: number,
+    limit?: number
+  ): Promise<AppointmentReportResponse>;
 }

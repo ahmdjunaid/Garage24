@@ -114,6 +114,10 @@ import { IReviewService } from "../services/review/interface/IReviewService";
 import { ReviewService } from "../services/review/implementation/reviewService";
 import { IReviewController } from "../controllers/review/interface/IReviewController";
 import { ReviewController } from "../controllers/review/implementation/reviewController";
+import { IReportService } from "../services/report/interface/IReportService";
+import { ReportService } from "../services/report/implementation/reportService";
+import { IReportController } from "../controllers/report/interface/IReportController";
+import { ReportController } from "../controllers/report/implementation/reportController";
 
 const container = new Container();
 
@@ -214,6 +218,10 @@ container.bind<IChatController>(TYPES.ChatController).to(ChatController);
 //Review
 container.bind<IReviewRepository>(TYPES.ReviewRepository).to(ReviewRepository);
 container.bind<IReviewService>(TYPES.ReviewService).to(ReviewService);
-container.bind<IReviewController>(TYPES.ReviewController).to(ReviewController)
+container.bind<IReviewController>(TYPES.ReviewController).to(ReviewController);
+
+//Reports
+container.bind<IReportService>(TYPES.ReportService).to(ReportService);
+container.bind<IReportController>(TYPES.ReportController).to(ReportController);
 
 export { container };
