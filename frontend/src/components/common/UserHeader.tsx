@@ -625,7 +625,7 @@ const UserHeader = ({
                     </h1>
 
                     <button
-                      className="bg-red-500 hover:bg-red-600 text-white
+                      className="bg-red-500 hover:bg-red-700 cursor-pointer text-white
                     px-6 sm:px-8 py-3 sm:py-3.5 rounded-md font-medium text-base sm:text-lg"
                       onClick={() => handleAppointmentClick?.()}
                     >

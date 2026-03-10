@@ -1,4 +1,4 @@
-import { ObjectId } from "mongodb";
+import { ObjectId } from "mongoose";
 import { IUser } from "./user";
 import { Types } from "mongoose";
 

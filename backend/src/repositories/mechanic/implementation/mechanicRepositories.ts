@@ -5,6 +5,7 @@ import { Mechanic, MechanicDocument } from "../../../models/mechanic";
 import { GetPaginationQuery } from "../../../types/common";
 import { FilterQuery, Types } from "mongoose";
 import { injectable } from "inversify";
+import { populatedMechanic } from "../../../utils/dto/mechanicDto";
 
 @injectable()
 export class MechanicRepository
@@ -54,7 +55,9 @@ export class MechanicRepository
     const totalMechanics = await this.model.countDocuments(searchFilter);
     const totalPages = Math.ceil(totalMechanics / limit);
 
-    return { mechanics, totalMechanics, totalPages };
+    const populatedMechanic = mechanics as unknown as populatedMechanic[];
+
+    return { mechanics: populatedMechanic, totalMechanics, totalPages };
   }
 
   async findOneAndDelete(

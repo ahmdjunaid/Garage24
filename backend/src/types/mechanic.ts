@@ -1,9 +1,10 @@
-import { ObjectId } from "mongodb";
+import { Types } from "mongoose";
+import { populatedMechanic } from "../utils/dto/mechanicDto";
 
 export interface IMechanic {
   name: string;
-  garageId: ObjectId;
-  userId: ObjectId;
+  garageId: Types.ObjectId;
+  userId: Types.ObjectId;
   skills: string[];
   imageUrl: string;
   mobileNumber: string;
@@ -12,7 +13,7 @@ export interface IMechanic {
 }
 
 export interface GetMechanicResponse{
-  mechanics:IMechanic[]
+  mechanics:populatedMechanic[]
   totalMechanics: number;
   totalPages: number;
 }
@@ -23,7 +24,6 @@ export interface IMechanicMappedData {
   name: string;
   email: string;
   isBlocked: boolean;
-  isVerified: boolean;
   isOnboardingRequired: boolean;
   role: string;
   skills: string[];
@@ -38,8 +38,8 @@ export interface GetMappedMechanicResponse{
 }
 
 export interface AssignableMechanic {
-  _id: ObjectId;
+  _id: Types.ObjectId;
   name: string;
-  userId: ObjectId;
+  userId: Types.ObjectId;
   skills: string[]
 }
