@@ -40,7 +40,8 @@ export class VehicleService implements IVehicleService {
     const vehicleExist = await this._vehicleRepository.getVehicleByLicencePlate(normalizedPlate, data.userId!)
 
     if(vehicleExist){
-      throw new AppError(HttpStatus.CONFLICT, VEHICLE_ALREADY_EXIST)
+      if (data.image?.path) deleteLocalFile(data.image.path);
+      throw new AppError(HttpStatus.CONFLICT, VEHICLE_ALREADY_EXIST);
     }
 
     const imageUrl = await uploadFile(data.image, "vehicle");
