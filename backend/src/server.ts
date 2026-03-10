@@ -6,13 +6,13 @@ import connectDB from "./config/db";
 import http from "http";
 import cors from "cors";
 import authRouter from "./routes/authRoutes";
-import garageRouter from "../src/routes/garageRoutes";
-import mechanicRouter from "../src/routes/mechanicRoutes";
-import adminRouter from "../src/routes/adminRoutes";
-import stripeRouter from "../src/routes/stripeRoutes";
-import userRouter from "../src/routes/userRouter";
-import notificationRouter from "../src/routes/notificationRouter";
-import chatRouter from "../src/routes/chatRoutes"
+import garageRouter from "./routes/garageRoutes";
+import mechanicRouter from "./routes/mechanicRoutes";
+import adminRouter from "./routes/adminRoutes";
+import stripeRouter from "./routes/stripeRoutes";
+import userRouter from "./routes/userRouter";
+import notificationRouter from "./routes/notificationRouter";
+import chatRouter from "./routes/chatRoutes"
 import cookieParser from "cookie-parser";
 import { connectRedis } from "./config/redisClient";
 import "reflect-metadata";

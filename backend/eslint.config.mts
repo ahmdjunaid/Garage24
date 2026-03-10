@@ -8,7 +8,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     ignores: ["node_modules", "dist", "build", ".next", "coverage"],
-    files: ["src/**/*.{js,ts,jsx,tsx}"],
+    files: ["src/**/*.{ts,tsx}"],
     languageOptions: {
       sourceType: "module",
       globals: {
