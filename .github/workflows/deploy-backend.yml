@@ -37,4 +37,9 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/garage-backend 
             docker stop garage-backend || true 
             docker rm garage-backend || true 
-            docker run -d --name garage-backend -p 3000:3000 --restart always ${{ secrets.DOCKER_USERNAME }}/garage-backend
+            docker run -d \ 
+            --name garage-backend \
+            --env-file /home/ubuntu/.env \
+            -p 3000:3000 \
+            --restart always \
+            ${{ secrets.DOCKER_USERNAME }}/garage-backend

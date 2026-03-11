@@ -8,11 +8,16 @@ import { TYPES } from "../DI/types";
 import { ChatService } from "../services/chat/implementaion/chatServices";
 
 let io: Server;
+const isProduction = process.env.NODE_ENV === "production";
+
+const CLIENT_URL = isProduction
+  ? process.env.PROD_CLIENT_URL
+  : process.env.LOCAL_CLIENT_URL;
 
 export const initSocket = (server: httpServer) => {
   io = new Server(server, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: CLIENT_URL,
       credentials: true,
     },
   });
