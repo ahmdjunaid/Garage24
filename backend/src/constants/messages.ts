@@ -1,4 +1,4 @@
-//Server Error
+//Server Messages
 export const SERVER_ERROR = "Internal server error.";
 
 //User messages
