@@ -14,9 +14,11 @@ import RescheduleAppointment from "@features/appointments/pages/user/RescheduleA
 import AppointmentDetailsPage from "@features/appointments/pages/user/AppointmentDetailsPage";
 import HomePage from "@features/home/pages/HomePage";
 import AppointmentHistory from "@/features/vehicleHistory/pages/user/HistoryUser";
+import ChatWidget from "@/features/chatBot/components/ChatWidget";
 
 const UserRoutes: React.FC = () => {
   return (
+    <>
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp role={'user'}/>} />
@@ -34,6 +36,8 @@ const UserRoutes: React.FC = () => {
         <Route path="*" element={<PageNotFound/>}/>
       </Route>
     </Routes>
+    <ChatWidget />
+    </>
   );
 };
 

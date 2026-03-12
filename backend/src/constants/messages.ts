@@ -91,6 +91,7 @@ export const INVALID_REPORT_PERIOD="Period should be selected to generate report
 //Notification
 export const NOTIFICATION_ID_MISSING="Notification id is missing"
 
+//My - Garage
 export const VEHICLE_ID_REQUIRED="Vehicle ID Required"
 export const VEHICLE_ALREADY_EXIST="Vehicle with same licence plate already exist."
 export const VEHICLE_NOT_FOUND="Vehicle not found."

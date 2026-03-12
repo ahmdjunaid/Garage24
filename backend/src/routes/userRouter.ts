@@ -13,6 +13,7 @@ import { GarageController } from "../controllers/garage/implementation/garageCon
 import { ServiceController } from "../controllers/service/implementation/serviceController";
 import { SlotController } from "../controllers/slot/implementation/slotController";
 import { ReviewController } from "../controllers/review/implementation/reviewController";
+import { ChatBotController } from "../controllers/chatBot/implementation/chatBotController";
 
 const router = express.Router()
 const vehicleController = container.get<VehicleController>(TYPES.VehicleController)
@@ -24,6 +25,7 @@ const garageController = container.get<GarageController>(TYPES.GarageController)
 const serviceController = container.get<ServiceController>(TYPES.ServiceController)
 const slotController = container.get<SlotController>(TYPES.SlotController)
 const reviewController = container.get<ReviewController>(TYPES.ReviewController)
+const chatBotController = container.get<ChatBotController>(TYPES.ChatBotController)
 
 router.route('/home/testimonials').get(reviewController.getPaginatedReviews)
 
@@ -55,5 +57,8 @@ router.route('/appointment/review').post(verifyJWT, authorizeRoles("user"), revi
 
 //Service History
 router.route('/vehicle/appointment').get(verifyJWT, authorizeRoles("user"), appointmentController.getAppointmentByVehicleNum);
+
+//Chat with Bot
+router.route('/chat/bot').post(chatBotController.chatWithBot);
 
 export default router;

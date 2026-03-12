@@ -59,8 +59,8 @@ export class SubscriptionService implements ISubscriptionService {
         productId: data.planId,
         productName: data.planName,
       },
-      successUrl: `${process.env.CLIENT_URL}/garage/plans?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${process.env.CLIENT_URL}/garage/plans?payment=failed`,
+      successUrl: `${process.env.PROD_CLIENT_URL}/garage/plans?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${process.env.PROD_CLIENT_URL}/garage/plans?payment=failed`,
     });
   }
 

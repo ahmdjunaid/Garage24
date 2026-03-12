@@ -533,8 +533,8 @@ export class AppointmentService implements IAppointmentService {
         appointmentId: appointment._id.toString(),
         userId: appointment.userId.toString(),
       },
-      successUrl: `${process.env.CLIENT_URL}/appointment/${appointmentId}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${process.env.CLIENT_URL}/appointment/${appointmentId}?payment=failed`,
+      successUrl: `${process.env.PROD_CLIENT_URL}/appointment/${appointmentId}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${process.env.PROD_CLIENT_URL}/appointment/${appointmentId}?payment=failed`,
     });
   }
 

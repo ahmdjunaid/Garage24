@@ -118,6 +118,10 @@ import { IReportService } from "../services/report/interface/IReportService";
 import { ReportService } from "../services/report/implementation/reportService";
 import { IReportController } from "../controllers/report/interface/IReportController";
 import { ReportController } from "../controllers/report/implementation/reportController";
+import { IChatBotService } from "../services/chatBot/interface/IChatBotServices";
+import { ChatBotService } from "../services/chatBot/implementation/chatBotServices";
+import { IChatBotController } from "../controllers/chatBot/interface/IChatBotController";
+import { ChatBotController } from "../controllers/chatBot/implementation/chatBotController";
 
 const container = new Container();
 
@@ -223,5 +227,9 @@ container.bind<IReviewController>(TYPES.ReviewController).to(ReviewController);
 //Reports
 container.bind<IReportService>(TYPES.ReportService).to(ReportService);
 container.bind<IReportController>(TYPES.ReportController).to(ReportController);
+
+//ChatBot
+container.bind<IChatBotService>(TYPES.ChatBotService).to(ChatBotService);
+container.bind<IChatBotController>(TYPES.ChatBotController).to(ChatBotController)
 
 export { container };

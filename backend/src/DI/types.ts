@@ -102,4 +102,8 @@ export const TYPES = {
   //Reports
   ReportService: Symbol.for("ReportService"),
   ReportController: Symbol.for("ReportController"),
+
+  //ChatBot
+  ChatBotService: Symbol.for("ChatBotService"),
+  ChatBotController: Symbol.for("ChatBotController"),
 };
