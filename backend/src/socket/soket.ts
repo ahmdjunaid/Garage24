@@ -10,9 +10,14 @@ import { ChatService } from "../services/chat/implementaion/chatServices";
 let io: Server;
 const isProduction = process.env.NODE_ENV === "production";
 
-const CLIENT_URL = isProduction
-  ? process.env.PROD_CLIENT_URL
-  : process.env.LOCAL_CLIENT_URL;
+const CLIENT_URL = (
+  isProduction
+    ? [
+        process.env.PROD_CLIENT_URL,
+        process.env.PROD_CLIENT_BASE_URL,
+      ]
+    : [process.env.LOCAL_CLIENT_URL]
+).filter(Boolean) as string[];
 
 export const initSocket = (server: httpServer) => {
   io = new Server(server, {
