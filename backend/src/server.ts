@@ -26,11 +26,7 @@ import { initSocket } from "./socket/soket";
 const app = express();
 const server = http.createServer(app);
 
-app.use(
-  "/api/webhook",
-  express.raw({ type: "application/json" }),
-  stripeRouter
-);
+app.use("/api/webhook", stripeRouter);
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));

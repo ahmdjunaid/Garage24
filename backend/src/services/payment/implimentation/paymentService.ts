@@ -66,7 +66,7 @@ export class PaymentService implements IPaymentService {
               amount: session.amount_total! / 100,
               BillType: "subscription",
               provider: "stripe",
-              referenceId: new Types.ObjectId(metadata.planId),
+              referenceId: new Types.ObjectId(metadata.productId),
               status: "paid",
             });
 
