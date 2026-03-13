@@ -20,7 +20,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
   const { totalUnread } = useSelector((state: RootState) => state.chat);
-  const [isLoading, setLoading] = useState<boolean>(false)
+  const [isLoading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
 
   const otherItems = [
@@ -34,7 +34,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
 
   const handleLogout = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       await logoutApi();
       dispatch(logout());
       socket.disconnect();
@@ -42,27 +42,20 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
     } catch (error) {
       if (error instanceof Error) errorToast(error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
   return (
     <>
-      {/* MOBILE TOP HEADER (FIXED HEIGHT) */}
-      <div
-        className="lg:hidden fixed top-0 left-0 w-full h-26
-        flex items-center justify-between px-4 py-5 z-50"
-      >
-        {/* LEFT: HAMBURGER */}
+      {/* MOBILE HAMBURGER — only as wide as the button, not full width */}
+      <div className="lg:hidden fixed top-0 left-0 h-16 flex items-center px-4 z-50">
         <button onClick={() => setOpen(true)} className="text-white">
           <Menu className="w-7 h-7" />
         </button>
-
-        {/* RIGHT: SPACER (for center alignment) */}
-        <div className="w-7 h-7" />
       </div>
 
-      {/* MOBILE OVERLAY ONLY */}
+      {/* MOBILE OVERLAY */}
       {open && (
         <div
           onClick={() => setOpen(false)}
@@ -80,20 +73,21 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
           border-r border-gray-800
           shadow-xl
           flex flex-col
+          overflow-hidden
           transform transition-transform duration-300
           ${open ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0
         `}
       >
         {/* CLOSE BUTTON (MOBILE) */}
-        <div className="lg:hidden flex justify-end p-4">
+        <div className="lg:hidden flex justify-end p-4 shrink-0">
           <button onClick={() => setOpen(false)}>
             <X className="w-6 h-6 text-white" />
           </button>
         </div>
 
-        {/* LOGO (DESKTOP) */}
-        <div className="mx-auto sm:p-0 md:p-2 lg:p-6">
+        {/* LOGO */}
+        <div className="mx-auto sm:p-0 md:p-2 lg:p-6 shrink-0">
           <img
             className="w-24 sm:w-32 md:w-44 lg:w-44"
             src={whiteLogo}
@@ -101,8 +95,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
           />
         </div>
 
-        {/* MENU */}
-        <div className="flex-1 px-4 overflow-y-auto">
+        {/* MENU — min-h-0 is critical so flex-1 doesn't overflow past the container */}
+        <div className="flex-1 px-4 overflow-y-auto min-h-0">
           <div className="text-xs text-gray-600 font-semibold mb-3 px-3 tracking-wider">
             MENU
           </div>
@@ -131,6 +125,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
           <div className="text-xs text-gray-600 font-semibold mb-3 px-3 mt-8 tracking-wider">
             OTHERS
           </div>
+
           {role !== "admin" &&
             otherItems.map((item) => (
               <NavLink
@@ -147,7 +142,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
               >
                 <item.icon className="w-5 h-5" />
                 <span>{item.name}</span>
-
                 {item.badge > 0 && (
                   <span className="ml-auto bg-red-600 text-white text-xs px-2 py-0.5 rounded-full">
                     {item.badge}
@@ -157,7 +151,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
             ))}
         </div>
 
-        <div className="p-4 border-t border-gray-800">
+        {/* FOOTER — shrink-0 ensures it's always visible and never squished */}
+        <div className="p-4 border-t border-gray-800 shrink-0">
           <NavLink
             to={`/${role}/profile`}
             className={({ isActive }) =>
@@ -171,7 +166,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
               alt="Profile"
               className="w-10 h-10 rounded-full bg-gray-600 ring-2 ring-red-600"
             />
-
             <div className="flex-1">
               <div className="font-semibold text-sm">{user?.name}</div>
               <div className="text-xs text-gray-400 flex items-center gap-1">
@@ -191,7 +185,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
               rounded-lg py-2 transition"
           >
             <LogOut className="w-4 h-4" />
-            { isLoading ? "Logging out..." : "Logout"}
+            {isLoading ? "Logging out..." : "Logout"}
           </button>
         </div>
       </aside>
