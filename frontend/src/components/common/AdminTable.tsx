@@ -19,6 +19,7 @@ const AdminTable = <T,>({
   renderActions,
   emptyMessage = "No Data Found",
 }: AdminTableProps<T>) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getValueByPath = (obj: any, path: string) => {
     return path.split(".").reduce((acc, key) => acc?.[key], obj);
   };
@@ -27,12 +28,14 @@ const AdminTable = <T,>({
     if (col.render) return col.render(item);
     return typeof col.key === "string"
       ? getValueByPath(item, col.key)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       : (item as any)[col.key];
   };
 
   const getRawValue = (item: T, col: TableColumn<T>): string => {
     return typeof col.key === "string"
       ? String(getValueByPath(item, col.key) ?? "")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       : String((item as any)[col.key] ?? "");
   };
 

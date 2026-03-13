@@ -7,12 +7,28 @@ import {
   Popup,
   useMapEvents,
 } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
 import { errorToast } from "@/utils/notificationAudio";
 import MapAutoCenter from "@/features/auth/components/MapAutoCenter";
 import {
   fetchAddressForAppointmentApi,
   fetchCoordinatedForAppointmentApi,
 } from "@/features/appointments/services/appointmentServices";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 type LatLng = {
   lat: number;
@@ -30,17 +46,24 @@ const MapSection: React.FC<Props> = ({ setLocation, location }) => {
 
   const getCurrentLocation = () => {
     setLoading(true);
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          setLocation({ lat: latitude, lng: longitude });
+
+          setLocation({
+            lat: latitude,
+            lng: longitude,
+          });
+
           setLoading(false);
         },
         (error) => {
           console.error(error);
+          errorToast("Unable to fetch current location");
           setLoading(false);
-        },
+        }
       );
     } else {
       errorToast("Geolocation is not supported by this browser");
@@ -51,13 +74,16 @@ const MapSection: React.FC<Props> = ({ setLocation, location }) => {
   const searchLocation = async () => {
     try {
       if (!locationName) return;
+
       const data = await fetchCoordinatedForAppointmentApi(locationName);
+
       setLocation({
         lat: parseFloat(data.lat),
         lng: parseFloat(data.lng),
       });
     } catch (error) {
       console.log(error);
+
       if (error instanceof Error) errorToast(error.message);
     }
   };
@@ -65,16 +91,15 @@ const MapSection: React.FC<Props> = ({ setLocation, location }) => {
   useEffect(() => {
     if (!location) return;
 
-    const controller = new AbortController();
-
     const setDisplayLocationName = async () => {
       try {
         const res = await fetchAddressForAppointmentApi(
           location.lat,
-          location.lng,
+          location.lng
         );
+
         setLocationName(
-          `${res.city}, ${res.district}, ${res.state}, ${res.pincode}`,
+          `${res.city}, ${res.district}, ${res.state}, ${res.pincode}`
         );
       } catch (err) {
         console.error(err);
@@ -82,14 +107,13 @@ const MapSection: React.FC<Props> = ({ setLocation, location }) => {
     };
 
     setDisplayLocationName();
-
-    return () => controller.abort();
   }, [location]);
 
   const LocationPicker = () => {
     useMapEvents({
-      click: async (e) => {
+      click: (e) => {
         const { lat, lng } = e.latlng;
+
         setLocation({ lat, lng });
       },
     });
@@ -113,9 +137,7 @@ const MapSection: React.FC<Props> = ({ setLocation, location }) => {
             value={locationName}
             onChange={(e) => setLocationName(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                searchLocation();
-              }
+              if (e.key === "Enter") searchLocation();
             }}
             className="w-full sm:flex-1 px-4 py-4 rounded-xl bg-gray-700 text-white border border-gray-600 focus:outline-none"
           />
@@ -126,7 +148,7 @@ const MapSection: React.FC<Props> = ({ setLocation, location }) => {
             className="w-full sm:w-auto px-6 py-4 bg-gray-700 rounded-xl hover:bg-gray-600 transition-all flex items-center justify-center gap-2 font-semibold"
           >
             <Navigation className="h-5 w-5" />
-            Current Location
+            {loading ? "Fetching..." : "Current Location"}
           </button>
         </div>
 
@@ -144,7 +166,8 @@ const MapSection: React.FC<Props> = ({ setLocation, location }) => {
               />
 
               <LocationPicker />
-              <MapAutoCenter lat={location?.lat} lng={location?.lng} />
+
+              <MapAutoCenter lat={location.lat} lng={location.lng} />
 
               <Marker position={[location.lat, location.lng]}>
                 <Popup>

@@ -14,6 +14,7 @@ interface CardProps {
 }
 
 const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress"];
+const ALLOWED_CANCEL = ["pending", "confirmed"];
 
 const AppointmentCard: React.FC<CardProps> = ({
   appointments,
@@ -87,18 +88,22 @@ const AppointmentCard: React.FC<CardProps> = ({
           <div className="flex flex-wrap items-center gap-2 md:flex-nowrap md:justify-end md:flex-shrink-0">
             {ACTIVE_STATUSES.includes(appointment.status) && (
               <>
-                <button
-                  onClick={() => handleCancel(appointment._id)}
-                  className="px-4 py-2 bg-[#2a2a2a] hover:bg-[#333] text-[#ddd] rounded-lg text-sm border border-[#3a3a3a] transition-colors whitespace-nowrap"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleReschedule(appointment._id)}
-                  className="px-4 py-2 bg-[#2a2a2a] hover:bg-[#333] text-[#ddd] rounded-lg text-sm border border-[#3a3a3a] transition-colors whitespace-nowrap"
-                >
-                  Reschedule
-                </button>
+                {ALLOWED_CANCEL.includes(appointment.status) && (
+                  <>
+                    <button
+                      onClick={() => handleCancel(appointment._id)}
+                      className="px-4 py-2 bg-[#2a2a2a] hover:bg-[#333] text-[#ddd] rounded-lg text-sm border border-[#3a3a3a] transition-colors whitespace-nowrap"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleReschedule(appointment._id)}
+                      className="px-4 py-2 bg-[#2a2a2a] hover:bg-[#333] text-[#ddd] rounded-lg text-sm border border-[#3a3a3a] transition-colors whitespace-nowrap"
+                    >
+                      Reschedule
+                    </button>
+                  </>
+                )}
                 <button
                   onClick={() => handleChat(appointment._id)}
                   className="relative flex items-center gap-1.5 px-4 py-2 

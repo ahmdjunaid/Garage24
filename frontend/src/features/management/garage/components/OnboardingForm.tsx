@@ -13,10 +13,7 @@ import {
   onboardingApi,
 } from "@/features/management/garage/services/garageServices";
 import { errorToast, successToast } from "@/utils/notificationAudio";
-import {
-  daysOfWeek,
-  fuelTypes,
-} from "@/constants/constantDatas";
+import { daysOfWeek, fuelTypes } from "@/constants/constantDatas";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import { login } from "@/redux/slice/userSlice";
 import { mobileRegex } from "@/constants/commonRegex";
@@ -66,7 +63,7 @@ const OnboardingForm: React.FC<formProps> = ({ handleSubmit }) => {
   const [numOfServiceBays, setNumOfServiceBays] = useState<number | string>("");
   const [serviceBayError, setServiceBayError] = useState<string>("");
   const [supportedFuelTypes, setSupportedFuelTypes] = useState<string[]>([]);
-  const [rejectionReason, setRejectionReason] = useState<string | null>(null)
+  const [rejectionReason, setRejectionReason] = useState<string | null>(null);
   const [supportedFuelTypesError, setSupportedFuelTypesError] =
     useState<string>("");
 
@@ -88,9 +85,9 @@ const OnboardingForm: React.FC<formProps> = ({ handleSubmit }) => {
         setSelectedHolidays(response.selectedHolidays!);
         setMobile(response.mobileNumber!);
         setIsRSAEnabled(response.isRSAEnabled!);
-        setRejectionReason(response.rejectionReason!)
-        setSupportedFuelTypes(response.supportedFuelTypes)
-        setNumOfServiceBays(response.numOfServiceBays)
+        setRejectionReason(response.rejectionReason!);
+        setSupportedFuelTypes(response.supportedFuelTypes);
+        setNumOfServiceBays(response.numOfServiceBays);
         setIsRejected(true);
       }
     };
@@ -102,7 +99,7 @@ const OnboardingForm: React.FC<formProps> = ({ handleSubmit }) => {
     const getAddress = async () => {
       if (!location) return;
       const address = await fetchAddressApi(location.lat, location.lng);
-      setAddress(address)
+      setAddress(address);
     };
     getAddress();
   }, [location]);
@@ -234,6 +231,8 @@ const OnboardingForm: React.FC<formProps> = ({ handleSubmit }) => {
       if (error instanceof Error) errorToast(error.message);
       console.error(error);
       setSubmitting(false);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -273,8 +272,8 @@ const OnboardingForm: React.FC<formProps> = ({ handleSubmit }) => {
           <div className="bg-red-100 rounded p-2 text-center">
             <p className="text-red-600 text-sm mt-1">
               <strong>Application rejected. </strong>
-              Your application is rejected due to "{rejectionReason}" verify and resubmit
-              after uploading valid documents.
+              Your application is rejected due to "{rejectionReason}" verify and
+              resubmit after uploading valid documents.
             </p>
           </div>
         )}
@@ -580,7 +579,14 @@ const OnboardingForm: React.FC<formProps> = ({ handleSubmit }) => {
         <div>
           <AuthButton
             action={handleCompleteRegistration}
-            text={isRejected ? "RE-SUBMIT" : "COMPLETE REGISTRATION"}
+            loading={submitting}
+            text={
+              submitting
+                ? "Submitting..."
+                : isRejected
+                  ? "RE-SUBMIT"
+                  : "COMPLETE REGISTRATION"
+            }
           />
         </div>
       </div>
