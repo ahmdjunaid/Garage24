@@ -106,7 +106,7 @@ const MapSection: React.FC<Props> = ({ setLocation, location }) => {
         </h2>
 
         {/* Search + Current Location */}
-        <div className="flex gap-3 mb-6">
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <input
             type="text"
             placeholder="Search location (optional)"
@@ -117,13 +117,13 @@ const MapSection: React.FC<Props> = ({ setLocation, location }) => {
                 searchLocation();
               }
             }}
-            className="flex-1 px-4 py-4 rounded-xl bg-gray-700 text-white border border-gray-600 focus:outline-none"
+            className="w-full sm:flex-1 px-4 py-4 rounded-xl bg-gray-700 text-white border border-gray-600 focus:outline-none"
           />
 
           <button
             onClick={getCurrentLocation}
             disabled={loading}
-            className="px-6 py-4 bg-gray-700 rounded-xl hover:bg-gray-600 transition-all flex items-center gap-2 font-semibold"
+            className="w-full sm:w-auto px-6 py-4 bg-gray-700 rounded-xl hover:bg-gray-600 transition-all flex items-center justify-center gap-2 font-semibold"
           >
             <Navigation className="h-5 w-5" />
             Current Location

@@ -24,11 +24,14 @@ const OtpModalDark: React.FC<ModalProps> = ({
   const [resendDisabled, setResendDisabled] = useState<boolean>(false);
   const [otp, setOtp] = useState<string>("");
   const [otpError, setOtpError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleOtp = async () => {
     setOtpError("");
     try {
+      setLoading(true);
       if (!otpRegex.test(otp)) {
+        setLoading(false);
         setOtpError("OTP must be a 6-digit number.");
         return;
       }
@@ -46,6 +49,8 @@ const OtpModalDark: React.FC<ModalProps> = ({
         setOtpError(error.message || "something went wrong");
         console.error("error on verifying Otp", error.message);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -87,11 +92,11 @@ const OtpModalDark: React.FC<ModalProps> = ({
           className="w-full bg-[#1c1c1c] border border-transparent focus:border-red-600 rounded-md px-4 py-3 text-gray-200 placeholder-gray-500 focus:outline-none transition"
         />
         <button
-          className="bg-red-600 text-white px-5 py-2.5 rounded-lg hover:bg-red-700 transition"
+          className="bg-red-600 text-white px-5 py-2.5 rounded-lg hover:bg-red-700 transition disabled:opacity-50"
           onClick={handleOtp}
-          disabled={seconds > 0 ? false : true}
+          disabled={seconds === 0 || loading}
         >
-          Verify OTP
+          {loading ? "Verifying..." : "Verify OTP"}
         </button>
         {seconds > 0 ? (
           <p className="text-center text-white/50 font-light">

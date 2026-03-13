@@ -28,14 +28,16 @@ const OtpModalLight: React.FC<ModalProps> = ({
   const [otpError, setOtpError] = useState<string>("");
   const [resendDisabled, setResendDisabled] = useState<boolean>(false);
   const [otp, setOtp] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleOtp = async () => {
     try {
+      
       if(!otpRegex.test(otp)){
         setOtpError("OTP must be a 6-digit number.");
         return;
       }
-
+      setLoading(true)
       const res = await verifyOtpApi({ email, otp, context});
       successToast(OTP_VERIFIED);
 
@@ -43,6 +45,7 @@ const OtpModalLight: React.FC<ModalProps> = ({
         onClose();
         setOtp("");
         onVerified(res?.token)
+        setLoading(false)
       }, 2000);
     } catch (error) {
       console.error("error on sending otp", error);
@@ -51,6 +54,8 @@ const OtpModalLight: React.FC<ModalProps> = ({
       }else{
         setOtpError("Something went wrong")
       }
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -93,8 +98,8 @@ const OtpModalLight: React.FC<ModalProps> = ({
         />
         <AuthButton
           action={handleOtp}
-          text={"Verify OTP"}
-          loading={seconds > 0 ? false : true}
+          text={loading ? "Verifying..." : "Verify OTP"}
+          loading={seconds === 0 || loading}
         />
         {seconds > 0 ? (
           <p className="text-center text-black/50 font-light">

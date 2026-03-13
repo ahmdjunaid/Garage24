@@ -583,13 +583,13 @@ const UserHeader = ({
                 My Appointments
               </Link>
 
-              <a
-                href="#services"
+              <Link
+                to="/service-history"
                 className="block hover:text-gray-300"
                 onClick={() => setShowMobileMenu(false)}
               >
-                Services
-              </a>
+                Service History
+              </Link>
 
               <a
                 href="#about"

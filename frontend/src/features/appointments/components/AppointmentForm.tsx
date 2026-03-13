@@ -780,38 +780,40 @@ const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({
                       setSelectedServices([]);
                       fetchAvailableServices(garage.userId);
                     }}
-                    className={`relative overflow-hidden rounded-2xl p-6 text-left transition-all transform hover:scale-102 ${
+                    className={`relative overflow-hidden rounded-2xl p-4 sm:p-6 text-left transition-all sm:hover:scale-[1.02] ${
                       selectedGarage?._id === garage._id
                         ? "bg-red-500 shadow-2xl"
                         : "bg-[#2a2a2a]"
                     }`}
                   >
-                    <div className="flex justify-between items-start mb-3">
+                    <div className="flex justify-between items-start mb-3 gap-3">
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold mb-2">
+                        <h3 className="text-lg sm:text-xl font-bold mb-2">
                           {garage.name}
                         </h3>
-                        <p className="text-sm opacity-80 mb-3">
+
+                        <p className="text-xs sm:text-sm opacity-80 mb-3 leading-relaxed">
                           {`${garage.address.city} ${garage.address.district} ${garage.address.state} ${garage.address.pincode}`}
                         </p>
                       </div>
+
                       {selectedGarage?._id === garage._id && (
-                        <CheckCircle className="h-6 w-6 flex-shrink-0" />
+                        <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
                       )}
                     </div>
-                    <div className="flex items-center gap-4 text-sm">
+
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
                       <span className="bg-black/30 px-3 py-1 rounded-full flex items-center gap-1">
                         <MapPin size={14} />
                         {metersToKm(garage.distance)} km
                       </span>
+
                       <span className="bg-black/30 px-3 py-1 rounded-full">
-                        RSA{" "}
-                        {garage.isRSAEnabled
-                          ? "Road-side assistance available"
-                          : "Not avaialable for RSA"}
+                        Bays {garage.numOfServiceBays}
                       </span>
+
                       <span className="bg-black/30 px-3 py-1 rounded-full">
-                        {garage.supportedFuelTypes.join(", ")} Vehicles
+                        {garage.supportedFuelTypes.join(", ")}
                       </span>
                     </div>
                   </button>
@@ -969,35 +971,40 @@ const CarServiceAppointmentForm: React.FC<AppointmentFormProps> = ({
         {/* Date Selection */}
         {selectedServices.length > 0 && (
           <section className="mb-12">
-            <h2 className="text-3xl font-bold mb-6 text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center">
               Pick Your Date
             </h2>
-            <div className="flex gap-4 overflow-x-auto pb-4 flex justify-center">
+
+            <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 sm:justify-center scrollbar-hide">
               {getNext7Days().map((day) => {
                 const isClosed = selectedGarage?.selectedHolidays.includes(
                   day.dayFull,
                 );
 
                 return (
-                  <div key={day.date} className="relative group">
+                  <div key={day.date} className="relative group flex-shrink-0">
                     <button
-                      onClick={() => {
-                        setSelectedDate(day.date);
-                      }}
+                      onClick={() => setSelectedDate(day.date)}
                       disabled={isClosed}
-                      className={`flex-shrink-0 w-24 p-4 rounded-2xl transition-all transform
-                        ${selectedDate === day.date ? "bg-red-500 shadow-2xl" : "bg-[#2a2a2a]"}
-                        disabled:opacity-50 disabled:cursor-not-allowed`}
+                      className={`w-20 sm:w-24 p-3 sm:p-4 rounded-2xl transition-all
+              ${selectedDate === day.date ? "bg-red-500 shadow-2xl" : "bg-[#2a2a2a]"}
+              disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       {isClosed && (
-                        <span className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full" />
+                        <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full" />
                       )}
 
-                      <div className="text-sm opacity-80 mb-1">{day.day}</div>
-                      <div className="text-3xl font-bold mb-1">
+                      <div className="text-xs sm:text-sm opacity-80 mb-1">
+                        {day.day}
+                      </div>
+
+                      <div className="text-2xl sm:text-3xl font-bold mb-1">
                         {day.dayNum}
                       </div>
-                      <div className="text-sm opacity-80">{day.month}</div>
+
+                      <div className="text-xs sm:text-sm opacity-80">
+                        {day.month}
+                      </div>
                     </button>
                   </div>
                 );

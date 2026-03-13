@@ -61,7 +61,7 @@ const AppointmentDetailsPageSection: React.FC<DetailPageProps> = ({
   }, [appointmentId]);
 
   const getAppointmentData = async (appointmentId: string) => {
-    if(!appointmentId) return
+    if (!appointmentId) return;
     try {
       const res = await getAppointmentDetails(appointmentId);
       setAppointment(res);
@@ -82,11 +82,11 @@ const AppointmentDetailsPageSection: React.FC<DetailPageProps> = ({
   }
 
   const totalPrice = appointment.services.reduce((sum, service) => {
-    if(service.status !== "skipped"){
-      return sum + service.price
+    if (service.status !== "skipped") {
+      return sum + service.price;
     }
-    return sum
-  },0);
+    return sum;
+  }, 0);
 
   const isCompleted = appointment.status === "completed";
   const isCancelled = appointment.status === "cancelled";
@@ -127,11 +127,11 @@ const AppointmentDetailsPageSection: React.FC<DetailPageProps> = ({
         {/* Vehicle & Status Header */}
         <div className="bg-[#242424] rounded-xl p-5 border border-[#2a2a2a]">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-4">
-              {/* Vehicle Icon Placeholder */}
-              <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              {/* Vehicle Icon */}
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg
-                  className="w-10 h-10"
+                  className="w-8 h-8 sm:w-10 sm:h-10"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -142,24 +142,39 @@ const AppointmentDetailsPageSection: React.FC<DetailPageProps> = ({
                 </svg>
               </div>
 
-              <div>
-                <h2 className="text-xl font-semibold">
+              {/* Appointment Details */}
+              <div className="flex-1">
+                {/* Appointment ID */}
+                <p className="text-xs text-gray-500 mb-1">
+                  Appointment ID:
+                  <span className="text-gray-300 ml-1 font-medium">
+                    {appointment.appId}
+                  </span>
+                </p>
+
+                {/* Vehicle Name */}
+                <h2 className="text-lg sm:text-xl font-semibold leading-snug">
                   {appointment.vehicle.make.name}
                   <span className="text-gray-400 ms-2">
                     {appointment.vehicle.model.name}
                   </span>
-                  <span className="text-gray-500 text-base ml-2">
+                  <span className="text-gray-500 text-sm sm:text-base ml-2">
                     ({appointment.vehicle.licensePlate})
                   </span>
                 </h2>
+
+                {/* Service */}
                 <p className="text-gray-400 text-sm mt-1">
                   {appointment.services[0]?.name}
                 </p>
-                <div className="flex items-center gap-2 mt-2">
+
+                {/* Status + Date */}
+                <div className="flex flex-wrap items-center gap-2 mt-2">
                   <span className="text-xs px-3 py-1 bg-green-500/20 text-green-400 rounded-md font-medium capitalize">
                     {appointment.status}
                   </span>
-                  <span className="text-gray-500 text-sm">
+
+                  <span className="text-gray-500 text-xs sm:text-sm">
                     {new Date(appointment.appointmentDate).toLocaleDateString(
                       "en-US",
                       {
@@ -174,14 +189,14 @@ const AppointmentDetailsPageSection: React.FC<DetailPageProps> = ({
                 </div>
               </div>
             </div>
-
+            {/* 
             <div className="flex items-center gap-3">
               {isUserView && (
                 <button className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">
                   Mechanic Notes
                 </button>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -419,16 +434,19 @@ const AppointmentDetailsPageSection: React.FC<DetailPageProps> = ({
         )}
 
         {/* Payment Button - Show only when completed and payment is pending */}
-        {isUserView && isCompleted && appointment.paymentStatus !== "paid" && totalPrice > 0 && (
-          <div className="pt-2 pb-4">
-            <button
-              onClick={() => handlePayment(appointment._id)}
-              className="w-full bg-[#ef4444] hover:bg-[#dc2626] text-white font-semibold py-3.5 rounded-lg transition-colors"
-            >
-              Proceed to Payment - ₹{totalPrice}
-            </button>
-          </div>
-        )}
+        {isUserView &&
+          isCompleted &&
+          appointment.paymentStatus !== "paid" &&
+          totalPrice > 0 && (
+            <div className="pt-2 pb-4">
+              <button
+                onClick={() => handlePayment(appointment._id)}
+                className="w-full bg-[#ef4444] hover:bg-[#dc2626] text-white font-semibold py-3.5 rounded-lg transition-colors"
+              >
+                Proceed to Payment - ₹{totalPrice}
+              </button>
+            </div>
+          )}
       </div>
       <PaymentSuccessModal
         paymentData={paymentData}
