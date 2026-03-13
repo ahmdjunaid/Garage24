@@ -71,12 +71,13 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
         </h1>
         <div className="flex items-center gap-4">
           {searchPlaceholder ? (
-            <div className="relative group">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-red-400 transition-colors" />
+            <div className="relative group w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-red-400 transition-colors" />
+
               <input
                 type="text"
                 placeholder={searchPlaceholder}
-                className="bg-black bg-opacity-30 backdrop-blur-md border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 w-72 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-all placeholder-gray-500"
+                className="w-full bg-black bg-opacity-30 backdrop-blur-md border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-all placeholder-gray-500"
                 onChange={(e) => setSearchQuery?.(e.target.value)}
               />
             </div>

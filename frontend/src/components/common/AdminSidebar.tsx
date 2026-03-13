@@ -20,7 +20,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
   const { totalUnread } = useSelector((state: RootState) => state.chat);
-
+  const [isLoading, setLoading] = useState<boolean>(false)
   const [open, setOpen] = useState(false);
 
   const otherItems = [
@@ -34,12 +34,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
 
   const handleLogout = async () => {
     try {
+      setLoading(true)
       await logoutApi();
       dispatch(logout());
       socket.disconnect();
       successToast("Logout successful.");
     } catch (error) {
       if (error instanceof Error) errorToast(error.message);
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -181,13 +184,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
           {/* LOGOUT BUTTON */}
           <button
             onClick={handleLogout}
+            disabled={isLoading}
             className="w-full flex items-center justify-center gap-2
               text-red-400 hover:text-white
               border border-red-600 hover:bg-red-600
               rounded-lg py-2 transition"
           >
             <LogOut className="w-4 h-4" />
-            Logout
+            { isLoading ? "Logging out..." : "Logout"}
           </button>
         </div>
       </aside>

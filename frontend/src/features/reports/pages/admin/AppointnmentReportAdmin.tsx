@@ -10,6 +10,7 @@ import {
   getAppointmentReportAdminApi,
 } from "../../services/reportServices";
 import type { AppointmentReport, ReportSummary } from "../../types/reportTypes";
+import { errorToast } from "@/utils/notificationAudio";
 
 const AppointnmentReportAdmin = () => {
   const [appointments, setAppointments] = useState<AppointmentReport[]>([]);
@@ -110,42 +111,50 @@ const AppointnmentReportAdmin = () => {
   };
 
   const handleDownloadPDF = async () => {
-    const response = await downloadAppointmentReportPDFAdminApi(
-      startDate,
-      endDate,
-    );
+    try {
+      const response = await downloadAppointmentReportPDFAdminApi(
+        startDate,
+        endDate,
+      );
 
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
 
-    link.href = url;
-    link.setAttribute("download", "appointment-report.pdf");
+      link.href = url;
+      link.setAttribute("download", "appointment-report.pdf");
 
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      if (error instanceof Error) errorToast(error.message);
+    }
   };
 
   const handleDownloadExcel = async () => {
-    const response = await downloadAppointmentReportExcelAdminApi(
-      startDate,
-      endDate,
-    );
+    try {
+      const response = await downloadAppointmentReportExcelAdminApi(
+        startDate,
+        endDate,
+      );
 
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
 
-    link.href = url;
-    link.setAttribute("download", "appointment-report.xlsx");
+      link.href = url;
+      link.setAttribute("download", "appointment-report.xlsx");
 
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      if (error instanceof Error) errorToast(error.message);
+    }
   };
 
   return (
     <div className="flex h-screen bg-gray-950 text-white overflow-hidden">
-      <AdminSidebar role="garage" />
+      <AdminSidebar role="admin" />
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <AdminHeader text={"Appointments"} />
@@ -153,74 +162,80 @@ const AppointnmentReportAdmin = () => {
         <div className="flex-1 bg-gradient-to-br from-gray-950 via-gray-900 to-black p-8 overflow-auto">
           {/* switch to current and prev */}
           <div className="bg-gray-900 p-4 rounded-xl mb-4 border border-gray-800">
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col gap-4">
               {/* Quick Filters */}
-              <button
-                onClick={() => handleQuickFilter("today")}
-                className={`px-3 py-2 rounded-lg text-sm ${
-                  filter === "today"
-                    ? "bg-red-700 text-white"
-                    : "bg-gray-800 text-gray-300"
-                }`}
-              >
-                Today
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => handleQuickFilter("today")}
+                  className={`px-3 py-2 rounded-lg text-sm ${
+                    filter === "today"
+                      ? "bg-red-700 text-white"
+                      : "bg-gray-800 text-gray-300"
+                  }`}
+                >
+                  Today
+                </button>
 
-              <button
-                onClick={() => handleQuickFilter("week")}
-                className={`px-3 py-2 rounded-lg text-sm ${
-                  filter === "week"
-                    ? "bg-red-700 text-white"
-                    : "bg-gray-800 text-gray-300"
-                }`}
-              >
-                Last 7 Days
-              </button>
+                <button
+                  onClick={() => handleQuickFilter("week")}
+                  className={`px-3 py-2 rounded-lg text-sm ${
+                    filter === "week"
+                      ? "bg-red-700 text-white"
+                      : "bg-gray-800 text-gray-300"
+                  }`}
+                >
+                  Last 7 Days
+                </button>
 
-              <button
-                onClick={() => handleQuickFilter("month")}
-                className={`px-3 py-2 rounded-lg text-sm ${
-                  filter === "month"
-                    ? "bg-red-700 text-white"
-                    : "bg-gray-800 text-gray-300"
-                }`}
-              >
-                Last 30 Days
-              </button>
+                <button
+                  onClick={() => handleQuickFilter("month")}
+                  className={`px-3 py-2 rounded-lg text-sm ${
+                    filter === "month"
+                      ? "bg-red-700 text-white"
+                      : "bg-gray-800 text-gray-300"
+                  }`}
+                >
+                  Last 30 Days
+                </button>
+              </div>
 
-              {/* Custom Date */}
-              <div className="flex items-center gap-2 ml-auto">
+              {/* Date Filters */}
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3">
                 <input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="bg-gray-800 text-gray-200 px-3 py-2 rounded-lg text-sm border border-gray-700"
+                  className="bg-gray-800 text-gray-200 px-3 py-2 rounded-lg text-sm border border-gray-700 w-full sm:w-auto"
                 />
 
-                <span className="text-gray-400 text-sm">to</span>
+                <span className="text-gray-400 text-sm hidden sm:block">
+                  to
+                </span>
 
                 <input
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="bg-gray-800 text-gray-200 px-3 py-2 rounded-lg text-sm border border-gray-700"
+                  className="bg-gray-800 text-gray-200 px-3 py-2 rounded-lg text-sm border border-gray-700 w-full sm:w-auto"
                 />
 
                 <button
                   onClick={handleApplyFilter}
-                  className="px-4 py-2 bg-red-700 text-white rounded-lg text-sm font-medium hover:bg-red-800"
+                  className="px-4 py-2 bg-red-700 text-white rounded-lg text-sm font-medium hover:bg-red-800 w-full sm:w-auto"
                 >
                   Apply
                 </button>
+
                 <button
                   onClick={handleDownloadExcel}
-                  className="px-4 py-2 bg-red-700 text-white rounded-lg text-sm font-medium hover:bg-red-800"
+                  className="px-4 py-2 bg-red-700 text-white rounded-lg text-sm font-medium hover:bg-red-800 w-full sm:w-auto"
                 >
                   Excel
                 </button>
+
                 <button
                   onClick={handleDownloadPDF}
-                  className="px-4 py-2 bg-red-700 text-white rounded-lg text-sm font-medium hover:bg-red-800"
+                  className="px-4 py-2 bg-red-700 text-white rounded-lg text-sm font-medium hover:bg-red-800 w-full sm:w-auto"
                 >
                   PDF
                 </button>
