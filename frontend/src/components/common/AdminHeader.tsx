@@ -99,7 +99,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
           {showNotifications && (
             <div
               className="
-      fixed right-8 top-20 w-96
+      fixed right-2 sm:right-8 top-20 w-[calc(100vw-1rem)] sm:w-96
       bg-gradient-to-br from-gray-950 via-gray-900 to-black
       text-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)]
       border border-gray-800

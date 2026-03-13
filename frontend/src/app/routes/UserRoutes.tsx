@@ -15,6 +15,7 @@ import AppointmentDetailsPage from "@features/appointments/pages/user/Appointmen
 import HomePage from "@features/home/pages/HomePage";
 import AppointmentHistory from "@/features/vehicleHistory/pages/user/HistoryUser";
 import ChatWidget from "@/features/chatBot/components/ChatWidget";
+import AboutPage from "@/features/about/pages/AboutPage";
 
 const UserRoutes: React.FC = () => {
   return (
@@ -24,7 +25,8 @@ const UserRoutes: React.FC = () => {
       <Route path="/signup" element={<SignUp role={'user'}/>} />
       <Route path="/forgot-password" element={<ForgotPassword/>} />
       <Route path="/unauthorized" element={<UnauthorizedPage/>} />
-        <Route path="/" element={<HomePage />} />
+      <Route path="/" element={<HomePage />} />
+      <Route path="/about-us" element={<AboutPage />} />
       <Route element={<ProtectedRoute requiredRoles={["user"]} />}>
         <Route path="/my-garage" element={<MyGarage/>}/>
         <Route path="/appointment" element={<Appointment />}/>

@@ -5,4 +5,5 @@ export interface IEmailService {
   sendGarageApprovalEmail(email: string, garageName: string): Promise<void>;
   sendGarageRejectionEmail(email: string, garageName: string, reason:string): Promise<void>;
   sendInvalidPlanBookingEmail(email: string, garageName: string): Promise<void>;
+  sendContactFormEmail(name: string, email: string, phone: string, message: string): Promise<void>
 }

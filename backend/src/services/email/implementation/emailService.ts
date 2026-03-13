@@ -91,7 +91,7 @@ export class EmailService implements IEmailService {
         <p style="color: #b72626;">
           Please log in and change your password immediately for security.
         </p>
-        <p>🔗 Login here: <strong>https://garage24.com/login</strong></p>
+        <p>🔗 Login here: <strong>https://www.garage247.online/login</strong></p>
         <p>If you did not request this, you can safely ignore this email.</p>
         <br/>
         <p>Best regards,</p>
@@ -123,7 +123,7 @@ export class EmailService implements IEmailService {
         <p>You can now log in and start managing your garage services.</p>
 
         <p> 🔗 Login here: 
-          <strong> <a href="https://garage24.com/login">https://garage24.com/login</a> </strong>
+          <strong> <a href="https://www.garage247.online/login">https://www.garage247.online/login</a> </strong>
         </p>
         <p>If you did not request this, you can safely ignore this email.</p>
         
@@ -208,8 +208,8 @@ export class EmailService implements IEmailService {
       <p>To continue receiving and managing customer bookings, please activate a valid plan at your earliest convenience.</p>
 
       <p>🔗 <strong>
-        <a href="https://garage24.com/subscription">
-          Click here to purchase or renew your plan
+        <a href="https://www.garage247.online/login">
+          Click here and login to purchase or renew your plan
         </a>
       </strong></p>
 
@@ -231,4 +231,42 @@ export class EmailService implements IEmailService {
       logger.error("Error while sending plan activation email", error);
     }
   }
+
+  async sendContactFormEmail(
+  name: string,
+  email: string,
+  phone: string,
+  message: string
+): Promise<void> {
+  const mailOptions = {
+    from: this.fromEmail,
+    to: "ahmdjunaid206@gmail.com",
+    subject: `New Contact Message from ${name}`,
+    html: `
+      <h2>New Contact Form Submission</h2>
+
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Phone:</strong> ${phone || "Not Provided"}</p>
+
+      <br/>
+
+      <p><strong>Message:</strong></p>
+      <p>${message}</p>
+
+      <br/>
+      <hr/>
+
+      <p>This message was sent from the Garage247 Contact Page.</p>
+    `,
+  };
+
+  try {
+    await this.transporter.sendMail(mailOptions);
+    logger.info(`Contact form email sent from ${email}`);
+  } catch (error) {
+    logger.error("Error while sending contact form email", error);
+    throw new Error("Failed to send contact message");
+  }
+}
 }

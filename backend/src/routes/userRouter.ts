@@ -14,6 +14,7 @@ import { ServiceController } from "../controllers/service/implementation/service
 import { SlotController } from "../controllers/slot/implementation/slotController";
 import { ReviewController } from "../controllers/review/implementation/reviewController";
 import { ChatBotController } from "../controllers/chatBot/implementation/chatBotController";
+import { ContactController } from "../controllers/contactUs/implementation/contactController";
 
 const router = express.Router()
 const vehicleController = container.get<VehicleController>(TYPES.VehicleController)
@@ -26,6 +27,7 @@ const serviceController = container.get<ServiceController>(TYPES.ServiceControll
 const slotController = container.get<SlotController>(TYPES.SlotController)
 const reviewController = container.get<ReviewController>(TYPES.ReviewController)
 const chatBotController = container.get<ChatBotController>(TYPES.ChatBotController)
+const contactController = container.get<ContactController>(TYPES.ContactController)
 
 router.route('/home/testimonials').get(reviewController.getPaginatedReviews)
 
@@ -60,5 +62,8 @@ router.route('/vehicle/appointment').get(verifyJWT, authorizeRoles("user"), appo
 
 //Chat with Bot
 router.route('/chat/bot').post(chatBotController.chatWithBot);
+
+//contact us
+router.route('/contact-us').post(contactController.sendContactFormEmail)
 
 export default router;

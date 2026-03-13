@@ -122,6 +122,8 @@ import { IChatBotService } from "../services/chatBot/interface/IChatBotServices"
 import { ChatBotService } from "../services/chatBot/implementation/chatBotServices";
 import { IChatBotController } from "../controllers/chatBot/interface/IChatBotController";
 import { ChatBotController } from "../controllers/chatBot/implementation/chatBotController";
+import { IContactController } from "../controllers/contactUs/interface/IContactController";
+import { ContactController } from "../controllers/contactUs/implementation/contactController";
 
 const container = new Container();
 
@@ -231,5 +233,8 @@ container.bind<IReportController>(TYPES.ReportController).to(ReportController);
 //ChatBot
 container.bind<IChatBotService>(TYPES.ChatBotService).to(ChatBotService);
 container.bind<IChatBotController>(TYPES.ChatBotController).to(ChatBotController)
+
+//Contact Us
+container.bind<IContactController>(TYPES.ContactController).to(ContactController);
 
 export { container };

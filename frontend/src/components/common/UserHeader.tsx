@@ -149,20 +149,14 @@ const UserHeader = ({
                     >
                       Service History
                     </Link>
-                    <a
-                      href="#about"
-                      className="block px-4 py-2 hover:bg-gray-100"
+
+                    <Link
+                      to="/about-us"
+                      className={`block px-4 py-2 hover:bg-gray-100 ${isActive("/about-us") ? "text-red-500" : ""}`}
                       onClick={() => setShowMoreMenu(false)}
                     >
-                      About
-                    </a>
-                    <a
-                      href="#contact"
-                      className="block px-4 py-2 hover:bg-gray-100"
-                      onClick={() => setShowMoreMenu(false)}
-                    >
-                      Contact
-                    </a>
+                      About & Contact
+                    </Link>
                   </div>
                 )}
               </div>
@@ -279,20 +273,13 @@ const UserHeader = ({
             >
               Service History
             </Link>
-            <a
-              href="#about"
-              className="block hover:text-gray-300"
+            <Link
+              to="/about-us"
+              className={`block hover:text-gray-300 ${isActive("/about-us") ? "text-red-500" : ""}`}
               onClick={() => setShowMobileMenu(false)}
             >
-              About
-            </a>
-            <a
-              href="#contact"
-              className="block hover:text-gray-300"
-              onClick={() => setShowMobileMenu(false)}
-            >
-              Contact
-            </a>
+              About & Contact
+            </Link>
           </div>
         )}
       </nav>
@@ -366,20 +353,13 @@ const UserHeader = ({
                       >
                         Service History
                       </Link>
-                      <a
-                        href="#about"
-                        className="block px-4 py-2 hover:bg-gray-100"
+                      <Link
+                        to="/about-us"
+                        className={`block px-4 py-2 hover:bg-gray-100 ${isActive("/about-us") ? "text-red-500" : ""}`}
                         onClick={() => setShowMoreMenu(false)}
                       >
-                        About
-                      </a>
-                      <a
-                        href="#contact"
-                        className="block px-4 py-2 hover:bg-gray-100"
-                        onClick={() => setShowMoreMenu(false)}
-                      >
-                        Contact
-                      </a>
+                        About & Contact
+                      </Link>
                     </div>
                   )}
                 </div>
@@ -591,21 +571,13 @@ const UserHeader = ({
                 Service History
               </Link>
 
-              <a
-                href="#about"
+              <Link
+                to="/about-us"
                 className="block hover:text-gray-300"
                 onClick={() => setShowMobileMenu(false)}
               >
-                About
-              </a>
-
-              <a
-                href="#contact"
-                className="block hover:text-gray-300"
-                onClick={() => setShowMobileMenu(false)}
-              >
-                Contact
-              </a>
+                About & Contact
+              </Link>
             </div>
           )}
 
