@@ -414,7 +414,7 @@ export class AppointmentService implements IAppointmentService {
         status: "in_progress",
       });
     }
-
+    
     const mechanic = await this._mechanicRepository.findById(
       updatedAppointment.mechanicId!.toString()
     );

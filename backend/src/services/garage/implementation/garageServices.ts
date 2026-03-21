@@ -18,7 +18,7 @@ import { extractS3KeyFromUrl } from "../../../utils/extractS3KeyFromUrl";
 import HttpStatus from "../../../constants/httpStatusCodes";
 import { IMechanicRepository } from "../../../repositories/mechanic/interface/IMechanicRepository";
 import { AppError } from "../../../middleware/errorHandler";
-import { AUTHENTICATION_FAILED, GARAGE_APPROVAL_FAILED } from "../../../constants/messages";
+import { AUTHENTICATION_FAILED, GARAGE_APPROVAL_FAILED, ONBOARDING_UPDATE_ERROR } from "../../../constants/messages";
 import { garageDataMapping } from "../../../utils/dto/garagesDto";
 import { GetPaginationQuery } from "../../../types/common";
 import { IEmailService } from "../../email/interface/IEmailService";
@@ -61,7 +61,7 @@ export class GarageService implements IGarageService {
     if (existing && existing.approvalStatus !== "rejected") {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        "Onboarding update not allowed"
+        ONBOARDING_UPDATE_ERROR
       );
     }
 

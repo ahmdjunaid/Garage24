@@ -39,6 +39,7 @@ export const PASSWORD_NOT_SET = "This account doesn’t have a password set. You
 export const PASSWORD_CHANGED_SUCCESS = "Your password has been changed successfully."
 export const AUTHENTICATION_FAILED = "Your session has expired. Please log in again."
 export const NEW_PASSWORD_CANNOT_BE_SAME = "Your new password cannot be the same as your previous password."
+export const ONBOARDING_UPDATE_ERROR="Onboarding update not allowed"
 
 // plan messages
 export const PLAN_NOT_FOUND = "Plan not found!"
