@@ -58,15 +58,14 @@ const DeliveryOtpModal: React.FC<ModalProps> = ({
       await resendDeliveryOtpApi(appointmentId);
 
       successToast("OTP has been resent successfully.");
-
-      setTimeout(() => {
-        setResendLoading(false);
-      }, 10000);
+      setResendLoading(false);
     } catch (error) {
       if (error instanceof Error) {
         console.error(error);
         setOtpError(error.message || "Error while resend OTP.");
       }
+      setResendLoading(false);
+    } finally {
       setResendLoading(false);
     }
   };

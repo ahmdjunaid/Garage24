@@ -141,7 +141,7 @@ const GarageAppointments = () => {
                     View
                   </button>
 
-                  {m.status === "completed" && (
+                  {m.status === "completed" && m.paymentStatus === "paid" && (
                     <button
                       className="text-green-600 hover:text-green-400"
                       onClick={() => setMarkPaidId(m._id)}

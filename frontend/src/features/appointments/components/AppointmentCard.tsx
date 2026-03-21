@@ -128,7 +128,7 @@ const AppointmentCard: React.FC<CardProps> = ({
                 </button>
               </>
             )}
-            {appointment.status === "completed" && !appointment.isRated && (
+            {appointment.status === "delivered" && !appointment.isRated && (
               <button
                 onClick={() => handleRating(appointment._id)}
                 className="relative flex items-center gap-1.5 px-4 py-2 
