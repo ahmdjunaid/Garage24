@@ -233,16 +233,16 @@ export class EmailService implements IEmailService {
   }
 
   async sendContactFormEmail(
-  name: string,
-  email: string,
-  phone: string,
-  message: string
-): Promise<void> {
-  const mailOptions = {
-    from: this.fromEmail,
-    to: "ahmdjunaid206@gmail.com",
-    subject: `New Contact Message from ${name}`,
-    html: `
+    name: string,
+    email: string,
+    phone: string,
+    message: string
+  ): Promise<void> {
+    const mailOptions = {
+      from: this.fromEmail,
+      to: "ahmdjunaid206@gmail.com",
+      subject: `New Contact Message from ${name}`,
+      html: `
       <h2>New Contact Form Submission</h2>
 
       <p><strong>Name:</strong> ${name}</p>
@@ -259,14 +259,52 @@ export class EmailService implements IEmailService {
 
       <p>This message was sent from the Garage247 Contact Page.</p>
     `,
-  };
+    };
 
-  try {
-    await this.transporter.sendMail(mailOptions);
-    logger.info(`Contact form email sent from ${email}`);
-  } catch (error) {
-    logger.error("Error while sending contact form email", error);
-    throw new Error("Failed to send contact message");
+    try {
+      await this.transporter.sendMail(mailOptions);
+      logger.info(`Contact form email sent from ${email}`);
+    } catch (error) {
+      logger.error("Error while sending contact form email", error);
+      throw new Error("Failed to send contact message");
+    }
   }
-}
+
+  async sendDeliveryOtpEmail(
+    email: string,
+    orderId: string,
+    otp: string
+  ): Promise<void> {
+    const mailOptions = {
+      from: this.fromEmail,
+      to: email,
+      subject: `Delivery OTP for Order #${orderId}`,
+      html: `
+      <h2>Delivery OTP</h2>
+
+      <p>Your OTP for confirming delivery is:</p>
+
+      <h1 style="letter-spacing: 5px;">${otp}</h1>
+
+      <p><strong>Order ID:</strong> ${orderId}</p>
+
+      <br/>
+
+      <p>Please share this OTP with the delivery agent to confirm delivery.</p>
+      
+      <br/>
+      <hr/>
+
+      <p>Garage247 Delivery System</p>
+    `,
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+      logger.info(`Delivery OTP sent to ${email} for order ${orderId}`);
+    } catch (error) {
+      logger.error("Error sending delivery OTP", error);
+      throw new Error("Failed to send delivery OTP");
+    }
+  }
 }

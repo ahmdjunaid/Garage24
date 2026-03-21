@@ -74,6 +74,7 @@ const appointmentSchema = new Schema<IAppointment>(
 
     isRated: { type: Boolean, default: false },
     rating: { type: Number, default: 0 },
+    deliveryOtp: { type: String },
   },
   { timestamps: true }
 );

@@ -47,7 +47,7 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsProps> = ({
   const [skipServiceId, setSkipServiceId] = useState<string | null>(null);
   const [skipReason, setSkipReason] = useState("");
 
-  const PREVIOUS_STATUSES = ["completed", "cancelled"];
+  const PREVIOUS_STATUSES = ["completed", "cancelled","delivered"];
 
   useEffect(() => {
     if (role === "MECHANIC") return;

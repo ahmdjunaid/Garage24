@@ -42,8 +42,8 @@ export class AppointmentRepository
   async getActiveAppointments(
     query: GetPaginationQuery
   ): Promise<GetMappedAppointmentResponse> {
-    const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress"];
-    const PREVIOUS_STATUSES = ["completed", "cancelled"];
+    const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress", "completed"];
+    const PREVIOUS_STATUSES = ["delivered", "cancelled"];
     const skip = (query.page - 1) * query.limit;
     const searchFilter =
       query.searchQuery === "current"
@@ -106,8 +106,8 @@ export class AppointmentRepository
   async getAllAppointmentByUserId(
     query: GetPaginationQuery
   ): Promise<GetMappedPopulatedAppointmentResponse> {
-    const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress"];
-    const PREVIOUS_STATUSES = ["completed", "cancelled"];
+    const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress", "completed"];
+    const PREVIOUS_STATUSES = ["delivered", "cancelled"];
 
     const skip = (query.page - 1) * query.limit;
 
@@ -234,8 +234,8 @@ export class AppointmentRepository
   async getAllAppointmentByMechId(
     query: GetPaginationQuery
   ): Promise<GetMappedPopulatedAppointmentResponse> {
-    const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress"];
-    const PREVIOUS_STATUSES = ["completed", "cancelled"];
+    const ACTIVE_STATUSES = ["pending", "confirmed", "in_progress", "completed"];
+    const PREVIOUS_STATUSES = ["delivered", "cancelled"];
 
     const skip = (query.page - 1) * query.limit;
 

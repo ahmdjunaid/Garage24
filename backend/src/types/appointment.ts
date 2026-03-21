@@ -98,8 +98,9 @@ export interface IAppointment {
   customerNote?: string;
   mechanicNote?: string;
 
-  isRated: boolean,
-  rating: number,
+  isRated: boolean;
+  rating: number;
+  deliveryOtp: string;
 }
 
 export interface GetMappedAppointmentResponse {

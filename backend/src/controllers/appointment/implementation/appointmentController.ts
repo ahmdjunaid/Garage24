@@ -150,10 +150,7 @@ export class AppointmentController implements IAppointmentController {
       const appointmentId = req.params.appointmentId;
 
       if (!appointmentId) {
-        throw new AppError(
-          HttpStatus.BAD_REQUEST,
-          APPOINTMENT_ID_REQUIRED
-        );
+        throw new AppError(HttpStatus.BAD_REQUEST, APPOINTMENT_ID_REQUIRED);
       }
 
       const response =
@@ -173,10 +170,7 @@ export class AppointmentController implements IAppointmentController {
     try {
       const appointmentId = req.params.appointmentId;
       if (!appointmentId) {
-        throw new AppError(
-          HttpStatus.BAD_REQUEST,
-          APPOINTMENT_ID_REQUIRED
-        );
+        throw new AppError(HttpStatus.BAD_REQUEST, APPOINTMENT_ID_REQUIRED);
       }
 
       const response =
@@ -198,10 +192,7 @@ export class AppointmentController implements IAppointmentController {
     try {
       const appointmentId = req.params.appointmentId;
       if (!appointmentId) {
-        throw new AppError(
-          HttpStatus.BAD_REQUEST,
-          APPOINTMENT_ID_REQUIRED
-        );
+        throw new AppError(HttpStatus.BAD_REQUEST, APPOINTMENT_ID_REQUIRED);
       }
 
       const { date, releasableSlotIds, slotIds, startTime, duration } =
@@ -344,5 +335,46 @@ export class AppointmentController implements IAppointmentController {
     } catch (error) {
       next(error);
     }
-  }
+  };
+
+  verifyDeliveryOTP = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { appointmentId, otp } = req.body;
+      if (!appointmentId || !otp) {
+        throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
+      }
+
+      const response = await this._appointmentService.verifyDeliveryOTP(
+        appointmentId,
+        otp
+      );
+      res.status(HttpStatus.OK).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  resendDeliveryOTP = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { appointmentId } = req.params;
+      if (!appointmentId) {
+        throw new AppError(HttpStatus.BAD_REQUEST, APPOINTMENT_ID_REQUIRED);
+      }
+
+      const response =
+        await this._appointmentService.resendDeliveryOTP(appointmentId);
+      res.status(HttpStatus.OK).json(response);
+      
+    } catch (error) {
+      next(error);
+    }
+  };
 }

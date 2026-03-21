@@ -51,6 +51,10 @@ router.route('/appointments').get(verifyJWT, authorizeRoles("garage"), appointme
 router.route('/mechanics/assignable/:garageId').get(verifyJWT, authorizeRoles("garage"), mechanicController.getAssignableMechanics)
 router.route('/appointment/assign-mechanic').post(verifyJWT, authorizeRoles("garage"), appointmentController.assignMechanic)
 
+//Appointment
+router.route('/appointment/delivery/verify').post(verifyJWT, authorizeRoles("garage"), appointmentController.verifyDeliveryOTP);
+router.route('/appointment/otp-resend/:appointmentId').post(verifyJWT, authorizeRoles("garage"), appointmentController.resendDeliveryOTP);
+
 //Dashboard
 router.route('/dashboard').get(verifyJWT, authorizeRoles("garage"), dashboardController.getGarageDashboardData)
 router.route('/top-services').get(verifyJWT, authorizeRoles("garage"), dashboardController.getTopFiveBookedServices)

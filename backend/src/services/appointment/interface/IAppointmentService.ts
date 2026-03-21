@@ -30,4 +30,6 @@ export interface IAppointmentService {
   getAllAppointmentByMechId(query: GetPaginationQuery): Promise<GetMappedPopulatedAppointmentResponse>;
   makeServicePayment(appointmentId:string):Promise<{ url:string }>;
   getAppointmentByVehicleNum(query:GetPaginationQuery, userId:string, role:string): Promise<GetMappedPopulatedAppointmentResponse>;
+  verifyDeliveryOTP(appointmentId:string, otp:string): Promise<PopulatedAppointmentData | null>;
+  resendDeliveryOTP(appointmentId:string): Promise<PopulatedAppointmentData | null>;
 }

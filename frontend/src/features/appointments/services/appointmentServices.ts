@@ -157,3 +157,15 @@ export const rateAppointmentApi = (data:Partial<IReview>) => {
     .post(`${USER_BASE_ROUTE}/appointment/review`, data)
     .then((res) => res.data)
 }
+
+export const verifyDeliveryOtpApi = (data: {appointmentId:string, otp: string}) => {
+  return api
+    .post(`${GARAGE_BASE_ROUTE}/appointment/delivery/verify`, data)
+    .then((res) => res.data)
+}
+
+export const resendDeliveryOtpApi = (appointmentId:string) => {
+  return api
+    .post(`${GARAGE_BASE_ROUTE}/appointment/otp-resend/${appointmentId}`)
+    .then((res) => res.data)
+}

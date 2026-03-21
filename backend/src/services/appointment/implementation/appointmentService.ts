@@ -25,6 +25,7 @@ import {
   APPOINTMENT_NOT_FOUND,
   AUTHENTICATION_FAILED,
   INVALID_INPUT,
+  INVALID_OTP,
   PAYMENT_STAGE_MISSING,
   PLAN_NOT_AVAILABLE_USER,
   USER_NOT_FOUND,
@@ -34,6 +35,8 @@ import IStripeService from "../../stripe/interface/IStripeService";
 import { INotificationService } from "../../notification/interface/INotificationService";
 import IGarageService from "../../garage/interface/IGarageService";
 import { IEmailService } from "../../email/interface/IEmailService";
+import { generateOtp } from "../../../utils/generateOtp";
+import bcrypt from "bcrypt";
 
 @injectable()
 export class AppointmentService implements IAppointmentService {
@@ -470,6 +473,18 @@ export class AppointmentService implements IAppointmentService {
         status: "completed",
       });
 
+      const { otp, hashedOtp } = generateOtp();
+
+      await this._appointmentRepository.findByIdAndUpdate(appointmentId, {
+        deliveryOtp: hashedOtp,
+      });
+
+      await this._emailService.sendDeliveryOtpEmail(
+        updatedAppointment.userData.email,
+        updatedAppointment.appId,
+        otp
+      );
+
       await this._appointmentRepository.pushToArray<IAppointmentEvents>(
         appointmentId,
         "events",
@@ -477,14 +492,14 @@ export class AppointmentService implements IAppointmentService {
           actorName: mechanic?.name,
           actorRole: "Mechanic",
           doneBy: mechanic?._id,
-          message: `Services completed. OTP sent to your registered email. Provide it at delivery.`,
+          message: `Service completed. OTP: ${otp}. Please share it during delivery.`,
         }
       );
 
       await this._notificationService.createNotification({
         recipientId: updatedAppointment.userId,
         title: "Services completed",
-        message: `Services completed. OTP sent to your registered email. Provide it at delivery.`,
+        message: `Service completed. OTP sent to your email and available in my-appointments. Provide it at delivery.`,
         isRead: false,
       });
     }
@@ -510,10 +525,7 @@ export class AppointmentService implements IAppointmentService {
       throw new AppError(HttpStatus.NOT_FOUND, APPOINTMENT_NOT_FOUND);
 
     if (appointment.paymentStatus === "paid")
-      throw new AppError(
-        HttpStatus.BAD_REQUEST,
-        PAYMENT_STAGE_MISSING
-      );
+      throw new AppError(HttpStatus.BAD_REQUEST, PAYMENT_STAGE_MISSING);
 
     const totalAmount = appointment.services.reduce((acc, s) => {
       if (s.status !== "skipped") {
@@ -543,7 +555,6 @@ export class AppointmentService implements IAppointmentService {
     userId: string,
     role: string
   ): Promise<GetMappedPopulatedAppointmentResponse> {
-
     if (role === "mechanic") {
       const mechanic = await this._mechanicRepository.findOneByUserId(userId);
 
@@ -551,9 +562,12 @@ export class AppointmentService implements IAppointmentService {
         throw new AppError(HttpStatus.BAD_REQUEST, INVALID_INPUT);
       }
 
-      return await this._appointmentRepository.getAppointmentByVehicleNum(query, {
-        garageUID: mechanic.garageId.toString(),
-      });
+      return await this._appointmentRepository.getAppointmentByVehicleNum(
+        query,
+        {
+          garageUID: mechanic.garageId.toString(),
+        }
+      );
     }
 
     if (role === "garage") {
@@ -561,14 +575,76 @@ export class AppointmentService implements IAppointmentService {
         garageUID: userId,
       });
     }
-    
+
     if (role === "user") {
-      return await this._appointmentRepository.getAppointmentByVehicleNum(query, {
-        userId: userId,
-      });
+      return await this._appointmentRepository.getAppointmentByVehicleNum(
+        query,
+        {
+          userId: userId,
+        }
+      );
     }
 
-
     throw new AppError(HttpStatus.FORBIDDEN, AUTHENTICATION_FAILED);
+  }
+
+  async verifyDeliveryOTP(
+    appointmentId: string,
+    otp: string
+  ): Promise<PopulatedAppointmentData | null> {
+    const appointment =
+      await this._appointmentRepository.getAppointmentById(appointmentId);
+    if (!appointment) {
+      throw new AppError(HttpStatus.BAD_REQUEST, APPOINTMENT_NOT_FOUND);
+    }
+
+    const isMatch = await bcrypt.compare(otp, appointment.deliveryOtp);
+
+    if (isMatch) {
+      throw new AppError(HttpStatus.BAD_REQUEST, INVALID_OTP);
+    }
+
+    await this._appointmentRepository.findByIdAndUpdate(appointmentId, {
+      status: "delivered"
+    })
+
+    return appointment;
+  }
+
+  async resendDeliveryOTP(
+    appointmentId: string
+  ): Promise<PopulatedAppointmentData | null> {
+    const appointment =
+      await this._appointmentRepository.getAppointmentById(appointmentId);
+
+    if (!appointment) {
+      throw new AppError(HttpStatus.BAD_REQUEST, APPOINTMENT_NOT_FOUND);
+    }
+
+    const { otp, hashedOtp } = generateOtp();
+
+    await this._appointmentRepository.findByIdAndUpdate(appointmentId, {
+      deliveryOtp: hashedOtp,
+    });
+
+    await this._emailService.sendDeliveryOtpEmail(
+      appointment.userData.email,
+      appointment.appId,
+      otp
+    );
+
+
+    await this._appointmentRepository.pushToArray<IAppointmentEvents>(
+      appointmentId,
+      "events",
+      {
+        actorName: "Garage",
+        actorRole: "Garage",
+        doneBy: appointment?.garageUID,
+        message: `New OTP sent to registred email or use ${otp}. Please share it during delivery.`,
+      }
+    );
+
+    return appointment;
   }
 }

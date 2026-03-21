@@ -14,4 +14,6 @@ export interface IAppointmentController {
     getAllAppointmentByMechId(req:Request, res:Response, next: NextFunction):Promise<void>;
     makeServicePayment(req:Request, res:Response, next: NextFunction): Promise<void>;
     getAppointmentByVehicleNum(req:Request, res:Response, next: NextFunction): Promise<void>;
+    verifyDeliveryOTP(req:Request, res:Response, next: NextFunction): Promise<void>;
+    resendDeliveryOTP(req:Request, res:Response, next: NextFunction): Promise<void>;
 }

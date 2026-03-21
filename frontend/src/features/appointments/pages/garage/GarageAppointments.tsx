@@ -8,6 +8,7 @@ import Pagination from "@/components/common/Pagination";
 import type { PopulatedAppointmentData } from "@/types/AppointmentTypes";
 import AppointmentDetailsModal from "@/features/appointments/modals/AppointmentDetailsModal";
 import { getActiveAppointmentsApi } from "../../services/appointmentServices";
+import DeliveryOtpModal from "../../modals/DeliverOtpModal";
 
 const GarageAppointments = () => {
   const [appointments, setAppointments] = useState<PopulatedAppointmentData[]>(
@@ -19,6 +20,7 @@ const GarageAppointments = () => {
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<
     string | null
   >(null);
+  const [markPaidId, setMarkPaidId] = useState<string | null>(null);
   const [view, setView] = useState<"current" | "previous">("current");
 
   const servicesPerPage = 5;
@@ -131,13 +133,22 @@ const GarageAppointments = () => {
             }
             renderActions={(m) => {
               return (
-                <div className="flex gap-3">
+                <div className="flex items-center gap-2">
                   <button
                     className="text-red-400 hover:text-red-300"
                     onClick={() => setSelectedAppointmentId(m._id)}
                   >
                     View
                   </button>
+
+                  {m.status === "completed" && (
+                    <button
+                      className="text-green-600 hover:text-green-400"
+                      onClick={() => setMarkPaidId(m._id)}
+                    >
+                      Mark as Delivered
+                    </button>
+                  )}
                 </div>
               );
             }}
@@ -161,6 +172,15 @@ const GarageAppointments = () => {
               onUpdate={() => fetchAppointments(currentPage, view)}
             />
           )}
+
+          <DeliveryOtpModal
+            appointmentId={markPaidId}
+            isOpen={!!markPaidId}
+            onClose={() => {
+              setMarkPaidId(null)
+              fetchAppointments(currentPage, view)
+            }}
+          />
         </div>
       </div>
     </div>
