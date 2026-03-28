@@ -8,7 +8,7 @@ const AuthButton = ({ text, action, loading }: AuthButtonProps) => {
   return (
     <button
       onClick={action}
-      className="w-full bg-gray-900 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors duration-200"
+      className={`w-full ${loading ? "bg-gray-700 cursor-not-allowed" : "bg-gray-900 hover:bg-gray-800"} text-white py-3 px-4 rounded-lg font-medium  transition-colors duration-200`}
       disabled={loading}
     >
       {text}

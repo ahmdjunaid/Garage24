@@ -1,0 +1,1 @@
+export const REG_ALLOWED_ROLES = ["user","garage","mechanic"]

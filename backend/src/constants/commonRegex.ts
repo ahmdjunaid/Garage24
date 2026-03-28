@@ -13,3 +13,5 @@ export function isValidIndianPlate(plate: string): boolean {
 
   return patterns.some((regex) => regex.test(normalized));
 }
+
+export const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;

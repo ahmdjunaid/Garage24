@@ -40,6 +40,7 @@ export const PASSWORD_CHANGED_SUCCESS = "Your password has been changed successf
 export const AUTHENTICATION_FAILED = "Your session has expired. Please log in again."
 export const NEW_PASSWORD_CANNOT_BE_SAME = "Your new password cannot be the same as your previous password."
 export const ONBOARDING_UPDATE_ERROR="Onboarding update not allowed"
+export const PASSWORD_RULE_VIOLATE="Password must be 8+ chars with uppercase, lowercase, number, and special character."
 
 // plan messages
 export const PLAN_NOT_FOUND = "Plan not found!"

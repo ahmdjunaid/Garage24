@@ -7,6 +7,7 @@ import {
   INVALID_EMAIL,
   LOGGED_OUT_MESSAGE,
   NO_REFRESH_TOKEN_FOUND,
+  PASSWORD_RULE_VIOLATE,
   PROFILE_FIELDS_EMPTY,
 } from "../../../constants/messages";
 import IAuthService from "../../../services/auth/interface/IAuthService";
@@ -16,6 +17,8 @@ import { inject, injectable } from "inversify";
 import { TYPES } from "../../../DI/types";
 import { AppError } from "../../../middleware/errorHandler";
 import { emailRegex } from "../../../constants/commonRegex";
+import { REG_ALLOWED_ROLES } from "../../../constants/constantDatas";
+import { passwordRegex } from "../../../constants/commonRegex";
 dotenv.config();
 
 const refreshTokenMaxAge =
@@ -34,6 +37,11 @@ export class Authcontroller implements IAuthController {
       }
 
       const { name, email, password, role } = parsed.data;
+
+      if(!REG_ALLOWED_ROLES.includes(role)){
+        throw new AppError(HttpStatus.BAD_REQUEST, `You are not allowed to register as ${role}`)
+      }
+
       const { message } = await this._authService.register(
         name,
         email,
@@ -261,6 +269,10 @@ export class Authcontroller implements IAuthController {
 
       if (!currentPassword || !newPassword) {
         throw new AppError(HttpStatus.BAD_REQUEST, ALL_FIELDS_REQUIRED);
+      }
+
+      if(!passwordRegex.test(newPassword)){
+        throw new AppError(HttpStatus.BAD_REQUEST, PASSWORD_RULE_VIOLATE);
       }
 
       const response = await this._authService.changePassword(
